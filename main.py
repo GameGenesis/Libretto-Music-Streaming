@@ -31,10 +31,42 @@ def play_track(track_index: int=0):
 
     # Getting the track length
     length = int(audio.info.length)
-    print(length)
 
 track_index = 0
 current_pos = 0
 
 init()
 play_track(track_index)
+
+while True:
+    print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
+    print("Press 'e' to exit the program")
+    query = input(">> ")
+    
+    if query == 'p':
+        # Pausing the music
+        mixer.music.pause()
+    elif query == 'u':
+        # Resuming the music
+        mixer.music.unpause()
+    elif query == 'r':
+        # Rewinding the music
+        current_pos = 0
+        mixer.music.rewind()
+    elif query == 'f':
+        # Skipping 10 sec in a track
+        current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + 10, length)
+        mixer.music.pause()
+        mixer.music.set_pos(current_pos)
+        mixer.music.unpause()
+    elif query == 'b':
+        # Reversing 10 sec in a track
+        # TODO: Fix reverse bug
+        current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - 10, 0)
+        mixer.music.pause()
+        mixer.music.set_pos(current_pos)
+        mixer.music.unpause()
+    elif query == 'e':
+        # Stop the mixer
+        mixer.music.stop()
+        break
