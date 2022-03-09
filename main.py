@@ -32,6 +32,14 @@ def play_track(track_index: int=0):
     # Getting the track length
     length = int(audio.info.length)
 
+def next_track():
+    global current_pos, track_index
+    current_pos = 0
+    track_index += 1
+    if track_index > len(tracks) - 1:
+        track_index = 0
+    play_track(track_index)
+
 track_index = 0
 current_pos = 0
 
@@ -56,16 +64,19 @@ while True:
     elif query == 'f':
         # Skipping 10 sec in a track
         current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + 10, length)
+        if current_pos >= length:
+            next_track()
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
     elif query == 'b':
         # Reversing 10 sec in a track
-        # TODO: Fix reverse bug
         current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - 10, 0)
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
+    elif query == 'n':
+        next_track()
     elif query == 'e':
         # Stop the mixer
         mixer.music.stop()
