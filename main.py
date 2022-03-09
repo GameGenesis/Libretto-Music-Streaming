@@ -2,6 +2,11 @@ from pygame import mixer
 from mutagen.mp3 import MP3
 import os
 
+def is_compatible_file(file: str):
+    extensions = [".mp3", ".wav", ".ogg"]
+    # Return true if the file ends with any of the compatible file extensions
+    return any([file.endswith(e) for e in extensions])
+
 def init():
     global tracks
     # Starting the mixer
@@ -9,9 +14,9 @@ def init():
 
     # Get playlist files
     dir = "temp"
-    tracks = [os.path.join(dir, f) for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+    tracks = [os.path.join(dir, f) for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and is_compatible_file(f)]
 
-def play_track(track_index):
+def play_track(track_index: int=0):
     global audio, tracks, length
 
     # Loading the track
