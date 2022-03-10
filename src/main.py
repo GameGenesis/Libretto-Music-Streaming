@@ -13,7 +13,7 @@ def is_compatible_dir(directory: str):
     # Return true if at least one of the files in the directory ends with any of the compatible file extensions
     return any([is_compatible_file(f) and os.path.isfile(os.path.join(directory, f)) for f in os.listdir(directory)])
 
-def get_child_dirs(parent_dir):
+def get_compatible_child_dirs(parent_dir):
     child_dirs = [os.path.join(parent_dir, current_dir) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
     return child_dirs
 
@@ -98,7 +98,7 @@ def toggle_mute():
 
 
 parent_dir = os.path.join("data", "playlists")
-playlist_dirs = get_child_dirs(parent_dir)
+playlist_dirs = get_compatible_child_dirs(parent_dir)
 
 playlist_index = 0
 track_index = 0
