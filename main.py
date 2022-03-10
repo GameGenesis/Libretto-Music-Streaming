@@ -9,6 +9,14 @@ def is_compatible_file(file: str):
     # Return true if the file ends with any of the compatible file extensions
     return any([file.endswith(e) for e in extensions])
 
+def is_compatible_dir(directory: str):
+    # Return true if at least one of the files in the directory ends with any of the compatible file extensions
+    return any([is_compatible_file(f) and os.path.isfile(os.path.join(directory, f)) for f in os.listdir(directory)])
+
+def get_child_dirs(parent_dir):
+    child_dirs = [os.path.join(parent_dir, current_dir) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
+    return child_dirs
+
 def init():
     global tracks, default_dir
     # Starting the mixer
