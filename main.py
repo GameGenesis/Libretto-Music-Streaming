@@ -42,9 +42,20 @@ def next_track():
     track_index = get_next_track_index(track_index, len(tracks) - 1)
     play_track(track_index)
 
+def toggle_mute():
+    global volume, saved_volume, muted
+    muted = not muted
+    if muted:
+        saved_volume = volume
+        mixer.music.set_volume(0)
+    else:
+        mixer.music.set_volume(saved_volume)
+
 track_index = 0
 current_pos = 0
 volume = 0.5
+saved_volume = volume
+muted = False
 MIN_VOLUME, MAX_VOLUME = 0, 1
 
 init()
@@ -52,7 +63,7 @@ play_track(track_index)
 
 while True:
     print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
-    print("Press '+' to increase the volume and '-' to decrease the volume")
+    print("Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute")
     print("Press 'e' to exit the program")
     query = input(">> ")
     os.system("cls||clear")
@@ -87,15 +98,23 @@ while True:
         next_track()
     elif query == '+':
         # Getting and setting the volume
+        if muted:
+            toggle_mute()
         volume = round(mixer.music.get_volume(), 1)
         volume = min(volume + 0.1, MAX_VOLUME)
         print(f"[Volume: {int(volume*100)}%]")
         mixer.music.set_volume(volume)
     elif query == '-':
+        if muted:
+            toggle_mute()
         volume = round(mixer.music.get_volume(), 1)
         volume = max(volume - 0.1, MIN_VOLUME)
         print(f"[Volume: {int(volume*100)}%]")
         mixer.music.set_volume(volume)
+    elif query == 'm':
+        toggle_mute()
+        muted_str = " (Muted)" if muted else ""
+        print(f"[Volume: {int(volume*100)}%{muted_str}]")
     elif query == 'e':
         # Stop the mixer
         mixer.music.stop()
