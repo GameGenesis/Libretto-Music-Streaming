@@ -48,23 +48,37 @@ def play_track(track_index: int=0, load_new_playlist: bool=False):
     
     mixer.music.queue(tracks[get_next_index(track_index, len(tracks) - 1)])
 
-def get_next_track_index(index, length):
+def get_next_index(index, length):
     # Supports looping
     return 0 if index >= length else index + 1
+
+def get_previous_index(index):
+    return 0 if index <= 0 else index - 1
+
+def next_playlist():
+    global current_pos, playlist_index, playlist_dirs, track_index
+    current_pos = 0
+    track_index = 0
+    playlist_index = get_next_index(playlist_index, len(playlist_dirs) - 1)
+    play_track(track_index, True)
+
+def previous_playlist():
+    global current_pos, playlist_index, playlist_dirs, track_index
+    current_pos = 0
+    track_index = 0
+    playlist_index = get_previous_index(playlist_index)
+    play_track(track_index, True)
 
 def next_track():
     global current_pos, track_index, tracks
     current_pos = 0
-    track_index = get_next_track_index(track_index, len(tracks) - 1)
+    track_index = get_next_index(track_index, len(tracks) - 1)
     play_track(track_index)
-
-def get_previous_track_index(index):
-    return 0 if index <= 0 else index - 1
 
 def previous_track():
     global current_pos, track_index, tracks
     current_pos = 0
-    track_index = get_previous_track_index(track_index)
+    track_index = get_previous_index(track_index)
     play_track(track_index)
 
 def shuffle_track():
