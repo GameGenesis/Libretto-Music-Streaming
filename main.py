@@ -11,6 +11,7 @@ def init():
     global tracks
     # Starting the mixer
     mixer.init()
+    mixer.music.set_volume(volume)
 
     # Get playlist files
     dir = "temp"
@@ -23,8 +24,6 @@ def play_track(track_index: int=0):
     mixer.music.load(tracks[track_index])
     audio = MP3(tracks[track_index])
 
-    # Setting the volume
-    mixer.music.set_volume(0.7)
 
     # Start playing the track
     mixer.music.play()
@@ -45,12 +44,15 @@ def next_track():
 
 track_index = 0
 current_pos = 0
+volume = 0.5
+MIN_VOLUME, MAX_VOLUME = 0, 1
 
 init()
 play_track(track_index)
 
 while True:
     print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
+    print("Press '+' to increase the volume and '-' to decrease the volume")
     print("Press 'e' to exit the program")
     query = input(">> ")
     os.system("cls||clear")
@@ -83,6 +85,17 @@ while True:
         mixer.music.unpause()
     elif query == 'n':
         next_track()
+    elif query == '+':
+        # Getting and setting the volume
+        volume = round(mixer.music.get_volume(), 1)
+        volume = min(volume + 0.1, MAX_VOLUME)
+        print(f"[Volume: {int(volume*100)}%]")
+        mixer.music.set_volume(volume)
+    elif query == '-':
+        volume = round(mixer.music.get_volume(), 1)
+        volume = max(volume - 0.1, MIN_VOLUME)
+        print(f"[Volume: {int(volume*100)}%]")
+        mixer.music.set_volume(volume)
     elif query == 'e':
         # Stop the mixer
         mixer.music.stop()
