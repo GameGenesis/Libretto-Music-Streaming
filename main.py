@@ -73,11 +73,15 @@ while True:
     print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
     print("Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute")
     print("Press 'e' to exit the program")
+    muted_str = " (Muted)" if muted else ""
+    print(f"[Volume: {int(volume*100)}%{muted_str}]")
+    print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
     query = input(">> ")
     os.system("cls||clear")
     
     if query == 'p':
         # Pausing the music
+        print("[Paused]")
         mixer.music.pause()
     elif query == 'u':
         # Resuming the music
