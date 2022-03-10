@@ -17,22 +17,28 @@ def get_child_dirs(parent_dir):
     child_dirs = [os.path.join(parent_dir, current_dir) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
     return child_dirs
 
+def load_playlist_tracks(playlist_dir):
+    global tracks
+    tracks = [os.path.join(playlist_dir, f) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
+
 def init():
-    global tracks, default_dir
+    global tracks, current_dir, playlist_dirs, playlist_index
     # Starting the mixer
     mixer.init()
     mixer.music.set_volume(volume)
 
-    # Get playlist files
-    tracks = [os.path.join(default_dir, f) for f in os.listdir(default_dir) if os.path.isfile(os.path.join(default_dir, f)) and is_compatible_file(f)]
+    load_playlist_tracks(playlist_dirs[playlist_index])
 
-def play_track(track_index: int=0):
-    global audio, tracks, length
+def play_track(track_index: int=0, load_new_playlist: bool=False):
+    global audio, tracks, length, playlist_dirs, playlist_index
+
+    # Loading the playlist tracks
+    if load_new_playlist:
+        load_playlist_tracks(playlist_dirs[playlist_index])
 
     # Loading the track
     mixer.music.load(tracks[track_index])
     audio = MP3(tracks[track_index])
-
 
     # Start playing the track
     mixer.music.play()
@@ -40,7 +46,7 @@ def play_track(track_index: int=0):
     # Getting the track length
     length = int(audio.info.length)
     
-    mixer.music.queue(tracks[get_next_track_index(track_index, len(tracks) - 1)])
+    mixer.music.queue(tracks[get_next_index(track_index, len(tracks) - 1)])
 
 def get_next_track_index(index, length):
     # Supports looping
@@ -77,15 +83,16 @@ def toggle_mute():
         mixer.music.set_volume(saved_volume)
 
 
-default_dir = "temp"
+parent_dir = os.path.join("data", "playlists")
+playlist_dirs = get_child_dirs(parent_dir)
 
+playlist_index = 0
 track_index = 0
 
 current_pos = 0
 SKIP_DURATION = 10
 
 volume = 0.5
-saved_volume = volume
 muted = False
 MIN_VOLUME, MAX_VOLUME, VOLUME_INCREMENT = 0, 1, 0.1
 
