@@ -31,13 +31,16 @@ def play_track(track_index: int=0):
 
     # Getting the track length
     length = int(audio.info.length)
+    
+    mixer.music.queue(tracks[get_next_track_index(track_index, len(tracks) - 1)])
+
+def get_next_track_index(index, length):
+    return 0 if track_index >= length else index + 1
 
 def next_track():
-    global current_pos, track_index
+    global current_pos, track_index, tracks
     current_pos = 0
-    track_index += 1
-    if track_index > len(tracks) - 1:
-        track_index = 0
+    track_index = get_next_track_index(track_index, len(tracks) - 1)
     play_track(track_index)
 
 track_index = 0
