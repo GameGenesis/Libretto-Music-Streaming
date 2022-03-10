@@ -50,6 +50,7 @@ while True:
     print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
     print("Press 'e' to exit the program")
     query = input(">> ")
+    os.system("cls||clear")
     
     if query == 'p':
         # Pausing the music
@@ -66,12 +67,14 @@ while True:
         current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + 10, length)
         if current_pos >= length:
             next_track()
+        print(f"[{current_pos//60}:{current_pos%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
     elif query == 'b':
         # Reversing 10 sec in a track
         current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - 10, 0)
+        print(f"[{current_pos//60}:{current_pos%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
