@@ -2,7 +2,11 @@
 import random
 from pygame import mixer
 from mutagen.mp3 import MP3
+from datetime import datetime
 import os
+
+from playlist import Playlist
+from track import Track
 
 def is_compatible_file(file: str):
     extensions = [".mp3", ".wav", ".ogg"]
@@ -13,32 +17,28 @@ def is_compatible_dir(directory: str):
     # Return true if at least one of the files in the directory ends with any of the compatible file extensions
     return any([is_compatible_file(f) and os.path.isfile(os.path.join(directory, f)) for f in os.listdir(directory)])
 
-def get_compatible_child_dirs(parent_dir):
-    child_dirs = [os.path.join(parent_dir, current_dir) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
-    return child_dirs
+def get_date_created(path: str):
+    return datetime.fromtimestamp(os.path.getctime(path))
 
-def load_playlist_tracks(playlist_dir):
-    global tracks
-    tracks = [os.path.join(playlist_dir, f) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
+def get_playlists(parent_dir: str):
+    playlists = [Playlist(os.path.join(parent_dir, current_dir), current_dir, "Artist", get_date_created(os.path.join(parent_dir, current_dir)), get_playlist_tracks(os.path.join(parent_dir, current_dir))) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
+    return playlists
+
+def get_playlist_tracks(playlist_dir: str):
+    return [os.path.join(playlist_dir, f) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
 
 def init():
-    global tracks, current_dir, playlist_dirs, playlist_index
+    global current_dir, playlists, playlist_index
     # Starting the mixer
     mixer.init()
     mixer.music.set_volume(volume)
 
-    load_playlist_tracks(playlist_dirs[playlist_index])
-
-def play_track(track_index: int=0, load_new_playlist: bool=False):
-    global audio, tracks, length, playlist_dirs, playlist_index
-
-    # Loading the playlist tracks
-    if load_new_playlist:
-        load_playlist_tracks(playlist_dirs[playlist_index])
+def play_track(track_index: int=0):
+    global audio, length, playlists, playlist_index
 
     # Loading the track
-    mixer.music.load(tracks[track_index])
-    audio = MP3(tracks[track_index])
+    mixer.music.load(playlists[playlist_index].tracks[track_index])
+    audio = MP3(playlists[playlist_index].tracks[track_index])
 
     # Start playing the track
     mixer.music.play()
@@ -46,45 +46,45 @@ def play_track(track_index: int=0, load_new_playlist: bool=False):
     # Getting the track length
     length = int(audio.info.length)
     
-    mixer.music.queue(tracks[get_next_index(track_index, len(tracks) - 1)])
+    mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)])
 
 def get_next_index(index, length):
     # Supports looping
-    return 0 if index >= length else index + 1
+    return 0 if index >= length - 1 else index + 1
 
 def get_previous_index(index):
     return 0 if index <= 0 else index - 1
 
 def next_playlist():
-    global current_pos, playlist_index, playlist_dirs, track_index
+    global current_pos, playlist_index, playlists, track_index
     current_pos = 0
     track_index = 0
-    playlist_index = get_next_index(playlist_index, len(playlist_dirs) - 1)
-    play_track(track_index, True)
+    playlist_index = get_next_index(playlist_index, len(playlists))
+    play_track(track_index)
 
 def previous_playlist():
-    global current_pos, playlist_index, playlist_dirs, track_index
+    global current_pos, playlist_index, track_index
     current_pos = 0
     track_index = 0
     playlist_index = get_previous_index(playlist_index)
-    play_track(track_index, True)
+    play_track(track_index)
 
 def next_track():
-    global current_pos, track_index, tracks
+    global current_pos, track_index
     current_pos = 0
-    track_index = get_next_index(track_index, len(tracks) - 1)
+    track_index = get_next_index(track_index, playlists[playlist_index].length)
     play_track(track_index)
 
 def previous_track():
-    global current_pos, track_index, tracks
+    global current_pos, track_index
     current_pos = 0
     track_index = get_previous_index(track_index)
     play_track(track_index)
 
 def shuffle_track():
     # Plays a random track from the current playlist
-    global current_pos, track_index, tracks
-    track_index = random.randint(0, len(tracks) - 1)
+    global current_pos, track_index
+    track_index = random.randint(0, playlists[playlist_index].length - 1)
     play_track(track_index)
 
 def toggle_mute():
@@ -98,7 +98,7 @@ def toggle_mute():
 
 
 parent_dir = os.path.join("data", "playlists")
-playlist_dirs = get_compatible_child_dirs(parent_dir)
+playlists = get_playlists(parent_dir)
 
 playlist_index = 0
 track_index = 0
@@ -127,7 +127,7 @@ Use 'e' to exit the program.''')
     os.system("cls||clear")
     
     if query == 'l':
-        playlists_list = [f"{i}: {e}" for i, e in enumerate(playlist_dirs)]
+        playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
         print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     if query == ']':
         next_playlist()
