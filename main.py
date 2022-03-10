@@ -1,3 +1,4 @@
+# Imports
 from pygame import mixer
 from mutagen.mp3 import MP3
 import os
@@ -8,14 +9,13 @@ def is_compatible_file(file: str):
     return any([file.endswith(e) for e in extensions])
 
 def init():
-    global tracks
+    global tracks, default_dir
     # Starting the mixer
     mixer.init()
     mixer.music.set_volume(volume)
 
     # Get playlist files
-    dir = "temp"
-    tracks = [os.path.join(dir, f) for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f)) and is_compatible_file(f)]
+    tracks = [os.path.join(default_dir, f) for f in os.listdir(default_dir) if os.path.isfile(os.path.join(default_dir, f)) and is_compatible_file(f)]
 
 def play_track(track_index: int=0):
     global audio, tracks, length
@@ -34,6 +34,7 @@ def play_track(track_index: int=0):
     mixer.music.queue(tracks[get_next_track_index(track_index, len(tracks) - 1)])
 
 def get_next_track_index(index, length):
+    # Supports looping
     return 0 if track_index >= length else index + 1
 
 def next_track():
@@ -47,12 +48,16 @@ def toggle_mute():
     muted = not muted
     if muted:
         saved_volume = volume
-        mixer.music.set_volume(0)
+        mixer.music.set_volume(MIN_VOLUME)
     else:
         mixer.music.set_volume(saved_volume)
 
+
+default_dir = "temp"
+
 track_index = 0
 current_pos = 0
+
 volume = 0.5
 saved_volume = volume
 muted = False
