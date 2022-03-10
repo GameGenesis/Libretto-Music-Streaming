@@ -36,7 +36,7 @@ def play_track(track_index: int=0):
 
 def get_next_track_index(index, length):
     # Supports looping
-    return 0 if track_index >= length else index + 1
+    return 0 if index >= length else index + 1
 
 def next_track():
     global current_pos, track_index, tracks
@@ -44,13 +44,13 @@ def next_track():
     track_index = get_next_track_index(track_index, len(tracks) - 1)
     play_track(track_index)
 
-def get_previous_track_index(index, length):
-    return 0 if track_index <= 0 else index - 1
+def get_previous_track_index(index):
+    return 0 if index <= 0 else index - 1
 
 def previous_track():
     global current_pos, track_index, tracks
     current_pos = 0
-    track_index = get_previous_track_index(track_index, len(tracks) - 1)
+    track_index = get_previous_track_index(track_index)
     play_track(track_index)
 
 def shuffle_track():
