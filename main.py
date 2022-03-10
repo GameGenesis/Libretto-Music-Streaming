@@ -1,4 +1,5 @@
 # Imports
+import random
 from pygame import mixer
 from mutagen.mp3 import MP3
 import os
@@ -43,6 +44,12 @@ def next_track():
     track_index = get_next_track_index(track_index, len(tracks) - 1)
     play_track(track_index)
 
+def shuffle_track():
+    # Plays a random track from the current playlist
+    global current_pos, track_index, tracks
+    track_index = random.randint(0, len(tracks) - 1)
+    play_track(track_index)
+
 def toggle_mute():
     global volume, saved_volume, muted
     muted = not muted
@@ -70,7 +77,7 @@ play_track(track_index)
 
 while True:
     # Print instructions and get user input
-    print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
+    print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track, 's' to shuffle tracks")
     print("Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute")
     print("Press 'e' to exit the program")
     muted_str = " (Muted)" if muted else ""
@@ -108,6 +115,8 @@ while True:
         mixer.music.unpause()
     elif query == 'n':
         next_track()
+    elif query == 's':
+        shuffle_track()
     elif query == '+':
         # Getting and setting the volume
         if muted:
