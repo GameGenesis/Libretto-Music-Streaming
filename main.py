@@ -56,17 +56,20 @@ def toggle_mute():
 default_dir = "temp"
 
 track_index = 0
+
 current_pos = 0
+SKIP_DURATION = 10
 
 volume = 0.5
 saved_volume = volume
 muted = False
-MIN_VOLUME, MAX_VOLUME = 0, 1
+MIN_VOLUME, MAX_VOLUME, VOLUME_INCREMENT = 0, 1, 0.1
 
 init()
 play_track(track_index)
 
 while True:
+    # Print instructions and get user input
     print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track")
     print("Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute")
     print("Press 'e' to exit the program")
@@ -84,8 +87,8 @@ while True:
         current_pos = 0
         mixer.music.rewind()
     elif query == 'f':
-        # Skipping 10 sec in a track
-        current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + 10, length)
+        # Skipping 10s forward in a track
+        current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + SKIP_DURATION, length)
         if current_pos >= length:
             next_track()
         print(f"[{current_pos//60}:{current_pos%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
@@ -93,8 +96,8 @@ while True:
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
     elif query == 'b':
-        # Reversing 10 sec in a track
-        current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - 10, 0)
+        # Skipping 10s backward in a track
+        current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - SKIP_DURATION, 0)
         print(f"[{current_pos//60}:{current_pos%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
@@ -106,14 +109,14 @@ while True:
         if muted:
             toggle_mute()
         volume = round(mixer.music.get_volume(), 1)
-        volume = min(volume + 0.1, MAX_VOLUME)
+        volume = min(volume + VOLUME_INCREMENT, MAX_VOLUME)
         print(f"[Volume: {int(volume*100)}%]")
         mixer.music.set_volume(volume)
     elif query == '-':
         if muted:
             toggle_mute()
         volume = round(mixer.music.get_volume(), 1)
-        volume = max(volume - 0.1, MIN_VOLUME)
+        volume = max(volume - VOLUME_INCREMENT, MIN_VOLUME)
         print(f"[Volume: {int(volume*100)}%]")
         mixer.music.set_volume(volume)
     elif query == 'm':
