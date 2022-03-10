@@ -115,17 +115,25 @@ play_track(track_index)
 
 while True:
     # Print instructions and get user input
-    print('''Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back. 
-Press 'n' for next track, 'q' for previous track, 's' to shuffle tracks. 
-Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute. 
-Press 'e' to exit the program.''')
+    print('''Use 'l' to list all playlists and '[' and ']' for cycling through playlists. 
+Use 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back. 
+Use 'n' for next track, 'q' for previous track, 's' to shuffle tracks. 
+Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute. 
+Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
     print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
     query = input(">> ")
     os.system("cls||clear")
     
-    if query == 'p':
+    if query == 'l':
+        playlists_list = [f"{i}: {e}" for i, e in enumerate(playlist_dirs)]
+        print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
+    if query == ']':
+        next_playlist()
+    if query == '[':
+        previous_playlist()
+    elif query == 'p':
         # Pausing the music
         print("[Paused]")
         mixer.music.pause()
