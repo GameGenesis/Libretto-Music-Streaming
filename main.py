@@ -44,6 +44,15 @@ def next_track():
     track_index = get_next_track_index(track_index, len(tracks) - 1)
     play_track(track_index)
 
+def get_previous_track_index(index, length):
+    return 0 if track_index <= 0 else index - 1
+
+def previous_track():
+    global current_pos, track_index, tracks
+    current_pos = 0
+    track_index = get_previous_track_index(track_index, len(tracks) - 1)
+    play_track(track_index)
+
 def shuffle_track():
     # Plays a random track from the current playlist
     global current_pos, track_index, tracks
@@ -77,9 +86,10 @@ play_track(track_index)
 
 while True:
     # Print instructions and get user input
-    print("Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back, 'n' for next track, 's' to shuffle tracks")
-    print("Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute")
-    print("Press 'e' to exit the program")
+    print('''Press 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back. 
+Press 'n' for next track, 'q' for previous track, 's' to shuffle tracks. 
+Press '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute. 
+Press 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
     print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
@@ -115,6 +125,8 @@ while True:
         mixer.music.unpause()
     elif query == 'n':
         next_track()
+    elif query == 'q':
+        previous_track()
     elif query == 's':
         shuffle_track()
     elif query == '+':
