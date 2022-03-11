@@ -115,23 +115,22 @@ play_track(track_index)
 
 while True:
     # Print instructions and get user input
-    print('''Use 'l' to list all playlists and '[' and ']' for cycling through playlists. 
+    print('''Use '[' and ']' for cycling through playlists. 
 Use 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back. 
 Use 'n' for next track, 'q' for previous track, 's' to shuffle tracks. 
 Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute. 
 Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
-    print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
+    print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title}]")
+    playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
+    print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     query = input(">> ")
     os.system("cls||clear")
     
-    if query == 'l':
-        playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
-        print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     if query == ']':
         next_playlist()
-    if query == '[':
+    elif query == '[':
         previous_playlist()
     elif query == 'p':
         # Pausing the music
@@ -149,14 +148,12 @@ Use 'e' to exit the program.''')
         current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + SKIP_DURATION, length)
         if current_pos >= length:
             next_track()
-        print(f"[{current_pos//60}:{current_pos%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
     elif query == 'b':
         # Skipping 10s backward in a track
         current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - SKIP_DURATION, 0)
-        print(f"[{current_pos//60}:{current_pos%60:02d} of {length//60}:{length%60:02d} || Path: {audio.filename}]")
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
@@ -172,19 +169,15 @@ Use 'e' to exit the program.''')
             toggle_mute()
         volume = round(mixer.music.get_volume(), 1)
         volume = min(volume + VOLUME_INCREMENT, MAX_VOLUME)
-        print(f"[Volume: {int(volume*100)}%]")
         mixer.music.set_volume(volume)
     elif query == '-':
         if muted:
             toggle_mute()
         volume = round(mixer.music.get_volume(), 1)
         volume = max(volume - VOLUME_INCREMENT, MIN_VOLUME)
-        print(f"[Volume: {int(volume*100)}%]")
         mixer.music.set_volume(volume)
     elif query == 'm':
         toggle_mute()
-        muted_str = " (Muted)" if muted else ""
-        print(f"[Volume: {int(volume*100)}%{muted_str}]")
     elif query == 'e':
         # Stop the mixer
         mixer.music.stop()
