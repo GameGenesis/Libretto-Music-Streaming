@@ -1,8 +1,6 @@
 # Imports
 import random
 from pygame import mixer
-from mutagen.mp3 import MP3
-from datetime import datetime
 import os
 
 from playlist import Playlist
@@ -17,15 +15,12 @@ def is_compatible_dir(directory: str):
     # Return true if at least one of the files in the directory ends with any of the compatible file extensions
     return any([is_compatible_file(f) and os.path.isfile(os.path.join(directory, f)) for f in os.listdir(directory)])
 
-def get_date_created(path: str):
-    return datetime.fromtimestamp(os.path.getctime(path))
-
 def get_playlists(parent_dir: str):
-    playlists = [Playlist(os.path.join(parent_dir, current_dir), current_dir, "Artist", get_date_created(os.path.join(parent_dir, current_dir)), get_playlist_tracks(os.path.join(parent_dir, current_dir))) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
+    playlists = [Playlist(os.path.join(parent_dir, current_dir), current_dir, "Artist", get_playlist_tracks(os.path.join(parent_dir, current_dir))) for current_dir in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, current_dir)) and is_compatible_dir(os.path.join(parent_dir, current_dir))]
     return playlists
 
 def get_playlist_tracks(playlist_dir: str):
-    return [os.path.join(playlist_dir, f) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
+    return [Track(os.path.join(playlist_dir, f), f[:-4], "Artist", playlist_dir) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
 
 def init():
     global current_dir, playlists, playlist_index
@@ -37,16 +32,15 @@ def play_track(track_index: int=0):
     global audio, length, playlists, playlist_index
 
     # Loading the track
-    mixer.music.load(playlists[playlist_index].tracks[track_index])
-    audio = MP3(playlists[playlist_index].tracks[track_index])
+    mixer.music.load(playlists[playlist_index].tracks[track_index].path)
 
     # Start playing the track
     mixer.music.play()
-
-    # Getting the track length
-    length = int(audio.info.length)
     
-    mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)])
+    # Queuing the next track
+    mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)].path)
+
+    length = playlists[playlist_index].tracks[track_index].duration
 
 def get_next_index(index, length):
     # Supports looping
