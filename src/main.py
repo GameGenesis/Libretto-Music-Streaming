@@ -28,14 +28,19 @@ def init():
     mixer.init()
     mixer.music.set_volume(volume)
 
-def play_track(track_index: int=0):
+def set_track_speed(multiplier: int=1):
+    global track_index, current_pos
+    mixer.init(frequency=int(playlists[playlist_index].tracks[track_index].sample_rate * multiplier))
+    play_track(track_index, current_pos)
+
+def play_track(track_index: int=0, start_time: int=0):
     global audio, length, playlists, playlist_index
 
     # Loading the track
     mixer.music.load(playlists[playlist_index].tracks[track_index].path)
 
     # Start playing the track
-    mixer.music.play()
+    mixer.music.play(start=start_time)
     
     # Queuing the next track
     mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)].path)
@@ -104,6 +109,8 @@ volume = 0.5
 muted = False
 MIN_VOLUME, MAX_VOLUME, VOLUME_INCREMENT = 0, 1, 0.1
 
+speed = 1
+
 init()
 play_track(track_index)
 
@@ -119,10 +126,17 @@ Use 'e' to exit the program.''')
     print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
     playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
     print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
-    query = input(">> ")
+    query = input(">> ").lower()
     os.system("cls||clear")
     
-    if query == ']':
+
+    if "speed" in query:
+        if ":" in query:
+            speed = float(query.split(":")[1])
+            set_track_speed(speed)
+        else:
+            print(f"Speed: x{speed}")
+    elif query == ']':
         next_playlist()
     elif query == '[':
         previous_playlist()
