@@ -20,7 +20,7 @@ def get_playlists(parent_dir: str):
     return playlists
 
 def get_playlist_tracks(playlist_dir: str):
-    return [Track(os.path.join(playlist_dir, f), f[:-4], "Artist", playlist_dir) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
+    return [Track(os.path.join(playlist_dir, f), f[:-4], playlist_dir) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
 
 def init():
     global current_dir, playlists, playlist_index
@@ -116,7 +116,7 @@ Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmu
 Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
-    print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title}]")
+    print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
     playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
     print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     query = input(">> ")
