@@ -2,7 +2,7 @@ import lyricsgenius as lg
 
 import config
 
-genius = lg.Genius(config.ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True)
+genius = lg.Genius(config.GENIUS_ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True)
 
 song = genius.search_song(title="Circles", artist="Post Malone")
 song.save_lyrics()
