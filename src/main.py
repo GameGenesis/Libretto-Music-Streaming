@@ -34,7 +34,7 @@ def set_track_speed(multiplier: int=1):
     play_track(track_index, current_pos)
 
 def play_track(track_index: int=0, start_time: int=0):
-    global audio, length, playlists, playlist_index
+    global audio, length, playlists, playlist_index, current_pos, elapsed_time_change
 
     # Loading the track
     mixer.music.load(playlists[playlist_index].tracks[track_index].path)
@@ -47,6 +47,9 @@ def play_track(track_index: int=0, start_time: int=0):
 
     length = playlists[playlist_index].tracks[track_index].duration
 
+    current_pos = start_time
+    elapsed_time_change = 0
+
 def get_next_index(index, length):
     # Supports looping
     return 0 if index >= length - 1 else index + 1
@@ -55,28 +58,24 @@ def get_previous_index(index):
     return 0 if index <= 0 else index - 1
 
 def next_playlist():
-    global current_pos, playlist_index, playlists, track_index
-    current_pos = 0
+    global playlist_index, playlists, track_index
     track_index = 0
     playlist_index = get_next_index(playlist_index, len(playlists))
     play_track(track_index)
 
 def previous_playlist():
-    global current_pos, playlist_index, track_index
-    current_pos = 0
+    global playlist_index, track_index
     track_index = 0
     playlist_index = get_previous_index(playlist_index)
     play_track(track_index)
 
 def next_track():
-    global current_pos, track_index
-    current_pos = 0
+    global track_index
     track_index = get_next_index(track_index, playlists[playlist_index].length)
     play_track(track_index)
 
 def previous_track():
-    global current_pos, track_index
-    current_pos = 0
+    global track_index
     track_index = get_previous_index(track_index)
     play_track(track_index)
 
@@ -103,6 +102,7 @@ playlist_index = 0
 track_index = 0
 
 current_pos = 0
+elapsed_time_change = 0
 SKIP_DURATION = 10
 
 volume = 0.5
