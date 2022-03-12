@@ -123,12 +123,11 @@ Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmu
 Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
-    print(f"[Elapsed time (not including skips) - {(mixer.music.get_pos() // 1000)//60}:{(mixer.music.get_pos() // 1000)%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
+    print(f"[Elapsed time - {(current_pos-elapsed_time_change+(mixer.music.get_pos()//1000))//60}:{(current_pos-elapsed_time_change+(mixer.music.get_pos()//1000))%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
     playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
     print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     query = input(">> ").lower()
     os.system("cls||clear")
-    
 
     if "speed" in query:
         if ":" in query:
@@ -151,9 +150,18 @@ Use 'e' to exit the program.''')
         # Rewinding the music
         current_pos = 0
         mixer.music.rewind()
+    elif "time:" in query:
+        current_pos = min(int(query.split(":")[1]), length)
+        elapsed_time_change = mixer.music.get_pos() // 1000
+        if current_pos >= length:
+            next_track()
+        mixer.music.pause()
+        mixer.music.set_pos(current_pos)
+        mixer.music.unpause()
     elif query == 'f':
         # Skipping 10s forward in a track
-        current_pos = min(current_pos + (mixer.music.get_pos() // 1000) + SKIP_DURATION, length)
+        current_pos = min(current_pos + (mixer.music.get_pos() // 1000) - elapsed_time_change + SKIP_DURATION, length)
+        elapsed_time_change = mixer.music.get_pos() // 1000
         if current_pos >= length:
             next_track()
         mixer.music.pause()
@@ -161,7 +169,8 @@ Use 'e' to exit the program.''')
         mixer.music.unpause()
     elif query == 'b':
         # Skipping 10s backward in a track
-        current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - SKIP_DURATION, 0)
+        current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - elapsed_time_change - SKIP_DURATION, 0)
+        elapsed_time_change = mixer.music.get_pos() // 1000
         mixer.music.pause()
         mixer.music.set_pos(current_pos)
         mixer.music.unpause()
