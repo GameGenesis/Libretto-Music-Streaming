@@ -94,6 +94,9 @@ def toggle_mute():
     else:
         mixer.music.set_volume(saved_volume)
 
+def get_elapsed_time():
+    global current_pos, elapsed_time_change
+    return current_pos - elapsed_time_change + (mixer.music.get_pos() // 1000)
 
 parent_dir = os.path.join("data", "playlists")
 playlists = get_playlists(parent_dir)
@@ -123,7 +126,7 @@ Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmu
 Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
-    print(f"[Elapsed time - {(current_pos-elapsed_time_change+(mixer.music.get_pos()//1000))//60}:{(current_pos-elapsed_time_change+(mixer.music.get_pos()//1000))%60:02d} of {length//60}:{length%60:02d} || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
+    print(f"[Elapsed time: {get_elapsed_time()//60}:{get_elapsed_time()%60:02d} of {length//60}:{length%60:02d} ({(length - get_elapsed_time())//60}:{(length - get_elapsed_time())%60:02d} remaining) || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
     playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
     print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     query = input(">> ").lower()
