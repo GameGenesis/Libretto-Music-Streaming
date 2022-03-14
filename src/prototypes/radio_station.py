@@ -6,10 +6,12 @@ import time
 class RadioStation:
     def __init__(self, url: str):
         self.url = url
+        # Get radio streams from url
         self.streams = self.get_streams()
         self.set_default_stream()
     
     def set_default_stream(self, stream_index: int=0):
+        # Set the stream that will be played by default
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
 
@@ -18,6 +20,7 @@ class RadioStation:
         response = urllib.request.urlopen(request)
         raw_file = response.read().decode("utf-8")
         
+        # Return the stream urls with regular expressions
         return re.findall(r"stream\":\"(.*?)\"", raw_file)
 
 '''
