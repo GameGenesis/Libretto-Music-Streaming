@@ -1,3 +1,5 @@
+# More Info: https://lyricsgenius.readthedocs.io/en/master/, https://github.com/johnwmillr/LyricsGenius
+
 import lyricsgenius as lg
 
 import config
