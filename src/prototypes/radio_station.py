@@ -13,11 +13,12 @@ class RadioStation:
             self.set_default_stream()
         else:
             # Assign streams if streams are valid
-            if self.check_stream_validity(streams_override[0])[0]:
+            if RadioStation.check_stream_validity(streams_override[0])[0]:
                 self.streams = streams_override
             self.set_default_stream()
     
-    def is_stream_playlist(self, stream_url: str):
+    @staticmethod
+    def is_stream_playlist(stream_url: str):
         # Create a list of playlist url extensions
         playlist_exts = ["pls", "m3u"]
         # Get url extension
@@ -25,17 +26,8 @@ class RadioStation:
         # Determine if the stream is a playlist
         return ext in playlist_exts
 
-    def set_default_stream(self, stream_index: int=0):
-        # Set the stream that will be played by default
-        if stream_index < len(self.streams):
-            self.default_stream = self.streams[stream_index]
-            # Determine if the default stream is a playlist
-            self.is_playlist = self.is_stream_playlist(self.default_stream)
-        else:
-            self.default_stream = None
-            print("Stream index is out of range!")
-    
-    def check_stream_validity(self, stream_url: str):
+    @staticmethod
+    def check_stream_validity(stream_url: str):
         # Returns the HTTP status code that was sent with the response
         code = str(urllib.request.urlopen(stream_url).getcode())
         # Check if the code starts with a 2 or 3 (not an error code)
@@ -45,7 +37,7 @@ class RadioStation:
             player = instance.media_player_new()
             player.audio_set_mute(True)
             
-            is_playlist = self.is_stream_playlist(stream_url)
+            is_playlist = RadioStation.is_stream_playlist(stream_url)
             if is_playlist:
                 player = instance.media_list_player_new()
                 media = instance.media_list_new([stream_url])
@@ -69,6 +61,16 @@ class RadioStation:
             return False, state
         print("Stream is not valid!")
         return False, None
+
+    def set_default_stream(self, stream_index: int=0):
+        # Set the stream that will be played by default
+        if stream_index < len(self.streams):
+            self.default_stream = self.streams[stream_index]
+            # Determine if the default stream is a playlist
+            self.is_playlist = RadioStation.is_stream_playlist(self.default_stream)
+        else:
+            self.default_stream = None
+            print("Stream index is out of range!")
 
     def add_stream_manual(self, stream_url: str, default: bool=True):
         # Get the stream validity before trying to add the stream
