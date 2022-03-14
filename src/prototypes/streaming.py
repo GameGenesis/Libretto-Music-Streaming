@@ -1,3 +1,5 @@
+# Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
+
 import time
 import pafy
 import vlc
