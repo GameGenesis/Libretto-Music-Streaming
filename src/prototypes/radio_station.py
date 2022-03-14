@@ -14,6 +14,29 @@ class RadioStation:
         # Set the stream that will be played by default
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
+    
+    def check_stream_validity(self, stream_url: str):
+        # Returns the HTTP status code that was sent with the response
+        code = str(urllib.request.urlopen(stream_url).getcode())
+        # Check if the code starts with a 2 or 3 (not an error code)
+        if code.startswith("2") or code.startswith("3"):
+            # Start a vlc instance and try playing the stream
+            instance = vlc.Instance()
+            player = instance.media_player_new()
+            media = instance.media_new(stream_url)
+            player.set_media(media)
+            player.audio_set_mute(True)
+            player.play()
+            time.sleep(5)
+
+            # Get the player state
+            state = player.get_state()
+            # Return true if the state is not an error
+            if state != vlc.State.Error:
+                player.stop()
+                return True, state
+            return False, state
+        return False, None
 
     def get_streams(self):
         request = urllib.request.Request(self.url)
