@@ -4,19 +4,18 @@ import vlc
 import time
 
 class RadioStation:
-    def __init__(self, url: str, streams_override: list[str]=[], check_default_stream_validity: bool=False):
+    def __init__(self, url: str, streams_override: list[str]=[]):
+        self.streams = []
         if not streams_override:
             self.url = url
             # Get radio streams from url
             self.streams = self.get_streams()
             self.set_default_stream()
         else:
-            # Assign streams if streams are valid or check_default_stream_validity is set to False
-            if (not check_default_stream_validity or self.check_stream_validity(streams_override[0])[0]):
+            # Assign streams if streams are valid
+            if self.check_stream_validity(streams_override[0])[0]:
                 self.streams = streams_override
-                self.set_default_stream()
-            else:
-                self.default_stream = None
+            self.set_default_stream()
     
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
@@ -26,10 +25,11 @@ class RadioStation:
             # Create a list of playlist url extensions
             playlist_exts = ["pls", "m3u"]
             # Get url extension
-            ext = (self.default_stream.rpartition(".")[-1])[:3]
+            ext = (self.default_stream.rpartition(".")[-1])
             # Determine if the default stream is a playlist
             self.is_playlist = ext in playlist_exts
         else:
+            self.default_stream = None
             print("Stream index is out of range!")
     
     def check_stream_validity(self, stream_url: str):
@@ -97,23 +97,27 @@ class RadioStation:
         # Create a vlc instance and player
         self.vlc_instace = vlc.Instance()
         self.player = self.vlc_instace.media_player_new()
-
+        self.player.audio_set_mute(False)
+        
         if self.is_playlist:
-            pass
+            self.player = self.vlc_instace.media_list_player_new()
+            self.media = self.vlc_instace.media_list_new([self.default_stream])
+            self.player.set_media_list(self.media)
         else:
             # Play the default steram
             self.media = self.vlc_instace.media_new(self.default_stream)
             self.media.get_mrl()
             self.player.set_media(self.media)
-            self.player.audio_set_mute(False)
-            self.player.play()
 
-            # Record the previously playing track
-            previously_playing = None
+        self.player.play()
 
-            # While the stream is still playing
-            while self.player.is_playing:
-                time.sleep(1)
+        # Record the previously playing track
+        previously_playing = None
+
+        # While the stream is still playing
+        while self.player.is_playing:
+            time.sleep(1)
+            if not self.is_playlist:
                 now_playing = self.media.get_meta(12)
                 
                 if now_playing != previously_playing:
@@ -132,7 +136,10 @@ virgin_radio = RadioStation("https://www.iheart.com/live/999-virgin-radio-7481/"
 virgin_radio.add_stream_manual("http://icecast.vrtcdn.be/mnm-high.mp3")
 virgin_radio.play_radio_stream()
 
-virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-radio-7481/"], True)
+iheart_radio = RadioStation("", ["https://playerservices.streamtheworld.com/pls/ST13_S01.pls"])
+iheart_radio.play_radio_stream()
+
+virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
 virgin_radio_broken.play_radio_stream()
 
 '''
