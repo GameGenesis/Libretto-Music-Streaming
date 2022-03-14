@@ -4,11 +4,19 @@ import vlc
 import time
 
 class RadioStation:
-    def __init__(self, url: str):
-        self.url = url
-        # Get radio streams from url
-        self.streams = self.get_streams()
-        self.set_default_stream()
+    def __init__(self, url: str, streams_override: list[str]=[], check_default_stream_validity: bool=False):
+        if not streams_override:
+            self.url = url
+            # Get radio streams from url
+            self.streams = self.get_streams()
+            self.set_default_stream()
+        else:
+            # Assign streams if streams are valid or check_default_stream_validity is set to False
+            if (not check_default_stream_validity or self.check_stream_validity(streams_override[0])[0]):
+                self.streams = streams_override
+                self.set_default_stream()
+            else:
+                self.default_stream = None
     
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
