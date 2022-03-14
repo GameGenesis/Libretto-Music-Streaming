@@ -22,6 +22,8 @@ class RadioStation:
         # Set the stream that will be played by default
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
+        else:
+            print("Stream index is out of range!")
     
     def check_stream_validity(self, stream_url: str):
         # Returns the HTTP status code that was sent with the response
@@ -41,7 +43,7 @@ class RadioStation:
             # Get the player state
             state = player.get_state()
             # Return true if the state is not an error
-            if state != vlc.State.Error:
+            if state != vlc.State.Error and state != vlc.State.Ended:
                 player.stop()
                 print("Stream is valid!")
                 return True, state
