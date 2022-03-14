@@ -1,3 +1,25 @@
+import re
+import urllib.request
+import vlc
+import time
+
+class RadioStation:
+    def __init__(self, url: str):
+        self.url = url
+        self.streams = self.get_streams()
+        self.set_default_stream()
+    
+    def set_default_stream(self, stream_index: int=0):
+        if stream_index < len(self.streams):
+            self.default_stream = self.streams[stream_index]
+
+    def get_streams(self):
+        request = urllib.request.Request(self.url)
+        response = urllib.request.urlopen(request)
+        raw_file = response.read().decode("utf-8")
+        
+        return re.findall(r"stream\":\"(.*?)\"", raw_file)
+
 '''
 Finding the stream URL using Chrome Dev Tools or Mozilla Firefox Firebug:
 - Right click
