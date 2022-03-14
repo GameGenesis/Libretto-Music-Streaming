@@ -98,30 +98,33 @@ class RadioStation:
         self.vlc_instace = vlc.Instance()
         self.player = self.vlc_instace.media_player_new()
 
-        # Play the default steram
-        self.media = self.vlc_instace.media_new(self.default_stream)
-        self.media.get_mrl()
-        self.player.set_media(self.media)
-        self.player.audio_set_mute(False)
-        self.player.play()
+        if self.is_playlist:
+            pass
+        else:
+            # Play the default steram
+            self.media = self.vlc_instace.media_new(self.default_stream)
+            self.media.get_mrl()
+            self.player.set_media(self.media)
+            self.player.audio_set_mute(False)
+            self.player.play()
 
-        # Record the previously playing track
-        previously_playing = None
+            # Record the previously playing track
+            previously_playing = None
 
-        # While the stream is still playing
-        while self.player.is_playing:
-            time.sleep(1)
-            now_playing = self.media.get_meta(12)
-            
-            if now_playing != previously_playing:
-                # Display the now playing track and record the previously playing track
-                print("Now playing", now_playing)
-                previously_playing = now_playing
+            # While the stream is still playing
+            while self.player.is_playing:
+                time.sleep(1)
+                now_playing = self.media.get_meta(12)
+                
+                if now_playing != previously_playing:
+                    # Display the now playing track and record the previously playing track
+                    print("Now playing", now_playing)
+                    previously_playing = now_playing
 
-                # Display the currently playing track genre
-                genre = self.media.get_meta(2)
-                if genre:
-                    print("Genre:", genre)
+                    # Display the currently playing track genre
+                    genre = self.media.get_meta(2)
+                    if genre:
+                        print("Genre:", genre)
         return self.player.audio_get_track_description()
 
 
