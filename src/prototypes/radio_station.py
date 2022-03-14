@@ -27,15 +27,19 @@ class RadioStation:
             player.set_media(media)
             player.audio_set_mute(True)
             player.play()
-            time.sleep(5)
 
+            print("Checking the stream validity...")
+            time.sleep(3)
             # Get the player state
             state = player.get_state()
             # Return true if the state is not an error
             if state != vlc.State.Error:
                 player.stop()
+                print("Stream is valid!")
                 return True, state
+            print("Stream is not valid!")
             return False, state
+        print("Stream is not valid!")
         return False, None
 
     def add_stream_manual(self, stream_url: str, default: bool=True):
