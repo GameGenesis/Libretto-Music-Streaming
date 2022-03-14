@@ -57,7 +57,7 @@ class RadioStation:
                 player.stop()
                 print("Stream is valid!")
                 return True, state
-            print("Stream is not valid!")
+            print(f"Stream is not valid! Player State: {state}")
             return False, state
         print("Stream is not valid!")
         return False, None
