@@ -58,7 +58,7 @@ class RadioStation:
             player.play()
 
             print("Checking the stream validity...")
-            time.sleep(3)
+            time.sleep(2)
             # Get the player state
             state = player.get_state()
             # Return true if the state is not an error
@@ -122,11 +122,12 @@ class RadioStation:
         self.player.audio_set_mute(False)
         
         if self.is_playlist:
+            # Set the default stream playlist as the playable media list
             self.player = self.vlc_instace.media_list_player_new()
             self.media = self.vlc_instace.media_list_new([self.default_stream])
             self.player.set_media_list(self.media)
         else:
-            # Play the default steram
+            # Set the default stream as the playable media
             self.media = self.vlc_instace.media_new(self.default_stream)
             self.media.get_mrl()
             self.player.set_media(self.media)
@@ -155,11 +156,13 @@ class RadioStation:
 
 
 virgin_radio = RadioStation("https://www.iheart.com/live/999-virgin-radio-7481/")
-virgin_radio.add_stream_manual("http://icecast.vrtcdn.be/mnm-high.mp3")
 virgin_radio.play_radio_stream()
 
-iheart_radio = RadioStation("", ["https://playerservices.streamtheworld.com/pls/ST13_S01.pls"])
+iheart_radio = RadioStation("https://www.iheart.com/live/iheartradio-top-20-7556/")
 iheart_radio.play_radio_stream()
+
+mnm_radio = RadioStation("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
+mnm_radio.play_radio_stream()
 
 virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
 virgin_radio_broken.play_radio_stream()
