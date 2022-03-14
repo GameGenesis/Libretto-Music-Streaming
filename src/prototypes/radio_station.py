@@ -116,6 +116,15 @@ class RadioStation:
                 if genre:
                     print("Genre:", genre)
         return self.player.audio_get_track_description()
+
+
+virgin_radio = RadioStation("https://www.iheart.com/live/999-virgin-radio-7481/")
+virgin_radio.add_stream_manual("http://icecast.vrtcdn.be/mnm-high.mp3")
+virgin_radio.play_radio_stream()
+
+virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-radio-7481/"], True)
+virgin_radio_broken.play_radio_stream()
+
 '''
 Finding the stream URL using Chrome Dev Tools or Mozilla Firefox Firebug:
 - Right click
