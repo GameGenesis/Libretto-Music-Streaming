@@ -22,6 +22,13 @@ class RadioStation:
         # Set the stream that will be played by default
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
+
+            # Create a list of playlist url extensions
+            playlist_exts = ["pls", "m3u"]
+            # Get url extension
+            ext = (self.default_stream.rpartition(".")[-1])[:3]
+            # Determine if the default stream is a playlist
+            self.is_playlist = ext in playlist_exts
         else:
             print("Stream index is out of range!")
     
