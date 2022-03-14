@@ -38,6 +38,27 @@ class RadioStation:
             return False, state
         return False, None
 
+    def add_stream_manual(self, stream_url: str, default: bool=True):
+        # Get the stream validity before trying to add the stream
+        valid_stream = self.check_stream_validity(stream_url)[0]
+        if not valid_stream:
+            print("Could not add stream!")
+            return 0
+
+        if default:
+            # Add as the first stream in the list
+            index = 0
+            self.streams.insert(index, stream_url)
+            self.set_default_stream()
+            # Return the added stream index
+            return index
+        else:
+            # Add as the last stream in the list
+            self.streams.append(stream_url)
+            index = len(self.streams) - 1
+            # Return the added stream index
+            return index
+
     def get_streams(self):
         request = urllib.request.Request(self.url)
         response = urllib.request.urlopen(request)
