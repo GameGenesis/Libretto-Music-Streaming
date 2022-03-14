@@ -17,17 +17,20 @@ class RadioStation:
                 self.streams = streams_override
             self.set_default_stream()
     
+    def is_stream_playlist(self, stream_url: str):
+        # Create a list of playlist url extensions
+        playlist_exts = ["pls", "m3u"]
+        # Get url extension
+        ext = stream_url.rpartition(".")[-1]
+        # Determine if the stream is a playlist
+        return ext in playlist_exts
+
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
-
-            # Create a list of playlist url extensions
-            playlist_exts = ["pls", "m3u"]
-            # Get url extension
-            ext = (self.default_stream.rpartition(".")[-1])
             # Determine if the default stream is a playlist
-            self.is_playlist = ext in playlist_exts
+            self.is_playlist = self.is_stream_playlist(self.default_stream)
         else:
             self.default_stream = None
             print("Stream index is out of range!")
@@ -40,9 +43,17 @@ class RadioStation:
             # Start a vlc instance and try playing the stream
             instance = vlc.Instance()
             player = instance.media_player_new()
-            media = instance.media_new(stream_url)
-            player.set_media(media)
             player.audio_set_mute(True)
+            
+            is_playlist = self.is_stream_playlist(stream_url)
+            if is_playlist:
+                player = instance.media_list_player_new()
+                media = instance.media_list_new([stream_url])
+                player.set_media_list(media)
+            else:
+                media = instance.media_new(stream_url)
+                player.set_media(media)
+
             player.play()
 
             print("Checking the stream validity...")
