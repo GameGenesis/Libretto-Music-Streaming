@@ -28,10 +28,19 @@ class RadioStation:
 
     @staticmethod
     def check_stream_validity(stream_url: str):
-        # Returns the HTTP status code that was sent with the response
-        code = str(urllib.request.urlopen(stream_url).getcode())
-        # Check if the code starts with a 2 or 3 (not an error code)
-        if code.startswith("2") or code.startswith("3"):
+        try:
+            # Try opening the stream url
+            urllib.request.urlopen(stream_url)
+        except urllib.error.HTTPError as e:
+            # Return the HTTP status code error that was sent with the response (e.g. 404, 501, ...)
+            print(f"HTTP Error: {e.code}")
+        except urllib.error.URLError as e:
+            # Not an HTTP-specific error (e.g. connection refused)
+            print(f"URL Error: {e.reason}")
+        except Exception as e:
+            # Not an HTTP-specific or URL error (e.g. unknow url type)
+            print(f"Error: {e}")
+        else:
             # Start a vlc instance and try playing the stream
             instance = vlc.Instance()
             player = instance.media_player_new()
