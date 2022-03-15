@@ -107,8 +107,10 @@ class RadioStation:
 
     @staticmethod
     def get_streams(url: str):
+        # Inititalize empty streams list
         streams = []
 
+        # Try opening the url
         request = urllib.request.Request(url)
         try:
             response = urllib.request.urlopen(request)
@@ -116,21 +118,23 @@ class RadioStation:
             print(f"Could not open the specified URL. Error: {e}")
             return streams
         
+        # Decoding the page source 
         raw_file = response.read().decode("utf-8")
         
         regex_terms = ["stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"]
-        # Return the stream urls with regular expressions
+        # Return the stream urls that match the regular expressions
         for term in regex_terms:
             if streams:
                 return streams
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
         
-        # Apple Podcasts, Google Podcasts, and Other
+        # Search terms for Apple Podcasts, Google Podcasts, etc.
         specialized_regex_terms = [r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""]
         for term in specialized_regex_terms:
             if streams:
                 return streams
             streams = re.findall(term, raw_file)
+            # Remove all results without the "mp3" extension (Due to these regular expressions being very generalized)
             for stream in streams:
                 if ".mp3" not in stream:
                     streams.remove(stream)
@@ -190,8 +194,13 @@ iheart_radio.play_radio_stream()
 mnm_radio = RadioStation("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
 mnm_radio.play_radio_stream()
 
+jbfm_radio = RadioStation("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
+jbfm_radio.play_radio_stream()
+
 virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
 virgin_radio_broken.play_radio_stream()
+
+# https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
 
 '''
 Finding the stream URL using Chrome Dev Tools or Mozilla Firefox Firebug:
