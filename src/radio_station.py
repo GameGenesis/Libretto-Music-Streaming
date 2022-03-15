@@ -107,6 +107,8 @@ class RadioStation:
 
     @staticmethod
     def get_streams(url: str):
+        streams = []
+
         request = urllib.request.Request(url)
         try:
             response = urllib.request.urlopen(request)
@@ -116,8 +118,14 @@ class RadioStation:
         
         raw_file = response.read().decode("utf-8")
         
+        regex_terms = ["stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"]
         # Return the stream urls with regular expressions
-        return re.findall(r"stream\":\"(.*?)\"", raw_file)
+        for term in regex_terms:
+            if streams:
+                return streams
+            streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
+        
+        return streams
 
     def play_radio_stream(self):
         # Check if there is no default stream
