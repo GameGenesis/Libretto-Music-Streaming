@@ -20,9 +20,12 @@ class RadioStation:
     @staticmethod
     def is_stream_playlist(stream_url: str):
         # Create a list of playlist url extensions
-        playlist_exts = ["pls", "m3u"]
-        # Get url extension
-        ext = stream_url.rpartition(".")[-1]
+        playlist_exts = ["pls", "m3u", "xspf"]
+        # Get the first 4 characters of a url extension
+        ext = stream_url.rpartition(".")[-1][:4]
+        # Remove trailing characters that aren't part of the extension
+        for char in "/?&#":
+            ext = ext.replace(char, "")
         # Determine if the stream is a playlist
         return ext in playlist_exts
 
