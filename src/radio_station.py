@@ -9,7 +9,7 @@ class RadioStation:
         if not streams_override:
             self.url = url
             # Get radio streams from url
-            self.streams = self.get_streams()
+            self.streams = RadioStation.get_streams(url)
             self.set_default_stream()
         else:
             # Assign streams if streams are valid
@@ -102,8 +102,9 @@ class RadioStation:
             # Return the added stream index
             return index
 
-    def get_streams(self):
-        request = urllib.request.Request(self.url)
+    @staticmethod
+    def get_streams(url: str):
+        request = urllib.request.Request(url)
         response = urllib.request.urlopen(request)
         raw_file = response.read().decode("utf-8")
         
