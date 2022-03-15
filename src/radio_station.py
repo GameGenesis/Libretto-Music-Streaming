@@ -125,6 +125,15 @@ class RadioStation:
                 return streams
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
         
+        # Apple Podcasts, Google Podcasts, and Other
+        specialized_regex_terms = [r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""]
+        for term in specialized_regex_terms:
+            if streams:
+                return streams
+            streams = re.findall(term, raw_file)
+            for stream in streams:
+                if ".mp3" not in stream:
+                    streams.remove(stream)
         return streams
 
     def play_radio_stream(self):
