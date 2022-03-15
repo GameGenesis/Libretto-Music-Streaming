@@ -1,5 +1,6 @@
 # Imports
 import random
+import time
 from pygame import mixer
 import os
 
@@ -126,7 +127,7 @@ Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmu
 Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")
-    print(f"[Elapsed time: {get_elapsed_time()//60}:{get_elapsed_time()%60:02d} of {length//60}:{length%60:02d} ({(length - get_elapsed_time())//60}:{(length - get_elapsed_time())%60:02d} remaining) || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
+    print(f"[Elapsed time: {time.strftime('%M:%S', time.gmtime(get_elapsed_time()))} of {time.strftime('%M:%S', time.gmtime(length))} ({time.strftime('%M:%S', time.gmtime(length-get_elapsed_time()))} remaining) || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
     playlists_list = [f"{i}: {e.get_info_string()}" for i, e in enumerate(playlists)]
     print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
     query = input(">> ").lower()
