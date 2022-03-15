@@ -108,7 +108,12 @@ class RadioStation:
     @staticmethod
     def get_streams(url: str):
         request = urllib.request.Request(url)
-        response = urllib.request.urlopen(request)
+        try:
+            response = urllib.request.urlopen(request)
+        except Exception as e:
+            print(f"Could not open the specified URL. Error: {e}")
+            return streams
+        
         raw_file = response.read().decode("utf-8")
         
         # Return the stream urls with regular expressions
