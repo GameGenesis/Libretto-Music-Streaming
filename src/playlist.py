@@ -12,6 +12,10 @@ class Playlist:
         self.length = len(self.tracks)
         self.total_duration = self.get_total_duration()
 
+    def add_track(self, track):
+        self.tracks.append(track)
+        self.length = len(self.tracks)
+        self.total_duration = self.get_total_duration()
 
     def get_total_duration(self):
         return sum([t.duration for t in self.tracks])
