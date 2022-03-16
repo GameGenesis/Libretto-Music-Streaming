@@ -184,6 +184,32 @@ class RadioStation:
                         print("Genre:", genre)
         return self.player.audio_get_track_description()
 
+nytimes_podcast = RadioStation("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
+nytimes_podcast.play_radio_stream()
+
+google_podcast = RadioStation("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
+google_podcast.play_radio_stream()
+
+apple_podcast = RadioStation("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
+apple_podcast.play_radio_stream()
+
+iheart_podcast = RadioStation("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
+iheart_podcast.play_radio_stream()
+
+cbc_news_podcast = RadioStation("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
+cbc_news_podcast.play_radio_stream()
+
+cnn_news_radio = RadioStation("https://www.cnn.com/audio")
+cnn_news_radio.play_radio_stream()
+
+abc_news_radio = RadioStation("https://www.abc.net.au/news/newsradio/")
+abc_news_radio.play_radio_stream()
+
+dance_wave_radio = RadioStation("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
+dance_wave_radio.play_radio_stream()
+
+antenne_bayerne_radio = RadioStation("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
+antenne_bayerne_radio.play_radio_stream()
 
 virgin_radio = RadioStation("https://www.iheart.com/live/999-virgin-radio-7481/")
 virgin_radio.play_radio_stream()
