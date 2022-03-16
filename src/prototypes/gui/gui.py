@@ -7,6 +7,8 @@ from pathlib import Path
 
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 
+HIGH_RES = False
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path("./assets")
 
@@ -59,7 +61,13 @@ def minimize_window():
 
 window = Tk("Music Player")
 
-window.geometry("1008x680")
+if HIGH_RES:
+    # DPI Awareness (Increase Pixels per inch)
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    window.geometry("1006x673")
+else:
+    window.geometry("1008x680")
+
 window.configure(bg = "#FFFFFF")
 
 hwnd = get_handle(window)
@@ -183,16 +191,16 @@ image_11 = canvas.create_image(
 )
 
 canvas.create_text(
-    270.0,
+    310.0,
     694.0,
-    anchor="nw",
+    anchor="ne",
     text="1:48",
     fill="#FFFFFF",
     font=("RobotoRoman Light", 12 * -1)
 )
 
 canvas.create_text(
-    713.0,
+    715.0,
     694.0,
     anchor="nw",
     text="2:36",
