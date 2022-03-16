@@ -7,13 +7,65 @@ from pathlib import Path
 
 from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
 
+OUTPUT_PATH = Path(__file__).parent
+ASSETS_PATH = OUTPUT_PATH / Path("./assets")
+
+GWL_STYLE = -16
+GWLP_HWNDPARENT = -8
+WS_CAPTION = 0x00C00000
+WS_THICKFRAME = 0x00040000
+
+INT = ctypes.c_int
+LONG_PTR = ctypes.c_long
+
+def _errcheck_not_zero(value, func, args):
+    if value == 0:
+        raise ctypes.WinError()
+    return args
+
+GetWindowLongPtrW = ctypes.windll.user32.GetWindowLongPtrW
+SetWindowLongPtrW = ctypes.windll.user32.SetWindowLongPtrW
+
+GetWindowLongPtrW = ctypes.windll.user32.GetWindowLongPtrW
+GetWindowLongPtrW.argtypes = (HWND, INT)
+GetWindowLongPtrW.restype = LONG_PTR
+GetWindowLongPtrW.errcheck = _errcheck_not_zero
+
+SetWindowLongPtrW = ctypes.windll.user32.SetWindowLongPtrW
+SetWindowLongPtrW.argtypes = (HWND, INT, LONG_PTR)
+SetWindowLongPtrW.restype = LONG_PTR
+SetWindowLongPtrW.errcheck = _errcheck_not_zero
+
 def relative_to_assets(path: str) -> Path:
     return ASSETS_PATH / Path(path)
 
+def get_handle(root) -> int:
+    root.update_idletasks()
+    return GetWindowLongPtrW(root.winfo_id(), GWLP_HWNDPARENT)
+
+fullscreen = False
+
+def toggle_fullscreen():
+    global fullscreen
+    if fullscreen == False:
+        window.wm_state('zoomed')
+        fullscreen = True
+    else:
+        window.wm_state('normal')
+        fullscreen = False
+
+def minimize_window():
+    window.iconify()
+
 window = Tk("Music Player")
 
-window.geometry("1024x720")
+window.geometry("1008x680")
 window.configure(bg = "#FFFFFF")
+
+hwnd = get_handle(window)
+style = GetWindowLongPtrW(hwnd, GWL_STYLE)
+style &= ~(WS_CAPTION | WS_THICKFRAME)
+SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 canvas = Canvas(
     window,
@@ -380,7 +432,7 @@ button_7 = Button(
     image=button_image_7,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_7 clicked"),
+    command=lambda: window.destroy(),
     relief="flat"
 )
 button_7.place(
@@ -412,7 +464,7 @@ button_9 = Button(
     image=button_image_9,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_9 clicked"),
+    command=toggle_fullscreen,
     relief="flat"
 )
 button_9.place(
@@ -428,7 +480,7 @@ button_10 = Button(
     image=button_image_10,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_10 clicked"),
+    command=minimize_window,
     relief="flat",
 )
 button_10.place(
