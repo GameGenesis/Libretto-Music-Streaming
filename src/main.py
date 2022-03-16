@@ -152,8 +152,9 @@ Use 'e' to exit the program.''')
         mixer.music.unpause()
     elif query == 'r':
         # Rewinding the music
-        current_pos = 0
         mixer.music.rewind()
+        current_pos = 0
+        elapsed_time_change = mixer.music.get_pos() // 1000
     elif "time:" in query:
         current_pos = min(int(query.split(":")[1]), length)
         elapsed_time_change = mixer.music.get_pos() // 1000
