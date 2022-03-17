@@ -3,6 +3,7 @@ import random
 import time
 from pygame import mixer
 import os
+from pathlib import Path
 
 from playlist import Playlist
 from track import Track
@@ -102,7 +103,8 @@ def get_elapsed_time():
     global current_pos, elapsed_time_change
     return current_pos - elapsed_time_change + (mixer.music.get_pos() // 1000)
 
-parent_dir = os.path.join("data", "playlists")
+current_path = Path(os.getcwd())
+parent_dir = os.path.join(current_path.parent.absolute(), "data", "playlists")
 playlists = get_playlists(parent_dir)
 
 playlist_index = 0

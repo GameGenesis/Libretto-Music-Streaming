@@ -5,13 +5,12 @@ import vlc
 import time
 import requests
 import pafy
+from pathlib import Path
 from bs4 import BeautifulSoup
 
 class Stream:
-    '''
-Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams
-    '''
-    def __init__(self, url: str, streams_override: list[str]=[], title_override:str="New Radio Station"):
+    '''Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams.'''
+    def __init__(self, url: str, streams_override: list[str]=None, title_override:str="New Radio Station"):
         self.streams = []
         if not streams_override:
             # Get website title
@@ -228,7 +227,8 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
         if not playlist_name:
             playlist_name = "Downloaded Tracks" if self.youtube_stream else "Podcasts"
 
-        default_dir = os.path.join("data", "playlists", playlist_name)
+        current_path = Path(os.getcwd())
+        default_dir = os.path.join(current_path.parent.absolute(), "data", "playlists", playlist_name)
         # If the directory does not exist, create a new directory
         if not os.path.exists(default_dir):
             os.mkdir(default_dir)
@@ -237,7 +237,7 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
 
         stream_to_download = None
         # Supported stream types to download
-        supported_extensions = [".mp3", ".aac", ".ogg", ".m4a"]
+        supported_extensions = [".mp3", ".aac", ".ogg", ".m4a", ".wav", ".mpeg"]
         # If the default stream does not match one of the supported stream extensions
         if not Stream.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_stream:
             if download_only_default:
