@@ -4,14 +4,15 @@ import urllib.request
 import vlc
 import time
 import requests
+import pafy
 
 class RadioStation:
     def __init__(self, url: str, streams_override: list[str]=[]):
         self.streams = []
         if not streams_override:
             self.url = url
-            # Get radio streams from url
-            self.streams = RadioStation.get_streams(url)
+            # Get streams from url and if available, the pafy youtube stream
+            self.streams, self.youtube_stream = RadioStation.get_streams(url)
             self.set_default_stream()
         else:
             # Assign streams if streams are valid
@@ -84,6 +85,11 @@ class RadioStation:
     def get_streams(url: str):
         # Inititalize empty streams list
         streams = []
+        youtube_stream = None
+        youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
+        if re.search(youtube_regex, url):
+            streams, youtube_stream = RadioStation.get_youtube_audio_streams(url)
+            return streams, youtube_stream
 
         # Try opening the url
         request = urllib.request.Request(url)
@@ -91,7 +97,7 @@ class RadioStation:
             response = urllib.request.urlopen(request)
         except Exception as e:
             print(f"Could not open the specified URL. Error: {e}")
-            return streams
+            return streams, youtube_stream
         
         # Decoding the page source 
         raw_file = response.read().decode("utf-8")
@@ -100,20 +106,30 @@ class RadioStation:
         # Return the stream urls that match the regular expressions
         for term in regex_terms:
             if streams:
-                return streams
+                return streams, youtube_stream
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
         
         # Search terms for Apple Podcasts, Google Podcasts, etc.
         specialized_regex_terms = [r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""]
         for term in specialized_regex_terms:
             if streams:
-                return streams
+                return streams, youtube_stream
             streams = re.findall(term, raw_file)
             # Remove all results without the "mp3" extension (Due to these regular expressions being very generalized)
             for stream in streams:
                 if ".mp3" not in stream:
                     streams.remove(stream)
-        return streams
+        return streams, youtube_stream
+
+    @staticmethod
+    def get_youtube_audio_streams(url: str):
+        video = pafy.new(url)
+        best_stream = video.getbestaudio()
+        streams = [stream for stream in video.audiostreams]
+        streams.sort(key=lambda stream: stream.rawbitrate, reverse=True)
+        stream_urls = [stream.url for stream in streams]
+        return stream_urls, best_stream
+
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
         if stream_index < len(self.streams):
@@ -196,6 +212,10 @@ class RadioStation:
             return None
 
         file_path = os.path.join(os.getcwd(), f"{file_name}.mp3")
+
+        if self.youtube_stream:
+            self.youtube_stream.download(filepath=file_path, quiet=True)
+            return file_path
         
         stream_to_download = None
         # Supported stream types to download
@@ -228,6 +248,10 @@ class RadioStation:
                 return file_path
             except Exception:
                 return None
+
+youtube = RadioStation("https://www.youtube.com/watch?v=wEGOxgfdRVc")
+youtube.download_stream("bazzi")
+youtube.play_default_stream()
 
 nytimes_podcast = RadioStation("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
 nytimes_podcast.play_default_stream()
