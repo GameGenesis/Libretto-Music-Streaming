@@ -5,21 +5,30 @@ import vlc
 import time
 import requests
 import pafy
+from bs4 import BeautifulSoup
 
 class Stream:
-    def __init__(self, url: str, streams_override: list[str]=[]):
+    '''
+Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams
+    '''
+    def __init__(self, url: str, streams_override: list[str]=[], title_override:str="New Radio Station"):
         self.streams = []
         if not streams_override:
+            # Get website title
+            soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
+            self.title = soup.title.text
+
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
             self.streams, self.youtube_stream = Stream.get_streams(url)
             self.set_default_stream()
         else:
+            self.title = title_override
             # Assign streams if streams are valid
             if Stream.check_stream_validity(streams_override[0])[0]:
                 self.streams = streams_override
             self.set_default_stream()
-    
+
     @staticmethod
     def is_stream_playlist(stream_url: str):
         # Create a list of playlist url extensions
@@ -51,7 +60,7 @@ class Stream:
             instance = vlc.Instance()
             player = instance.media_player_new()
             player.audio_set_mute(True)
-            
+
             is_playlist = Stream.is_stream_playlist(stream_url)
             if is_playlist:
                 player = instance.media_list_player_new()
@@ -98,17 +107,17 @@ class Stream:
         except Exception as e:
             print(f"Could not open the specified URL. Error: {e}")
             return streams, youtube_stream
-        
-        # Decoding the page source 
+
+        # Decoding the page source
         raw_file = response.read().decode("utf-8")
-        
+
         regex_terms = ["stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"]
         # Return the stream urls that match the regular expressions
         for term in regex_terms:
             if streams:
                 return streams, youtube_stream
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
-        
+
         # Search terms for Apple Podcasts, Google Podcasts, etc.
         specialized_regex_terms = [r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""]
         for term in specialized_regex_terms:
@@ -171,7 +180,7 @@ class Stream:
         self.vlc_instace = vlc.Instance()
         self.player = self.vlc_instace.media_player_new()
         self.player.audio_set_mute(False)
-        
+
         if self.is_playlist:
             # Set the default stream playlist as the playable media list
             self.player = self.vlc_instace.media_list_player_new()
@@ -193,7 +202,7 @@ class Stream:
             time.sleep(1)
             if not self.is_playlist:
                 now_playing = self.media.get_meta(12)
-                
+
                 if now_playing != previously_playing:
                     # Display the now playing track and record the previously playing track
                     print("Now playing", now_playing)
@@ -204,19 +213,25 @@ class Stream:
                     if genre:
                         print("Genre:", genre)
         return self.player.audio_get_track_description()
-    
-    def download_stream(self, file_name: str, download_only_default: bool=False):
+
+    def download_stream(self, file_name: str="", playlist_name: str="Downloaded Tracks", download_only_default: bool=False):
         # Return if there is no default stream
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
             return None
 
-        file_path = os.path.join(os.getcwd(), f"{file_name}.mp3")
+        if not file_name:
+            file_name = self.title
+        default_dir = os.path.join("data", "playlists", playlist_name)
+        if not os.path.exists(default_dir):
+            os.mkdir(default_dir)
+
+        file_path = os.path.join(os.getcwd(), default_dir, f"{file_name}.mp3")
 
         if self.youtube_stream:
             self.youtube_stream.download(filepath=file_path, quiet=True)
             return file_path
-        
+
         stream_to_download = None
         # Supported stream types to download
         supported_extensions = [".mp3", ".aac", ".ogg", ".m4a"]
@@ -236,7 +251,7 @@ class Stream:
                 return None
         else:
             stream_to_download = self.default_stream
-        
+
         # Downloading the stream
         stream_request = requests.get(stream_to_download, stream=True)
 
