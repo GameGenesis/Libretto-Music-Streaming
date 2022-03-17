@@ -16,7 +16,8 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
         if not streams_override:
             # Get website title
             soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
-            self.title = soup.title.text
+            # Get stream title and remove white spaces and special/escape characters
+            self.title = " ".join(soup.title.text.split())
 
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
