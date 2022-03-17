@@ -8,7 +8,7 @@ class Track:
         self.path = path
         self.title = title
         self.album = album
-        
+
         self.date_added = datetime.fromtimestamp(os.path.getctime(self.path))
 
         mp3 = MP3(self.path)
@@ -16,7 +16,8 @@ class Track:
         self.sample_rate = mp3.info.sample_rate
 
         file = File(self.path, easy=True)
+
         try:
             self.artist = file["artist"][0]
-        except:
+        except Exception:
             self.artist = "Unknown Artist"
