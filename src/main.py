@@ -43,7 +43,7 @@ def play_track(track_index: int=0, start_time: int=0):
 
         # Start playing the track
         mixer.music.play(start=start_time)
-        
+
         # Queuing the next track
         mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)].path)
     except Exception:
@@ -123,10 +123,10 @@ play_track(track_index)
 
 while True:
     # Print instructions and get user input
-    print('''Use '[' and ']' for cycling through playlists. 
-Use 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back. 
-Use 'n' for next track, 'q' for previous track, 's' to shuffle tracks. 
-Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute. 
+    print('''Use '[' and ']' for cycling through playlists.
+Use 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back.
+Use 'n' for next track, 'q' for previous track, 's' to shuffle tracks.
+Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute.
 Use 'e' to exit the program.''')
     muted_str = " (Muted)" if muted else ""
     print(f"[Volume: {int(volume*100)}%{muted_str}]")

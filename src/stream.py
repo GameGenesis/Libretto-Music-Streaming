@@ -268,16 +268,19 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
                 return None
 
 youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-youtube.download_stream("bazzi")
+youtube.download_stream()
 youtube.play_default_stream()
 
 nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
+nytimes_podcast.download_stream()
 nytimes_podcast.play_default_stream()
 
 google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
+google_podcast.download_stream()
 google_podcast.play_default_stream()
 
 apple_podcast = Stream("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
+apple_podcast.download_stream()
 apple_podcast.play_default_stream()
 
 iheart_podcast = Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
@@ -287,6 +290,7 @@ cbc_news_podcast = Stream("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-t
 cbc_news_podcast.play_default_stream()
 
 cnn_news_radio = Stream("https://www.cnn.com/audio")
+cnn_news_radio.download_stream()
 cnn_news_radio.play_default_stream()
 
 abc_news_radio = Stream("https://www.abc.net.au/news/newsradio/")
@@ -312,9 +316,6 @@ jbfm_radio.play_default_stream()
 
 virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
 virgin_radio_broken.play_default_stream()
-
-# https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
-# Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
 
 '''
 Helpful Resources
