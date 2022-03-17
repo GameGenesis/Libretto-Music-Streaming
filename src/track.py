@@ -16,4 +16,7 @@ class Track:
         self.sample_rate = mp3.info.sample_rate
 
         file = File(self.path, easy=True)
-        self.artist = file["artist"][0]
+        try:
+            self.artist = file["artist"][0]
+        except:
+            self.artist = "Unknown Artist"
