@@ -215,29 +215,31 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
                         print("Genre:", genre)
         return self.player.audio_get_track_description()
 
-    def download_stream(self, file_name: str="", playlist_name: str="Downloaded Tracks", download_only_default: bool=False):
+    def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False):
         # Return if there is no default stream
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
             return None
 
+        # If file name is not overriden, use webite title from specified URL
         if not file_name:
             file_name = self.title
+        # Playlist defaults to "Downloaded Tracks" for YouTube audio streams and "Podcasts" for other stream types
+        if not playlist_name:
+            playlist_name = "Downloaded Tracks" if self.youtube_stream else "Podcasts"
+
         default_dir = os.path.join("data", "playlists", playlist_name)
+        # If the directory does not exist, create a new directory
         if not os.path.exists(default_dir):
             os.mkdir(default_dir)
 
         file_path = os.path.join(os.getcwd(), default_dir, f"{file_name}.mp3")
 
-        if self.youtube_stream:
-            self.youtube_stream.download(filepath=file_path, quiet=True)
-            return file_path
-
         stream_to_download = None
         # Supported stream types to download
         supported_extensions = [".mp3", ".aac", ".ogg", ".m4a"]
         # If the default stream does not match one of the supported stream extensions
-        if not Stream.is_supported_stream(self.default_stream, supported_extensions):
+        if not Stream.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_stream:
             if download_only_default:
                 print("Can't download radio stream; there are no supported streams!")
                 return None
