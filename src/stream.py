@@ -31,7 +31,7 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
             self.set_default_stream()
 
     @staticmethod
-    def is_stream_playlist(stream_url: str):
+    def is_stream_playlist(stream_url: str) -> bool:
         # Create a list of playlist url extensions
         playlist_exts = ["pls", "m3u", "xspf"]
         # Get the first 4 characters of a url extension
@@ -43,7 +43,7 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
         return ext in playlist_exts
 
     @staticmethod
-    def check_stream_validity(stream_url: str):
+    def check_stream_validity(stream_url: str) -> tuple[bool, vlc.State]:
         try:
             # Try opening the stream url
             urllib.request.urlopen(stream_url)
@@ -88,11 +88,11 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
         return False, None
 
     @staticmethod
-    def is_supported_stream(stream: str, supported_extensions: list[str]):
+    def is_supported_stream(stream: str, supported_extensions: list[str]) -> bool:
         return any(extension in stream for extension in supported_extensions)
 
     @staticmethod
-    def get_streams(url: str):
+    def get_streams(url: str) -> list[str]:
         # Inititalize empty streams list
         streams = []
         youtube_stream = None
@@ -132,7 +132,7 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
         return streams, youtube_stream
 
     @staticmethod
-    def get_youtube_audio_streams(url: str):
+    def get_youtube_audio_streams(url: str) -> tuple[list[str], pafy.Stream | None]:
         video = pafy.new(url)
         best_stream = video.getbestaudio()
         streams = [stream for stream in video.audiostreams]
@@ -150,7 +150,7 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
             self.default_stream = None
             print("Stream index is out of range!")
 
-    def add_stream_manual(self, stream_url: str, default: bool=True):
+    def add_stream_manual(self, stream_url: str, default: bool=True) -> int:
         # Get the stream validity before trying to add the stream
         valid_stream = self.check_stream_validity(stream_url)[0]
         if not valid_stream:
@@ -215,7 +215,7 @@ Supports radio streaming, podcast streaming, and YouTube audio streams. Also sup
                         print("Genre:", genre)
         return self.player.audio_get_track_description()
 
-    def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False):
+    def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> str:
         # Return if there is no default stream
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
@@ -322,17 +322,4 @@ Helpful Resources
 https://stackoverflow.com/questions/19377262/regex-for-youtube-url
 https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
 Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
-'''
-
-'''
-99.9 Virgin Radio
-"hls_stream":"http://playerservices.streamtheworld.com/api/livestream-redirect/CKFMFM_ADP.m3u8"
-"secure_mp3_pls_stream":"https://playerservices.streamtheworld.com/pls/CKFMFM.pls"
-"pls_stream":"http://playerservices.streamtheworld.com/pls/CKFMFMAAC.pls"
-"secure_hls_stream":"https://playerservices.streamtheworld.com/api/livestream-redirect/CKFMFM_ADP.m3u8"
-"secure_pls_stream":"https://playerservices.streamtheworld.com/pls/CKFMFMAAC.pls"
-
-Belgian radio station (MNM) example: http://icecast.vrtcdn.be/mnm-high.mp3 (includes now playing info)
-
-IHeart radio playlist: https://playerservices.streamtheworld.com/pls/ST13_S01.pls
 '''
