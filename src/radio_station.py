@@ -194,12 +194,16 @@ class RadioStation:
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
             return None
+
+        file_path = os.path.join(os.getcwd(), f"{file_name}.mp3")
         
+        stream_to_download = None
         # Supported stream types to download
-        supported_extensions = [".mp3", ".aac", ".ogg"]
+        supported_extensions = [".mp3", ".aac", ".ogg", ".m4a"]
         # If the default stream does not match one of the supported stream extensions
         if not RadioStation.is_supported_stream(self.default_stream, supported_extensions):
             if download_only_default:
+                print("Can't download radio stream; there are no supported streams!")
                 return None
             # If download_only_default is set to false, check for other supported streams
             for stream in self.streams:
@@ -207,12 +211,14 @@ class RadioStation:
                     if RadioStation.is_supported_stream(stream, supported_extensions):
                         stream_to_download = stream
                         break
+            if not stream_to_download:
+                print("Can't download radio stream; there are no supported streams!")
+                return None
         else:
             stream_to_download = self.default_stream
         
         # Downloading the stream
         stream_request = requests.get(stream_to_download, stream=True)
-        file_path = os.path.join(os.getcwd(), f"{file_name}.mp3")
 
         with open(file_path, "wb") as f:
             try:
