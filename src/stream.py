@@ -317,10 +317,10 @@ virgin_radio_broken.play_default_stream()
 # Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
 
 '''
-Finding the stream URL using Chrome Dev Tools or Mozilla Firefox Firebug:
-- Right click
-- View page source
-- Find stream urls
+Helpful Resources
+https://stackoverflow.com/questions/19377262/regex-for-youtube-url
+https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
+Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
 '''
 
 '''
