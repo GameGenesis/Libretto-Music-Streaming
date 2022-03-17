@@ -37,14 +37,17 @@ def set_track_speed(multiplier: int=1):
 def play_track(track_index: int=0, start_time: int=0):
     global audio, length, playlists, playlist_index, current_pos, elapsed_time_change
 
-    # Loading the track
-    mixer.music.load(playlists[playlist_index].tracks[track_index].path)
+    try:
+        # Loading the track
+        mixer.music.load(playlists[playlist_index].tracks[track_index].path)
 
-    # Start playing the track
-    mixer.music.play(start=start_time)
-    
-    # Queuing the next track
-    mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)].path)
+        # Start playing the track
+        mixer.music.play(start=start_time)
+        
+        # Queuing the next track
+        mixer.music.queue(playlists[playlist_index].tracks[get_next_index(track_index, playlists[playlist_index].length)].path)
+    except Exception:
+        print("Can't play track! File format not supported!")
 
     length = playlists[playlist_index].tracks[track_index].duration
 
