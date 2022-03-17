@@ -13,12 +13,15 @@ class Playlist:
         self.total_duration = self.get_total_duration()
 
     def add_track(self, track):
+        '''Append a track to the playlist'''
         self.tracks.append(track)
         self.length = len(self.tracks)
         self.total_duration = self.get_total_duration()
 
-    def get_total_duration(self):
+    def get_total_duration(self) -> int:
+        '''Get the duration of all the tracks in the playlist'''
         return sum([t.duration for t in self.tracks])
 
-    def get_info_string(self):
+    def get_info_string(self) -> str:
+        '''Get a string containing the basic information pertaining to the playlist'''
         return f"Title: {self.title}, Artist: {self.artist}, Date Created: {self.date_created}, Total Duration: {self.total_duration}s, Path: {self.path}"
