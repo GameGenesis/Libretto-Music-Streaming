@@ -76,6 +76,10 @@ class RadioStation:
         print("Stream is not valid!")
         return False, None
 
+    @staticmethod
+    def is_supported_stream(stream: str, supported_extensions: list[str]):
+        return any(extension in stream for extension in supported_extensions)
+
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
         if stream_index < len(self.streams):
@@ -185,6 +189,40 @@ class RadioStation:
                     if genre:
                         print("Genre:", genre)
         return self.player.audio_get_track_description()
+    
+    def download_stream(self, file_name: str, download_only_default: bool=False):
+        # Return if there is no default stream
+        if not self.default_stream:
+            print("Can't download radio stream; there is no default stream!")
+            return None
+        
+        # Supported stream types to download
+        supported_extensions = [".mp3", ".aac", ".ogg"]
+        # If the default stream does not match one of the supported stream extensions
+        if not RadioStation.is_supported_stream(self.default_stream, supported_extensions):
+            if download_only_default:
+                return None
+            # If download_only_default is set to false, check for other supported streams
+            for stream in self.streams:
+                if stream != self.default_stream:
+                    if RadioStation.is_supported_stream(stream, supported_extensions):
+                        stream_to_download = stream
+                        break
+        else:
+            stream_to_download = self.default_stream
+        
+        # Downloading the stream
+        stream_request = requests.get(stream_to_download, stream=True)
+        file_path = os.path.join(os.getcwd(), f"{file_name}.mp3")
+
+        with open(file_path, "wb") as f:
+            try:
+                # Write each chunk of the stream content to the created file
+                for block in stream_request.iter_content(1024):
+                    f.write(block)
+                return file_path
+            except Exception:
+                return None
 
 nytimes_podcast = RadioStation("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
 nytimes_podcast.play_default_stream()
