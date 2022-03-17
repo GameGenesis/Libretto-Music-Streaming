@@ -80,37 +80,6 @@ class RadioStation:
     def is_supported_stream(stream: str, supported_extensions: list[str]):
         return any(extension in stream for extension in supported_extensions)
 
-    def set_default_stream(self, stream_index: int=0):
-        # Set the stream that will be played by default
-        if stream_index < len(self.streams):
-            self.default_stream = self.streams[stream_index]
-            # Determine if the default stream is a playlist
-            self.is_playlist = RadioStation.is_stream_playlist(self.default_stream)
-        else:
-            self.default_stream = None
-            print("Stream index is out of range!")
-
-    def add_stream_manual(self, stream_url: str, default: bool=True):
-        # Get the stream validity before trying to add the stream
-        valid_stream = self.check_stream_validity(stream_url)[0]
-        if not valid_stream:
-            print("Could not add stream!")
-            return 0
-
-        if default:
-            # Add as the first stream in the list
-            index = 0
-            self.streams.insert(index, stream_url)
-            self.set_default_stream()
-            # Return the added stream index
-            return index
-        else:
-            # Add as the last stream in the list
-            self.streams.append(stream_url)
-            index = len(self.streams) - 1
-            # Return the added stream index
-            return index
-
     @staticmethod
     def get_streams(url: str):
         # Inititalize empty streams list
@@ -145,6 +114,36 @@ class RadioStation:
                 if ".mp3" not in stream:
                     streams.remove(stream)
         return streams
+    def set_default_stream(self, stream_index: int=0):
+        # Set the stream that will be played by default
+        if stream_index < len(self.streams):
+            self.default_stream = self.streams[stream_index]
+            # Determine if the default stream is a playlist
+            self.is_playlist = RadioStation.is_stream_playlist(self.default_stream)
+        else:
+            self.default_stream = None
+            print("Stream index is out of range!")
+
+    def add_stream_manual(self, stream_url: str, default: bool=True):
+        # Get the stream validity before trying to add the stream
+        valid_stream = self.check_stream_validity(stream_url)[0]
+        if not valid_stream:
+            print("Could not add stream!")
+            return 0
+
+        if default:
+            # Add as the first stream in the list
+            index = 0
+            self.streams.insert(index, stream_url)
+            self.set_default_stream()
+            # Return the added stream index
+            return index
+        else:
+            # Add as the last stream in the list
+            self.streams.append(stream_url)
+            index = len(self.streams) - 1
+            # Return the added stream index
+            return index
 
     def play_default_stream(self):
         # Return if there is no default stream
@@ -267,6 +266,7 @@ virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-
 virgin_radio_broken.play_default_stream()
 
 # https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
+# Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
 
 '''
 Finding the stream URL using Chrome Dev Tools or Mozilla Firefox Firebug:
