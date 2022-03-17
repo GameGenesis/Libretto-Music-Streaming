@@ -6,17 +6,17 @@ import time
 import requests
 import pafy
 
-class RadioStation:
+class Stream:
     def __init__(self, url: str, streams_override: list[str]=[]):
         self.streams = []
         if not streams_override:
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
-            self.streams, self.youtube_stream = RadioStation.get_streams(url)
+            self.streams, self.youtube_stream = Stream.get_streams(url)
             self.set_default_stream()
         else:
             # Assign streams if streams are valid
-            if RadioStation.check_stream_validity(streams_override[0])[0]:
+            if Stream.check_stream_validity(streams_override[0])[0]:
                 self.streams = streams_override
             self.set_default_stream()
     
@@ -52,7 +52,7 @@ class RadioStation:
             player = instance.media_player_new()
             player.audio_set_mute(True)
             
-            is_playlist = RadioStation.is_stream_playlist(stream_url)
+            is_playlist = Stream.is_stream_playlist(stream_url)
             if is_playlist:
                 player = instance.media_list_player_new()
                 media = instance.media_list_new([stream_url])
@@ -88,7 +88,7 @@ class RadioStation:
         youtube_stream = None
         youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
         if re.search(youtube_regex, url):
-            streams, youtube_stream = RadioStation.get_youtube_audio_streams(url)
+            streams, youtube_stream = Stream.get_youtube_audio_streams(url)
             return streams, youtube_stream
 
         # Try opening the url
@@ -135,7 +135,7 @@ class RadioStation:
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
             # Determine if the default stream is a playlist
-            self.is_playlist = RadioStation.is_stream_playlist(self.default_stream)
+            self.is_playlist = Stream.is_stream_playlist(self.default_stream)
         else:
             self.default_stream = None
             print("Stream index is out of range!")
@@ -221,14 +221,14 @@ class RadioStation:
         # Supported stream types to download
         supported_extensions = [".mp3", ".aac", ".ogg", ".m4a"]
         # If the default stream does not match one of the supported stream extensions
-        if not RadioStation.is_supported_stream(self.default_stream, supported_extensions):
+        if not Stream.is_supported_stream(self.default_stream, supported_extensions):
             if download_only_default:
                 print("Can't download radio stream; there are no supported streams!")
                 return None
             # If download_only_default is set to false, check for other supported streams
             for stream in self.streams:
                 if stream != self.default_stream:
-                    if RadioStation.is_supported_stream(stream, supported_extensions):
+                    if Stream.is_supported_stream(stream, supported_extensions):
                         stream_to_download = stream
                         break
             if not stream_to_download:
@@ -249,50 +249,50 @@ class RadioStation:
             except Exception:
                 return None
 
-youtube = RadioStation("https://www.youtube.com/watch?v=wEGOxgfdRVc")
+youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
 youtube.download_stream("bazzi")
 youtube.play_default_stream()
 
-nytimes_podcast = RadioStation("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
+nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
 nytimes_podcast.play_default_stream()
 
-google_podcast = RadioStation("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
+google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
 google_podcast.play_default_stream()
 
-apple_podcast = RadioStation("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
+apple_podcast = Stream("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
 apple_podcast.play_default_stream()
 
-iheart_podcast = RadioStation("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
+iheart_podcast = Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
 iheart_podcast.play_default_stream()
 
-cbc_news_podcast = RadioStation("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
+cbc_news_podcast = Stream("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
 cbc_news_podcast.play_default_stream()
 
-cnn_news_radio = RadioStation("https://www.cnn.com/audio")
+cnn_news_radio = Stream("https://www.cnn.com/audio")
 cnn_news_radio.play_default_stream()
 
-abc_news_radio = RadioStation("https://www.abc.net.au/news/newsradio/")
+abc_news_radio = Stream("https://www.abc.net.au/news/newsradio/")
 abc_news_radio.play_default_stream()
 
-dance_wave_radio = RadioStation("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
+dance_wave_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
 dance_wave_radio.play_default_stream()
 
-antenne_bayerne_radio = RadioStation("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
+antenne_bayerne_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
 antenne_bayerne_radio.play_default_stream()
 
-virgin_radio = RadioStation("https://www.iheart.com/live/999-virgin-radio-7481/")
+virgin_radio = Stream("https://www.iheart.com/live/999-virgin-radio-7481/")
 virgin_radio.play_default_stream()
 
-iheart_radio = RadioStation("https://www.iheart.com/live/iheartradio-top-20-7556/")
+iheart_radio = Stream("https://www.iheart.com/live/iheartradio-top-20-7556/")
 iheart_radio.play_default_stream()
 
-mnm_radio = RadioStation("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
+mnm_radio = Stream("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
 mnm_radio.play_default_stream()
 
-jbfm_radio = RadioStation("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
+jbfm_radio = Stream("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
 jbfm_radio.play_default_stream()
 
-virgin_radio_broken = RadioStation("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
+virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
 virgin_radio_broken.play_default_stream()
 
 # https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
