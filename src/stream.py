@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 
 class Stream:
     '''Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams.'''
-    def __init__(self, url: str, streams_override: list[str]=None, title_override:str="New Radio Station"):
+    def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None):
         self.streams = []
         if not streams_override:
             # Get website title
@@ -23,11 +23,21 @@ class Stream:
             self.streams, self.youtube_stream = Stream.get_streams(url)
             self.set_default_stream()
         else:
-            self.title = title_override
             # Assign streams if streams are valid
             if Stream.check_stream_validity(streams_override[0])[0]:
                 self.streams = streams_override
             self.set_default_stream()
+
+            try:
+                # Try getting a website url from the default stream
+                url = requests.get(self.default_stream, stream=True).headers.get("icy-url")
+                # Get website title
+                soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
+                # Get stream title and remove white spaces and special/escape characters
+                self.title = " ".join(soup.title.text.split())
+            except:
+                if not title_override:
+                    self.title = "New Radio Station"
 
     @staticmethod
     def is_stream_playlist(stream_url: str) -> bool:
@@ -131,7 +141,7 @@ class Stream:
         return streams, youtube_stream
 
     @staticmethod
-    def get_youtube_audio_streams(url: str) -> tuple[list[str], pafy.Stream | None]:
+    def get_youtube_audio_streams(url: str):
         video = pafy.new(url)
         best_stream = video.getbestaudio()
         streams = [stream for stream in video.audiostreams]
