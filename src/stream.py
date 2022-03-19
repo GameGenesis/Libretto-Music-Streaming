@@ -1,13 +1,16 @@
 import os
 import re
 import urllib.request
-import vlc
 import time
-import requests
-import pafy
 from pathlib import Path
+
+import vlc
+import requests
 from bs4 import BeautifulSoup
+
 from pytube import YouTube
+from moviepy.editor import AudioFileClip
+import mutagen
 
 class Stream:
     '''Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams.'''
@@ -253,7 +256,7 @@ class Stream:
         # If file name is not overriden, use webite title from specified URL
         if not file_name:
             file_name = self.title
-        file_path = os.path.join(os.getcwd(), playlist_dir, f"{file_name}.mp3")
+        file_path = os.path.join(playlist_dir, f"{file_name}.mp3")
 
         stream_to_download = None
         # Supported stream types to download
