@@ -1,8 +1,10 @@
 from datetime import datetime
 import os
 
+from track import Track
+
 class Playlist:
-    def __init__(self, path, title, artist, tracks):
+    def __init__(self, path: str, title: str, artist: str, tracks: list[Track]) -> None:
         self.path = path
         self.title = title
         self.artist = artist
@@ -12,7 +14,7 @@ class Playlist:
         self.length = len(self.tracks)
         self.total_duration = self.get_total_duration()
 
-    def add_track(self, track):
+    def add_track(self, track: Track) -> None:
         '''Append a track to the playlist'''
         self.tracks.append(track)
         self.length = len(self.tracks)

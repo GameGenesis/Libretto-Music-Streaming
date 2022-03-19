@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 class Track:
-    def __init__(self, path, title, album):
+    def __init__(self, path: str, title: str, album: str) -> None:
         self.path = path
         self.title = title
         self.album = album
