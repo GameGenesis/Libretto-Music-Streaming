@@ -95,7 +95,11 @@ class Stream:
             player.play()
 
             print("Checking the stream validity...")
-            time.sleep(2)
+            # Wait until the vlc player starts playing
+            condition, current_time = True, 0
+            while condition:
+                condition, current_time = Stream.wait_while(not player.is_playing(), current_time)
+
             # Get the player state
             state = player.get_state()
             # Return true if the state is not an error
@@ -159,6 +163,17 @@ class Stream:
         streams = [stream.url for stream in youtube_streams]
         # stream_abrs = [stream.abr for stream in youtube_streams] # (Debug)
         return streams, youtube_streams
+
+    @staticmethod # Move to another class/file
+    def wait_while(condition, current_time, time_out: float=5, increment_steps: int=100):
+        current_time = 0
+        increment = time_out / float(increment_steps)
+        
+        if condition and current_time < time_out:
+            current_time += increment
+            time.sleep(increment)
+            return True, current_time
+        return False, current_time
 
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
