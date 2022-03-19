@@ -237,8 +237,8 @@ class Stream:
         if not playlist_name:
             playlist_name = "Downloaded Tracks" if self.youtube_stream else "Podcasts"
 
-        current_path = Path(os.getcwd())
-        default_dir = os.path.join(current_path.parent.absolute(), "data", "playlists", playlist_name)
+        base_path = Path(os.getcwd()).parent.absolute() if "src" in os.getcwd() else os.getcwd()
+        default_dir = os.path.join(base_path, "data", "playlists", playlist_name)
         # If the directory does not exist, create a new directory
         if not os.path.exists(default_dir):
             os.mkdir(default_dir)
