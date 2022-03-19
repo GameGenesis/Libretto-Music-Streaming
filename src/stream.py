@@ -252,6 +252,22 @@ class Stream:
         if not os.path.exists(playlist_dir):
             os.makedirs(playlist_dir)
 
+        if self.youtube_streams:
+            QUALITY = {"Ultra" : 0, "High" : 1, "Medium" : 2, "Low" : -1}
+            # Download best stream and set filepath
+            video = self.youtube_streams[QUALITY.get("Ultra")]
+            video.download(playlist_dir)
+            file_path = os.path.join(playlist_dir, video.default_filename)
+            print(os.path.splitext(video.default_filename)[-1])
+            file_path_mp3 = file_path.replace(os.path.splitext(video.default_filename)[-1], ".mp3")
+
+            # Use moviepy to convert an mp4 to an mp3 with metadata support. Delete mp4 afterwards
+            audio_clip = AudioFileClip(file_path)
+            audio_clip.write_audiofile(file_path_mp3)
+            audio_clip.close()
+            os.remove(file_path)
+            file_path = file_path_mp3
+            return file_path
 
         # If file name is not overriden, use webite title from specified URL
         if not file_name:
