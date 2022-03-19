@@ -230,12 +230,20 @@ class Stream:
             self.player.set_media(self.media)
 
         self.player.play()
+        # Wait until the vlc player starts playing
+        condition, current_time = True, 0
+        while condition:
+            condition, current_time = Stream.wait_while(not self.player.is_playing(), current_time)
+
+        # Get the current track duration
+        if not self.is_playlist:
+            self.duration = self.player.get_length() // 1000
 
         # Record the previously playing track
         previously_playing = None
 
         # While the stream is still playing
-        while self.player.is_playing:
+        while self.player.is_playing():
             time.sleep(1)
 
             # Debug information
