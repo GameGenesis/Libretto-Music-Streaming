@@ -262,19 +262,19 @@ class Stream:
             # Download best stream and set filepath
             video = self.youtube_streams[QUALITY.get("Ultra")]
             file_path = os.path.join(playlist_dir, video.default_filename)
+            file_extension = os.path.splitext(video.default_filename)[-1]
+            file_path_mp3 = file_path.replace(file_extension, ".mp3")
 
             # Check if the file already exists
-            if os.path.exists(file_path):
+            if os.path.exists(file_path_mp3):
                 print("This track was already downloaded to the specified playlist!")
-                return file_path
+                return file_path_mp3
 
             video.download(playlist_dir)
-            print(os.path.splitext(video.default_filename)[-1])
-            file_path_mp3 = file_path.replace(os.path.splitext(video.default_filename)[-1], ".mp3")
 
             # Use moviepy to convert an mp4 to an mp3 with metadata support. Delete mp4 afterwards
             audio_clip = AudioFileClip(file_path)
-            audio_clip.write_audiofile(file_path_mp3)
+            audio_clip.write_audiofile(file_path_mp3, verbose=False, logger=None)
             audio_clip.close()
             os.remove(file_path)
             file_path = file_path_mp3
