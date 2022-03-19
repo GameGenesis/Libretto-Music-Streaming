@@ -258,9 +258,12 @@ class Stream:
             os.makedirs(playlist_dir)
 
         if self.youtube_streams:
-            QUALITY = {"Ultra" : 0, "High" : 1, "Medium" : 2, "Low" : -1}
+            # Audio quality (bitrate) does not have a noticeable effect on the download times or sizes.
+            # Using Ultra or High is preferable in most circumstances
+            AUDIO_QUALITY = {"Ultra" : 0, "High" : 1, "Medium" : 2, "Low" : -1}
+
             # Download best stream and set filepath
-            video = self.youtube_streams[QUALITY.get("Ultra")]
+            video = self.youtube_streams[AUDIO_QUALITY.get("Ultra")]
             file_path = os.path.join(playlist_dir, video.default_filename)
             file_extension = os.path.splitext(video.default_filename)[-1]
             file_path_mp3 = file_path.replace(file_extension, ".mp3")
@@ -286,6 +289,7 @@ class Stream:
                 media_file["artist"] = self.artist
                 # media_file["album"] = playlist_name
                 media_file.save(file)
+
             return file_path
 
         # If file name is not overriden, use webite title from specified URL
