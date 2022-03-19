@@ -7,6 +7,7 @@ import requests
 import pafy
 from pathlib import Path
 from bs4 import BeautifulSoup
+from pytube import YouTube
 
 class Stream:
     '''Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams.'''
@@ -21,7 +22,7 @@ class Stream:
 
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
-            self.streams, self.youtube_stream = Stream.get_streams(url)
+            self.streams, self.youtube_streams = Stream.get_streams(url)
             self.set_default_stream()
         else:
             # Assign streams if streams are valid
@@ -105,11 +106,11 @@ class Stream:
     def get_streams(url: str) -> list[str]:
         # Inititalize empty streams list
         streams = []
-        youtube_stream = None
+        youtube_streams = None
         youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
         if re.search(youtube_regex, url):
-            streams, youtube_stream = Stream.get_youtube_audio_streams(url)
-            return streams, youtube_stream
+            streams, youtube_streams = Stream.get_youtube_audio_streams(url)
+            return streams, youtube_streams
 
         # Try opening the url
         request = urllib.request.Request(url)
@@ -117,7 +118,7 @@ class Stream:
             response = urllib.request.urlopen(request)
         except Exception as e:
             print(f"Could not open the specified URL. Error: {e}")
-            return streams, youtube_stream
+            return streams, youtube_streams
 
         # Decoding the page source
         raw_file = response.read().decode("utf-8")
@@ -126,29 +127,27 @@ class Stream:
         # Return the stream urls that match the regular expressions
         for term in regex_terms:
             if streams:
-                return streams, youtube_stream
+                return streams, youtube_streams
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
 
         # Search terms for Apple Podcasts, Google Podcasts, etc.
         specialized_regex_terms = [r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""]
         for term in specialized_regex_terms:
             if streams:
-                return streams, youtube_stream
+                return streams, youtube_streams
             streams = re.findall(term, raw_file)
             # Remove all results without the "mp3" extension (Due to these regular expressions being very generalized)
             for stream in streams:
                 if ".mp3" not in stream:
                     streams.remove(stream)
-        return streams, youtube_stream
+        return streams, youtube_streams
 
     @staticmethod
     def get_youtube_audio_streams(url: str):
-        video = pafy.new(url)
-        best_stream = video.getbestaudio()
-        streams = [stream for stream in video.audiostreams]
-        streams.sort(key=lambda stream: stream.rawbitrate, reverse=True)
-        stream_urls = [stream.url for stream in streams]
-        return stream_urls, best_stream
+        yt = YouTube(url)
+        youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
+        streams = [stream.url for stream in youtube_streams]
+        return streams, youtube_streams
 
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
@@ -243,7 +242,7 @@ class Stream:
             file_name = self.title
         # Playlist defaults to "Downloaded Tracks" for YouTube audio streams and "Podcasts" for other stream types
         if not playlist_name:
-            playlist_name = "Downloaded Tracks" if self.youtube_stream else "Podcasts"
+            playlist_name = "Downloaded Tracks" if self.youtube_streams else "Podcasts"
 
         base_path = Path(os.getcwd()).parent.absolute() if "src" in os.getcwd() else os.getcwd()
         default_dir = os.path.join(base_path, "data", "playlists", playlist_name)
@@ -257,7 +256,7 @@ class Stream:
         # Supported stream types to download
         supported_extensions = [".mp3", ".aac", ".ogg", ".m4a", ".wav", ".mpeg"]
         # If the default stream does not match one of the supported stream extensions
-        if not Stream.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_stream:
+        if not Stream.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_streams:
             if download_only_default:
                 print("Can't download radio stream; there are no supported streams!")
                 return None
