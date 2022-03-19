@@ -27,7 +27,8 @@ class Stream:
                 # Get website title
                 soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
                 # Get stream title and remove white spaces and special/escape characters
-                self.title = " ".join(soup.title.text.split())
+                self.title = soup.title.text.replace("|", "").split()
+                self.title = " ".join(self.title)
             else:
                 yt = YouTube(self.url)
                 self.title = yt.title
@@ -211,7 +212,6 @@ class Stream:
         else:
             # Set the default stream as the playable media
             self.media = self.vlc_instace.media_new(self.default_stream)
-            self.media.get_mrl()
             self.player.set_media(self.media)
 
         self.player.play()
@@ -222,6 +222,12 @@ class Stream:
         # While the stream is still playing
         while self.player.is_playing:
             time.sleep(1)
+
+            # Debug information
+            if not self.is_playlist:
+                print(f"Percent: {round(self.player.get_position() * 100, 2)}%") #set_position
+                self.current_time = self.player.get_time() // 1000 # self.player.set_time()
+                print(f"Current time: {time.strftime('%M:%S', time.gmtime(self.current_time))} of {time.strftime('%M:%S', time.gmtime(self.duration))}")
 
             # Playlist streams do not support media data
             if self.is_playlist:
