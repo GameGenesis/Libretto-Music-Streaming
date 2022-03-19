@@ -261,8 +261,14 @@ class Stream:
             QUALITY = {"Ultra" : 0, "High" : 1, "Medium" : 2, "Low" : -1}
             # Download best stream and set filepath
             video = self.youtube_streams[QUALITY.get("Ultra")]
-            video.download(playlist_dir)
             file_path = os.path.join(playlist_dir, video.default_filename)
+
+            # Check if the file already exists
+            if os.path.exists(file_path):
+                print("This track was already downloaded to the specified playlist!")
+                return file_path
+
+            video.download(playlist_dir)
             print(os.path.splitext(video.default_filename)[-1])
             file_path_mp3 = file_path.replace(os.path.splitext(video.default_filename)[-1], ".mp3")
 
@@ -286,6 +292,11 @@ class Stream:
         if not file_name:
             file_name = self.title
         file_path = os.path.join(playlist_dir, f"{file_name}.mp3")
+
+        # Check if the file already exists
+        if os.path.exists(file_path):
+            print("This track was already downloaded to the specified playlist!")
+            return file_path
 
         stream_to_download = None
         # Supported stream types to download
