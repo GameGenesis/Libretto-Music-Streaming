@@ -158,10 +158,10 @@ class Stream:
 
     @staticmethod
     def get_youtube_audio_streams(url: str):
+        '''Get streams and stream urls ordered by bitrate in descending order (highest bitrate first).'''
         yt = YouTube(url)
         youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
         streams = [stream.url for stream in youtube_streams]
-        # stream_abrs = [stream.abr for stream in youtube_streams] # (Debug)
         return streams, youtube_streams
 
     @staticmethod # Move to another class/file
@@ -174,6 +174,11 @@ class Stream:
             time.sleep(increment)
             return True, current_time
         return False, current_time
+
+    def get_youtube_stream_bitrates(self):
+        '''Returns a list of the average bitrate of the streams in the same order'''
+        if self.youtube_streams:
+            return [stream.abr for stream in self.youtube_streams]
 
     def set_default_stream(self, stream_index: int=0):
         # Set the stream that will be played by default
