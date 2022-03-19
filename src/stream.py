@@ -10,7 +10,8 @@ from bs4 import BeautifulSoup
 
 class Stream:
     '''Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams.'''
-    def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None):
+
+    def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None) -> None:
         self.streams = []
         if not streams_override:
             # Get website title
@@ -160,25 +161,27 @@ class Stream:
             print("Stream index is out of range!")
 
     def add_stream_manual(self, stream_url: str, default: bool=True) -> int:
+        # Return -1 if the stream could not be added
+        index = -1
+
         # Get the stream validity before trying to add the stream
         valid_stream = self.check_stream_validity(stream_url)[0]
         if not valid_stream:
             print("Could not add stream!")
-            return 0
+            return index
 
         if default:
             # Add as the first stream in the list
             index = 0
             self.streams.insert(index, stream_url)
             self.set_default_stream()
-            # Return the added stream index
-            return index
         else:
             # Add as the last stream in the list
             self.streams.append(stream_url)
             index = len(self.streams) - 1
-            # Return the added stream index
-            return index
+
+        # Return the added stream index
+        return index
 
     def play_default_stream(self):
         # Return if there is no default stream
@@ -210,18 +213,23 @@ class Stream:
         # While the stream is still playing
         while self.player.is_playing:
             time.sleep(1)
-            if not self.is_playlist:
-                now_playing = self.media.get_meta(12)
 
-                if now_playing != previously_playing:
-                    # Display the now playing track and record the previously playing track
-                    print("Now playing", now_playing)
-                    previously_playing = now_playing
+            # Playlist streams do not support media data
+            if self.is_playlist:
+                continue
 
-                    # Display the currently playing track genre
-                    genre = self.media.get_meta(2)
-                    if genre:
-                        print("Genre:", genre)
+            now_playing = self.media.get_meta(12)
+            if now_playing == previously_playing:
+                continue
+
+            # Display the now playing track and record the previously playing track
+            print("Now playing", now_playing)
+            previously_playing = now_playing
+
+            # Display the currently playing track genre
+            genre = self.media.get_meta(2)
+            if genre:
+                print("Genre:", genre)
         return self.player.audio_get_track_description()
 
     def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> str:
@@ -255,14 +263,17 @@ class Stream:
                 return None
             # If download_only_default is set to false, check for other supported streams
             for stream in self.streams:
-                if stream != self.default_stream:
-                    if Stream.is_supported_stream(stream, supported_extensions):
-                        stream_to_download = stream
-                        break
-            if not stream_to_download:
+                if stream == self.default_stream:
+                    continue
+                if Stream.is_supported_stream(stream, supported_extensions):
+                    stream_to_download = stream
+                    break
+            else:
+                # If none of the streams are supported (the for loop ends without breaking)
                 print("Can't download radio stream; there are no supported streams!")
                 return None
         else:
+            # If the default stream is a supported stream
             stream_to_download = self.default_stream
 
         # Downloading the stream
