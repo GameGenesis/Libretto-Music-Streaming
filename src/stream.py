@@ -15,15 +15,16 @@ class Stream:
     def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None) -> None:
         self.streams = []
         if not streams_override:
-            # Get website title
-            soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
-            # Get stream title and remove white spaces and special/escape characters
-            self.title = " ".join(soup.title.text.split())
-
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
             self.streams, self.youtube_streams = Stream.get_streams(url)
             self.set_default_stream()
+
+            if not self.youtube_streams:
+                # Get website title
+                soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
+                # Get stream title and remove white spaces and special/escape characters
+                self.title = " ".join(soup.title.text.split())
         else:
             # Assign streams if streams are valid
             if Stream.check_stream_validity(streams_override[0])[0]:
@@ -147,6 +148,7 @@ class Stream:
         yt = YouTube(url)
         youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
         streams = [stream.url for stream in youtube_streams]
+        # stream_abrs = [stream.abr for stream in youtube_streams] # (Debug)
         return streams, youtube_streams
 
     def set_default_stream(self, stream_index: int=0):
@@ -237,20 +239,21 @@ class Stream:
             print("Can't download radio stream; there is no default stream!")
             return None
 
-        # If file name is not overriden, use webite title from specified URL
-        if not file_name:
-            file_name = self.title
         # Playlist defaults to "Downloaded Tracks" for YouTube audio streams and "Podcasts" for other stream types
         if not playlist_name:
             playlist_name = "Downloaded Tracks" if self.youtube_streams else "Podcasts"
 
         base_path = Path(os.getcwd()).parent.absolute() if "src" in os.getcwd() else os.getcwd()
-        default_dir = os.path.join(base_path, "data", "playlists", playlist_name)
+        playlist_dir = os.path.join(base_path, "data", "playlists", playlist_name)
         # If the directory does not exist, create a new directory
-        if not os.path.exists(default_dir):
-            os.mkdir(default_dir)
+        if not os.path.exists(playlist_dir):
+            os.makedirs(playlist_dir)
 
-        file_path = os.path.join(os.getcwd(), default_dir, f"{file_name}.mp3")
+
+        # If file name is not overriden, use webite title from specified URL
+        if not file_name:
+            file_name = self.title
+        file_path = os.path.join(os.getcwd(), playlist_dir, f"{file_name}.mp3")
 
         stream_to_download = None
         # Supported stream types to download
