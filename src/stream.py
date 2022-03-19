@@ -28,6 +28,11 @@ class Stream:
                 soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
                 # Get stream title and remove white spaces and special/escape characters
                 self.title = " ".join(soup.title.text.split())
+            else:
+                yt = YouTube(self.url)
+                self.title = yt.title
+                self.artist = yt.author
+                self.duration = yt.length
         else:
             # Assign streams if streams are valid
             if Stream.check_stream_validity(streams_override[0])[0]:
@@ -267,6 +272,14 @@ class Stream:
             audio_clip.close()
             os.remove(file_path)
             file_path = file_path_mp3
+
+            # Update the file metadata according to YouTube video details
+            with open(file_path, 'r+b') as file:
+                media_file = mutagen.File(file, easy=True)
+                media_file["title"] = self.title
+                media_file["artist"] = self.artist
+                # media_file["album"] = playlist_name
+                media_file.save(file)
             return file_path
 
         # If file name is not overriden, use webite title from specified URL
