@@ -49,7 +49,8 @@ class Stream:
                 soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
                 # Get stream title and remove white spaces and special/escape characters
                 self.title = " ".join(soup.title.text.split())
-            except:
+            except Exception as e:
+                print(f"Error: {e}")
                 if not title_override:
                     self.title = "New Radio Station"
 
@@ -370,13 +371,10 @@ class Stream:
         stream_request = requests.get(stream_to_download, stream=True)
 
         with open(file_path, "wb") as f:
-            try:
-                # Write each chunk of the stream content to the created file
-                for block in stream_request.iter_content(1024):
-                    f.write(block)
-                return file_path
-            except Exception:
-                return None
+            # Write each chunk of the stream content to the created file
+            for block in stream_request.iter_content(1024):
+                f.write(block)
+            return file_path
 
 
 class AudioQuality(Enum):
