@@ -13,7 +13,7 @@ from moviepy.editor import AudioFileClip
 import mutagen
 
 class Stream:
-    '''Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams.'''
+    """Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams."""
 
     def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None) -> None:
         self.streams = []
@@ -53,8 +53,9 @@ class Stream:
 
     @staticmethod
     def is_stream_playlist(stream_url: str) -> bool:
-        # Create a list of playlist url extensions
-        playlist_exts = ["pls", "m3u", "xspf"]
+        """Check if a stream is a playlist type"""
+        # Create a set of playlist url extensions
+        playlist_exts = {"pls", "m3u", "xspf"}
         # Get the first 4 characters of a url extension
         ext = stream_url.rpartition(".")[-1][:4]
         # Remove trailing characters that aren't part of the extension
@@ -158,7 +159,7 @@ class Stream:
 
     @staticmethod
     def get_youtube_audio_streams(url: str):
-        '''Get streams and stream urls ordered by bitrate in descending order (highest bitrate first).'''
+        """Get streams and stream urls ordered by bitrate in descending order (highest bitrate first)."""
         yt = YouTube(url)
         youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
         streams = [stream.url for stream in youtube_streams]
@@ -166,6 +167,7 @@ class Stream:
 
     @staticmethod # Move to another class/file
     def wait_while(condition, current_time, time_out: float=5, increment_steps: int=100):
+        """Wait while a condition is true until the function times out"""
         current_time = 0
         increment = time_out / float(increment_steps)
         
@@ -176,12 +178,12 @@ class Stream:
         return False, current_time
 
     def get_youtube_stream_bitrates(self):
-        '''Returns a list of the average bitrate of the streams in the same order'''
+        """Returns a list of the average bitrate of the streams in the same order"""
         if self.youtube_streams:
             return [stream.abr for stream in self.youtube_streams]
 
     def set_default_stream(self, stream_index: int=0):
-        # Set the stream that will be played by default
+        """Set the stream that will be played by default"""
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
             # Determine if the default stream is a playlist
@@ -191,6 +193,8 @@ class Stream:
             print("Stream index is out of range!")
 
     def add_stream_manual(self, stream_url: str, default: bool=True) -> int:
+        """Manually add a stream and check if it is valid"""
+
         # Return -1 if the stream could not be added
         index = -1
 
@@ -214,6 +218,7 @@ class Stream:
         return index
 
     def play_default_stream(self):
+        """Play the default stream using the VLC media player"""
         # Return if there is no default stream
         if not self.default_stream:
             print("Can't play radio stream; there is no default stream!")
@@ -248,6 +253,7 @@ class Stream:
         previously_playing = None
 
         # While the stream is still playing
+        # Alternatively, use "self.player.get_state() != vlc.State.Ended" without the prior wait while
         while self.player.is_playing():
             time.sleep(1)
 
@@ -276,6 +282,7 @@ class Stream:
         return self.player.audio_get_track_description()
 
     def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> str:
+        """Download the default or supported stream to a playlist"""
         # Return if there is no default stream
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
@@ -371,59 +378,63 @@ class Stream:
             except Exception:
                 return None
 
-youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-youtube.download_stream()
-youtube.play_default_stream()
+def main():
+    youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
+    youtube.download_stream()
+    youtube.play_default_stream()
 
-nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
-nytimes_podcast.download_stream()
-nytimes_podcast.play_default_stream()
+    nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
+    nytimes_podcast.download_stream()
+    nytimes_podcast.play_default_stream()
 
-google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
-google_podcast.download_stream()
-google_podcast.play_default_stream()
+    google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
+    google_podcast.download_stream()
+    google_podcast.play_default_stream()
 
-apple_podcast = Stream("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
-apple_podcast.download_stream()
-apple_podcast.play_default_stream()
+    apple_podcast = Stream("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
+    apple_podcast.download_stream()
+    apple_podcast.play_default_stream()
 
-iheart_podcast = Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
-iheart_podcast.play_default_stream()
+    iheart_podcast = Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
+    iheart_podcast.play_default_stream()
 
-cbc_news_podcast = Stream("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
-cbc_news_podcast.play_default_stream()
+    cbc_news_podcast = Stream("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
+    cbc_news_podcast.play_default_stream()
 
-cnn_news_radio = Stream("https://www.cnn.com/audio")
-cnn_news_radio.download_stream()
-cnn_news_radio.play_default_stream()
+    cnn_news_radio = Stream("https://www.cnn.com/audio")
+    cnn_news_radio.download_stream()
+    cnn_news_radio.play_default_stream()
 
-abc_news_radio = Stream("https://www.abc.net.au/news/newsradio/")
-abc_news_radio.play_default_stream()
+    abc_news_radio = Stream("https://www.abc.net.au/news/newsradio/")
+    abc_news_radio.play_default_stream()
 
-dance_wave_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
-dance_wave_radio.play_default_stream()
+    dance_wave_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
+    dance_wave_radio.play_default_stream()
 
-antenne_bayerne_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
-antenne_bayerne_radio.play_default_stream()
+    antenne_bayerne_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
+    antenne_bayerne_radio.play_default_stream()
 
-virgin_radio = Stream("https://www.iheart.com/live/999-virgin-radio-7481/")
-virgin_radio.play_default_stream()
+    virgin_radio = Stream("https://www.iheart.com/live/999-virgin-radio-7481/")
+    virgin_radio.play_default_stream()
 
-iheart_radio = Stream("https://www.iheart.com/live/iheartradio-top-20-7556/")
-iheart_radio.play_default_stream()
+    iheart_radio = Stream("https://www.iheart.com/live/iheartradio-top-20-7556/")
+    iheart_radio.play_default_stream()
 
-mnm_radio = Stream("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
-mnm_radio.play_default_stream()
+    mnm_radio = Stream("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
+    mnm_radio.play_default_stream()
 
-jbfm_radio = Stream("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
-jbfm_radio.play_default_stream()
+    jbfm_radio = Stream("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
+    jbfm_radio.play_default_stream()
 
-virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
-virgin_radio_broken.play_default_stream()
+    virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
+    virgin_radio_broken.play_default_stream()
 
-'''
+if __name__ == "__main__":
+    main()
+
+"""
 Helpful Resources
 https://stackoverflow.com/questions/19377262/regex-for-youtube-url
 https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
 Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
-'''
+"""
