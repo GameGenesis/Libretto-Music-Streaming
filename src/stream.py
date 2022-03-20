@@ -3,6 +3,7 @@ import re
 import urllib.request
 import time
 from pathlib import Path
+from enum import Enum
 from typing import Any, Optional
 
 import vlc
@@ -115,11 +116,13 @@ class Stream:
         return False, None
 
     @staticmethod
-    def is_supported_stream(stream: str, supported_extensions: list[str]) -> bool:
-        return any(extension in stream for extension in supported_extensions)
+    def is_supported_stream(stream_url: str, supported_extensions: list[str]) -> bool:
+        """Checks if the stream url contains any of the specified extensions"""
+        return any(extension in stream_url for extension in supported_extensions)
 
     @staticmethod
     def get_streams(url: str) -> tuple[list[str], Optional[Any]]:
+        """Returns a list of stream urls (and optionally, a list of YouTube audio streams) from a URL"""
         # Inititalize empty streams list
         streams = []
         youtube_streams = None
@@ -171,7 +174,7 @@ class Stream:
         """Wait while a condition is true until the function times out"""
         current_time = 0.0
         increment = time_out / float(increment_steps)
-        
+
         if condition and current_time < time_out:
             current_time += increment
             time.sleep(increment)
@@ -300,12 +303,8 @@ class Stream:
             os.makedirs(playlist_dir)
 
         if self.youtube_streams:
-            # Audio quality (bitrate) does not have a noticeable effect on the download times or sizes.
-            # Using Ultra or High is preferable in most circumstances
-            AUDIO_QUALITY = {"Ultra" : 0, "High" : 1, "Medium" : 2, "Low" : -1}
-
             # Download best stream and set filepath
-            video = self.youtube_streams[AUDIO_QUALITY.get("Ultra")]
+            video = self.youtube_streams[AudioQuality.ULTRA.value]
             file_path = os.path.join(playlist_dir, video.default_filename)
             file_extension = os.path.splitext(video.default_filename)[-1]
             file_path_mp3 = file_path.replace(file_extension, ".mp3")
@@ -379,6 +378,18 @@ class Stream:
             except Exception:
                 return None
 
+
+class AudioQuality(Enum):
+    """
+    Audio quality (bitrate) does not have a noticeable effect on the download times or sizes.
+    Using Ultra or High is preferable in most circumstances.
+    """
+    ULTRA = 0
+    HIGH = 1
+    MEDIUM = 2
+    LOW = -1
+
+
 def main():
     youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
     youtube.download_stream()
@@ -429,6 +440,7 @@ def main():
 
     virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
     virgin_radio_broken.play_default_stream()
+
 
 if __name__ == "__main__":
     main()
