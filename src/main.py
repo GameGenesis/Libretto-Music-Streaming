@@ -30,7 +30,7 @@ def init():
     mixer.init()
     mixer.music.set_volume(volume)
 
-def set_track_speed(multiplier: int=1):
+def set_track_speed(multiplier: float=1):
     global track_index, current_pos
     mixer.init(frequency=int(playlists[playlist_index].tracks[track_index].sample_rate * multiplier))
     play_track(track_index, current_pos)
@@ -103,13 +103,14 @@ def get_elapsed_time():
     global current_pos, elapsed_time_change
     return current_pos - elapsed_time_change + (mixer.music.get_pos() // 1000)
 
-base_path = Path(os.getcwd()).parent.absolute() if "src" in os.getcwd() else os.getcwd()
+base_path = str(Path(os.getcwd()).parent.absolute()) if "src" in os.getcwd() else os.getcwd()
 parent_dir = os.path.join(base_path, "data", "playlists")
 playlists = get_playlists(parent_dir)
 
 playlist_index = 0
 track_index = 0
 
+length = 0
 current_pos = 0
 elapsed_time_change = 0
 SKIP_DURATION = 10
@@ -118,94 +119,95 @@ volume = 0.5
 muted = False
 MIN_VOLUME, MAX_VOLUME, VOLUME_INCREMENT = 0, 1, 0.1
 
-speed = 1
+speed = 1.0
 
-init()
-play_track(track_index)
+if __name__ == "__main__":
+    init()
+    play_track(track_index)
 
-while True:
-    # Print instructions and get user input
-    print('''Use '[' and ']' for cycling through playlists.
-Use 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back.
-Use 'n' for next track, 'q' for previous track, 's' to shuffle tracks.
-Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute.
-Use 'e' to exit the program.''')
-    muted_str = " (Muted)" if muted else ""
-    print(f"[Volume: {int(volume*100)}%{muted_str}]")
-    print(f"[Elapsed time: {time.strftime('%M:%S', time.gmtime(get_elapsed_time()))} of {time.strftime('%M:%S', time.gmtime(length))} ({time.strftime('%M:%S', time.gmtime(length-get_elapsed_time()))} remaining) || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
-    playlists_list = [f"{i}: {e}" for i, e in enumerate(playlists)]
-    print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
-    query = input(">> ").lower()
-    os.system("cls||clear")
+    while True:
+        # Print instructions and get user input
+        print('''Use '[' and ']' for cycling through playlists.
+    Use 'p' to pause, 'u' to unpause, 'r' to rewind, 'f' for forward, 'b' for back.
+    Use 'n' for next track, 'q' for previous track, 's' to shuffle tracks.
+    Use '+' to increase the volume, '-' to decrease the volume, and 'm' to mute/unmute.
+    Use 'e' to exit the program.''')
+        muted_str = " (Muted)" if muted else ""
+        print(f"[Volume: {int(volume*100)}%{muted_str}]")
+        print(f"[Elapsed time: {time.strftime('%M:%S', time.gmtime(get_elapsed_time()))} of {time.strftime('%M:%S', time.gmtime(length))} ({time.strftime('%M:%S', time.gmtime(length-get_elapsed_time()))} remaining) || Title: {playlists[playlist_index].tracks[track_index].title} || Artist: {playlists[playlist_index].tracks[track_index].artist}]")
+        playlists_list = [f"{i}: {e}" for i, e in enumerate(playlists)]
+        print(f"Playlists: {str(playlists_list)}. Current Playlist: {playlist_index}")
+        query = input(">> ").lower()
+        os.system("cls||clear")
 
-    if "speed" in query:
-        if ":" in query:
-            speed = float(query.split(":")[1])
-            set_track_speed(speed)
-        else:
-            print(f"Speed: x{speed}")
-    elif query == ']':
-        next_playlist()
-    elif query == '[':
-        previous_playlist()
-    elif query == 'p':
-        # Pausing the music
-        print("[Paused]")
-        mixer.music.pause()
-    elif query == 'u':
-        # Resuming the music
-        mixer.music.unpause()
-    elif query == 'r':
-        # Rewinding the music
-        mixer.music.rewind()
-        current_pos = 0
-        elapsed_time_change = mixer.music.get_pos() // 1000
-    elif "time:" in query:
-        current_pos = min(int(query.split(":")[1]), length)
-        elapsed_time_change = mixer.music.get_pos() // 1000
-        if current_pos >= length:
+        if "speed" in query:
+            if ":" in query:
+                speed = float(query.split(":")[1])
+                set_track_speed(speed)
+            else:
+                print(f"Speed: x{speed}")
+        elif query == ']':
+            next_playlist()
+        elif query == '[':
+            previous_playlist()
+        elif query == 'p':
+            # Pausing the music
+            print("[Paused]")
+            mixer.music.pause()
+        elif query == 'u':
+            # Resuming the music
+            mixer.music.unpause()
+        elif query == 'r':
+            # Rewinding the music
+            mixer.music.rewind()
+            current_pos = 0
+            elapsed_time_change = mixer.music.get_pos() // 1000
+        elif "time:" in query:
+            current_pos = min(int(query.split(":")[1]), length)
+            elapsed_time_change = mixer.music.get_pos() // 1000
+            if current_pos >= length:
+                next_track()
+            mixer.music.pause()
+            mixer.music.set_pos(current_pos)
+            mixer.music.unpause()
+        elif query == 'f':
+            # Skipping 10s forward in a track
+            current_pos = min(current_pos + (mixer.music.get_pos() // 1000) - elapsed_time_change + SKIP_DURATION, length)
+            elapsed_time_change = mixer.music.get_pos() // 1000
+            if current_pos >= length:
+                next_track()
+            mixer.music.pause()
+            mixer.music.set_pos(current_pos)
+            mixer.music.unpause()
+        elif query == 'b':
+            # Skipping 10s backward in a track
+            current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - elapsed_time_change - SKIP_DURATION, 0)
+            elapsed_time_change = mixer.music.get_pos() // 1000
+            mixer.music.pause()
+            mixer.music.set_pos(current_pos)
+            mixer.music.unpause()
+        elif query == 'n':
             next_track()
-        mixer.music.pause()
-        mixer.music.set_pos(current_pos)
-        mixer.music.unpause()
-    elif query == 'f':
-        # Skipping 10s forward in a track
-        current_pos = min(current_pos + (mixer.music.get_pos() // 1000) - elapsed_time_change + SKIP_DURATION, length)
-        elapsed_time_change = mixer.music.get_pos() // 1000
-        if current_pos >= length:
-            next_track()
-        mixer.music.pause()
-        mixer.music.set_pos(current_pos)
-        mixer.music.unpause()
-    elif query == 'b':
-        # Skipping 10s backward in a track
-        current_pos = max(current_pos + (mixer.music.get_pos() // 1000) - elapsed_time_change - SKIP_DURATION, 0)
-        elapsed_time_change = mixer.music.get_pos() // 1000
-        mixer.music.pause()
-        mixer.music.set_pos(current_pos)
-        mixer.music.unpause()
-    elif query == 'n':
-        next_track()
-    elif query == 'q':
-        previous_track()
-    elif query == 's':
-        shuffle_track()
-    elif query == '+':
-        # Getting and setting the volume
-        if muted:
+        elif query == 'q':
+            previous_track()
+        elif query == 's':
+            shuffle_track()
+        elif query == '+':
+            # Getting and setting the volume
+            if muted:
+                toggle_mute()
+            volume = round(mixer.music.get_volume(), 1)
+            volume = min(volume + VOLUME_INCREMENT, MAX_VOLUME)
+            mixer.music.set_volume(volume)
+        elif query == '-':
+            if muted:
+                toggle_mute()
+            volume = round(mixer.music.get_volume(), 1)
+            volume = max(volume - VOLUME_INCREMENT, MIN_VOLUME)
+            mixer.music.set_volume(volume)
+        elif query == 'm':
             toggle_mute()
-        volume = round(mixer.music.get_volume(), 1)
-        volume = min(volume + VOLUME_INCREMENT, MAX_VOLUME)
-        mixer.music.set_volume(volume)
-    elif query == '-':
-        if muted:
-            toggle_mute()
-        volume = round(mixer.music.get_volume(), 1)
-        volume = max(volume - VOLUME_INCREMENT, MIN_VOLUME)
-        mixer.music.set_volume(volume)
-    elif query == 'm':
-        toggle_mute()
-    elif query == 'e':
-        # Stop the mixer
-        mixer.music.stop()
-        break
+        elif query == 'e':
+            # Stop the mixer
+            mixer.music.stop()
+            break
