@@ -143,7 +143,7 @@ class Stream:
         # Decoding the page source
         raw_file = response.read().decode("utf-8")
 
-        regex_terms = ["stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"]
+        regex_terms = {"stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"}
         # Return the stream urls that match the regular expressions
         for term in regex_terms:
             if streams:
@@ -151,7 +151,7 @@ class Stream:
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
 
         # Search terms for Apple Podcasts, Google Podcasts, etc.
-        specialized_regex_terms = [r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""]
+        specialized_regex_terms = {r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""}
         for term in specialized_regex_terms:
             if streams:
                 return streams, youtube_streams
@@ -346,7 +346,7 @@ class Stream:
 
         stream_to_download = None
         # Supported stream types to download
-        supported_extensions = [".mp3", ".aac", ".ogg", ".m4a", ".wav", ".mpeg"]
+        supported_extensions = {".mp3", ".aac", ".ogg", ".m4a", ".wav", ".mpeg"}
         # If the default stream does not match one of the supported stream extensions
         if not Stream.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_streams:
             if download_only_default:
