@@ -3,6 +3,7 @@ import re
 import urllib.request
 import time
 from pathlib import Path
+from typing import Any, Optional
 
 import vlc
 import requests
@@ -97,7 +98,7 @@ class Stream:
 
             print("Checking the stream validity...")
             # Wait until the vlc player starts playing
-            condition, current_time = True, 0
+            condition, current_time = True, 0.0
             while condition:
                 condition, current_time = Stream.wait_while(not player.is_playing(), current_time)
 
@@ -118,7 +119,7 @@ class Stream:
         return any(extension in stream for extension in supported_extensions)
 
     @staticmethod
-    def get_streams(url: str) -> list[str]:
+    def get_streams(url: str) -> tuple[list[str], Optional[Any]]:
         # Inititalize empty streams list
         streams = []
         youtube_streams = None
@@ -158,7 +159,7 @@ class Stream:
         return streams, youtube_streams
 
     @staticmethod
-    def get_youtube_audio_streams(url: str):
+    def get_youtube_audio_streams(url: str) -> tuple[list[str], list[Any]]:
         """Get streams and stream urls ordered by bitrate in descending order (highest bitrate first)."""
         yt = YouTube(url)
         youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
@@ -166,9 +167,9 @@ class Stream:
         return streams, youtube_streams
 
     @staticmethod # Move to another class/file
-    def wait_while(condition, current_time, time_out: float=5, increment_steps: int=100):
+    def wait_while(condition, current_time, time_out: float=5, increment_steps: int=100) -> tuple[bool, float]:
         """Wait while a condition is true until the function times out"""
-        current_time = 0
+        current_time = 0.0
         increment = time_out / float(increment_steps)
         
         if condition and current_time < time_out:
@@ -177,12 +178,13 @@ class Stream:
             return True, current_time
         return False, current_time
 
-    def get_youtube_stream_bitrates(self):
+    def get_youtube_stream_bitrates(self) -> Optional[list[str]]:
         """Returns a list of the average bitrate of the streams in the same order"""
         if self.youtube_streams:
             return [stream.abr for stream in self.youtube_streams]
+        return None
 
-    def set_default_stream(self, stream_index: int=0):
+    def set_default_stream(self, stream_index: int=0) -> None:
         """Set the stream that will be played by default"""
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
@@ -217,7 +219,7 @@ class Stream:
         # Return the added stream index
         return index
 
-    def play_default_stream(self):
+    def play_default_stream(self) -> None:
         """Play the default stream using the VLC media player"""
         # Return if there is no default stream
         if not self.default_stream:
@@ -241,7 +243,7 @@ class Stream:
 
         self.player.play()
         # Wait until the vlc player starts playing
-        condition, current_time = True, 0
+        condition, current_time = True, 0.0
         while condition:
             condition, current_time = Stream.wait_while(not self.player.is_playing(), current_time)
 
@@ -279,9 +281,8 @@ class Stream:
             genre = self.media.get_meta(2)
             if genre:
                 print("Genre:", genre)
-        return self.player.audio_get_track_description()
 
-    def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> str:
+    def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> Optional[str]:
         """Download the default or supported stream to a playlist"""
         # Return if there is no default stream
         if not self.default_stream:
@@ -292,7 +293,7 @@ class Stream:
         if not playlist_name:
             playlist_name = "Downloaded Tracks" if self.youtube_streams else "Podcasts"
 
-        base_path = Path(os.getcwd()).parent.absolute() if "src" in os.getcwd() else os.getcwd()
+        base_path = str(Path(os.getcwd()).parent.absolute()) if "src" in os.getcwd() else os.getcwd()
         playlist_dir = os.path.join(base_path, "data", "playlists", playlist_name)
         # If the directory does not exist, create a new directory
         if not os.path.exists(playlist_dir):
