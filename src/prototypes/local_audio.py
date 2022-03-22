@@ -70,11 +70,25 @@ class LocalAudio:
         self.current_pos = 0
         self.elapsed_time_change = mixer.music.get_pos() // 1000
 
-    def toggle_mute(self):
-        self.muted = not self.muted
-        if self.muted:
-            saved_volume = self.volume
-            mixer.music.set_volume(self.MIN_VOLUME)
+    @classmethod
+    def get_volume(cls):
+        return round(mixer.music.get_volume(), 2)
+
+    @classmethod
+    def set_volume(cls, volume: float):
+        if volume <= 0:
+            cls.muted = True
+        elif cls.muted:
+            cls.toggle_mute()
+        volume = round(max(min(volume, cls.MAX_VOLUME), cls.MIN_VOLUME), 2)
+        mixer.music.set_volume(volume)
+
+    @classmethod
+    def toggle_mute(cls):
+        cls.muted = not cls.muted
+        if cls.muted:
+            saved_volume = cls.volume
+            mixer.music.set_volume(cls.MIN_VOLUME)
         else:
             mixer.music.set_volume(saved_volume)
 
