@@ -86,3 +86,14 @@ class LocalAudio:
             if event.type == self.MUSIC_END:
                 end_event(*args, **kwargs)
         return True
+    
+    def queue_track(self, track):
+        return self.on_end_callback(end_event=lambda: track.play())
+
+
+if __name__ == "__main__":
+    first_track = LocalAudio("data\playlists\Bazzi\Bazzi - Mine [Official Music Video].mp3", "Mine", "Album")
+    second_track = LocalAudio("data\playlists\Post Malone\Post Malone - Circles.mp3", "Circles", "Album")
+    first_track.play()
+    while first_track.queue_track(second_track):
+        pass
