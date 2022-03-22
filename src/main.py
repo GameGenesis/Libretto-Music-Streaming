@@ -25,7 +25,6 @@ def get_playlist_tracks(playlist_dir: str):
     return [Track(os.path.join(playlist_dir, f), f[:-4], playlist_dir) for f in os.listdir(playlist_dir) if os.path.isfile(os.path.join(playlist_dir, f)) and is_compatible_file(f)]
 
 def init():
-    global current_dir, playlists, playlist_index
     # Starting the mixer
     mixer.init()
     mixer.music.set_volume(volume)
