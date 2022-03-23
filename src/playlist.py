@@ -5,6 +5,18 @@ from track import Track
 
 class Playlist:
     def __init__(self, path: str, title: str, artist: str, tracks: list[Track]) -> None:
+        """
+        Parameters
+        ----------
+        path : str
+            The playlist directory path
+        title : str
+            The title of the playlist
+        album : str
+            The playlist artist
+        tracks : list[Track]
+            The list of tracks that are in the playlist
+        """
         self.path = path
         self.title = title
         self.artist = artist
@@ -15,13 +27,29 @@ class Playlist:
         self.total_duration = self.get_total_duration()
 
     def add_track(self, track: Track) -> None:
-        """Append a track to the playlist"""
+        """
+        Appends a track to the playlist.
+        Also updates the playlist track length and total playlist duration.
+
+        Parameters
+        ----------
+        track : Track
+            The track to append
+
+        Raises
+        ------
+        NotImplementedError
+            If no track is passed in as a parameter.
+        """
+        if not Track:
+            raise NotImplementedError
+
         self.tracks.append(track)
         self.length = len(self.tracks)
         self.total_duration = self.get_total_duration()
 
     def get_total_duration(self) -> int:
-        """Get the duration of all the tracks in the playlist"""
+        """Get the total duration of all the tracks in the playlist"""
         return sum([t.duration for t in self.tracks])
 
     def __str__(self) -> str:
