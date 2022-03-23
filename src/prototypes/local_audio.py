@@ -44,35 +44,27 @@ class LocalAudio:
         # Return true if the file ends with any of the compatible file extensions
         return any([file.endswith(e) for e in extensions])
 
-    def play(self, start_time: Optional[int]=0):
-        try:
-            # Loading the track
-            mixer.music.load(self.path)
-
-            # Start playing the track
-            mixer.music.play(start=start_time)
-
-            mixer.music.set_endevent(self.MUSIC_END)
-        except Exception:
-            print("Can't play track! File format not supported!")
-
+    @staticmethod
     def pause():
         mixer.music.pause()
 
+    @staticmethod
     def unpause():
         mixer.music.unpause()
 
+    @staticmethod
     def stop():
         mixer.music.stop()
 
+    @staticmethod
     def rewind(self):
         mixer.music.rewind()
         self.current_pos = 0
         self.elapsed_time_change = mixer.music.get_pos() // 1000
 
     @classmethod
-    def get_volume(cls):
-        return round(mixer.music.get_volume(), 2)
+    def get_volume(cls) -> tuple[float, bool]:
+        return round(mixer.music.get_volume(), 2), cls.muted
 
     @classmethod
     def set_volume(cls, volume: float):
@@ -91,6 +83,18 @@ class LocalAudio:
             mixer.music.set_volume(cls.MIN_VOLUME)
         else:
             mixer.music.set_volume(saved_volume)
+
+    def play(self, start_time: Optional[int]=0):
+        try:
+            # Loading the track
+            mixer.music.load(self.path)
+
+            # Start playing the track
+            mixer.music.play(start=start_time)
+
+            mixer.music.set_endevent(self.MUSIC_END)
+        except Exception:
+            print("Can't play track! File format not supported!")
 
     def on_end_callback(self, end_event: Optional[Callable]=None, *args, **kwargs):
         for event in pygame.event.get():
