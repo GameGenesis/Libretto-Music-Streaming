@@ -39,7 +39,7 @@ class Playlist:
         Raises
         ------
         NotImplementedError
-            If no track is passed in as a parameter.
+            If no track is passed in as a parameter
         """
         if not Track:
             raise NotImplementedError
@@ -55,7 +55,7 @@ class Playlist:
         Returns
         -------
         int
-            the total duration duration of all the tracks in the playlist.
+            the total duration duration of all the tracks in the playlist
         """
         return sum([t.duration for t in self.tracks])
 
@@ -66,6 +66,6 @@ class Playlist:
         Returns
         -------
         str
-            information about the object.
+            information about the object
         """
         return f"Title: {self.title}, Artist: {self.artist}, Date Created: {self.date_created}, Total Duration: {self.total_duration}s, Path: {self.path}"

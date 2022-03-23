@@ -75,12 +75,12 @@ class Stream:
         Parameters
         ----------
         stream_url : str
-            The url of a stream
+            The url of the stream
         
         Returns
         -------
         bool
-            if the stream is a playlist type.
+            if the stream is a playlist type
         """
         # Create a set of playlist url extensions
         playlist_exts = {"pls", "m3u", "xspf"}
@@ -94,6 +94,21 @@ class Stream:
 
     @staticmethod
     def check_stream_validity(stream_url: str) -> tuple[bool, vlc.State]:
+        """
+        Checks if a stream is valid and is able to be played by the VLC player.
+
+        Parameters
+        ----------
+        stream_url : str
+            The url of the stream
+        
+        Returns
+        -------
+        bool
+            if the stream is valid
+        vlc.State
+            the state of the VLC player while checking the stream
+        """
         try:
             # Try opening the stream url
             urllib.request.urlopen(stream_url)
@@ -148,7 +163,21 @@ class Stream:
 
     @staticmethod
     def get_streams(url: str) -> tuple[list[str], Optional[Any]]:
-        """Returns a list of stream urls (and optionally, a list of YouTube audio streams) from a URL"""
+        """
+        Returns a list of stream urls (and optionally, a list of YouTube audio streams) from a URL.
+        
+        Parameters
+        ----------
+        url : str
+            The url of website to extract the streams from
+        
+        Returns
+        -------
+        list[str]
+            a list of stream urls
+        list[Stream], optional
+            an optional list of YouTube streams
+        """
         # Inititalize empty streams list
         streams = []
         youtube_streams = None
