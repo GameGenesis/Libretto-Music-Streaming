@@ -5,6 +5,16 @@ import os
 
 class Track:
     def __init__(self, path: str, title: str, album: str) -> None:
+        """
+        Parameters
+        ----------
+        path : str
+            The local track file path
+        title : str
+            The title of the track
+        album : str
+            The album of the track
+        """
         self.path = path
         self.title = title
         self.album = album
