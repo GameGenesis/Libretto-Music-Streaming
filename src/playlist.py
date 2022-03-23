@@ -49,8 +49,23 @@ class Playlist:
         self.total_duration = self.get_total_duration()
 
     def get_total_duration(self) -> int:
-        """Get the total duration of all the tracks in the playlist"""
+        """
+        Get the total duration of all the tracks in the playlist.
+
+        Returns
+        -------
+        int
+            the total duration duration of all the tracks in the playlist.
+        """
         return sum([t.duration for t in self.tracks])
 
     def __str__(self) -> str:
+        """
+        Returns a string that includes information about the object.
+
+        Returns
+        -------
+        str
+            information about the object.
+        """
         return f"Title: {self.title}, Artist: {self.artist}, Date Created: {self.date_created}, Total Duration: {self.total_duration}s, Path: {self.path}"

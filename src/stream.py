@@ -18,6 +18,19 @@ class Stream:
     """Supports radio streaming, podcast streaming, and YouTube audio streams. Also supports downloading streams."""
 
     def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None) -> None:
+        """
+        Parameters
+        ----------
+        url : str
+            The website url to extract streams from
+        streams_override : list[str], optional
+            The urls of streams that are passed in manually
+        album : str
+            The playlist artist
+        title_override : str, optional
+            Overrides the track title.
+            Otherwise, extracts the track title from the website url or original source
+        """
         self.streams = []
         if not streams_override:
             self.url = url
@@ -56,7 +69,19 @@ class Stream:
 
     @staticmethod
     def is_stream_playlist(stream_url: str) -> bool:
-        """Check if a stream is a playlist type"""
+        """
+        Check if a stream matches a playlist type
+
+        Parameters
+        ----------
+        stream_url : str
+            The url of a stream
+        
+        Returns
+        -------
+        bool
+            if the stream is a playlist type.
+        """
         # Create a set of playlist url extensions
         playlist_exts = {"pls", "m3u", "xspf"}
         # Get the first 4 characters of a url extension
