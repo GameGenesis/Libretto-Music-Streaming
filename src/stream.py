@@ -218,15 +218,53 @@ class Stream:
 
     @staticmethod
     def get_youtube_audio_streams(url: str) -> tuple[list[str], list[Any]]:
-        """Get streams and stream urls ordered by bitrate in descending order (highest bitrate first)."""
+        """
+        Get streams and stream urls ordered by bitrate in descending order (highest bitrate first).
+        
+        Parameters
+        ----------
+        url : str
+            The YouTube video url to extract the streams from
+        
+        Returns
+        -------
+        list[str]
+            a list of stream urls
+        list[Stream], optional
+            a list of YouTube streams
+        """
         yt = YouTube(url)
         youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
         streams = [stream.url for stream in youtube_streams]
         return streams, youtube_streams
 
     @staticmethod # Move to another class/file
-    def wait_while(condition, current_time, time_out: float=5, increment_steps: int=100) -> tuple[bool, float]:
-        """Wait while a condition is true until the function times out"""
+    def wait_while(condition: bool, current_time: float, time_out: float=5, increment_steps: int=100) -> tuple[bool, float]:
+        """
+        Wait while a condition is true until the function times out.
+        You need to use this method as a conditional in a while loop
+
+        Implementation
+        ----------
+        condition, current_time = True, 0.0
+
+        while condition:
+            condition, current_time = Stream.wait_while(condition, current_time, ...)
+        
+        Parameters
+        ----------
+        condition : bool
+            The condition to check for
+        current_time : float
+            The current time counter (to check for a time out)
+        
+        Returns
+        -------
+        bool
+            whether the condition is True and it hasn't timed out yet
+        float
+            the updated current time counter (to check for a time out)
+        """
         current_time = 0.0
         increment = time_out / float(increment_steps)
 
@@ -237,7 +275,14 @@ class Stream:
         return False, current_time
 
     def get_youtube_stream_bitrates(self) -> Optional[list[str]]:
-        """Returns a list of the average bitrate of the streams in the same order"""
+        """
+        Returns a list of the average bitrate of the streams in the same order (if there are supported YouTube streams)
+        
+        Returns
+        -------
+        list[str], optional
+            a list of stream url average bitrates, ordered
+        """
         if self.youtube_streams:
             return [stream.abr for stream in self.youtube_streams]
         return None
