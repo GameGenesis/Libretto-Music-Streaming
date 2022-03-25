@@ -288,14 +288,27 @@ class Stream:
         return None
 
     def set_default_stream(self, stream_index: int=0) -> None:
-        """Set the stream that will be played by default"""
+        """
+        Set the stream that will be played by default
+
+        Parameters
+        ----------
+        stream_index : int, optional
+            The index of the stream in the list of stream urls to set as default.
+            If not specified, it is defaulted to the first stream.
+
+        Raises
+        ------
+        IndexError
+            If the stream_index exceeds the value of the final stream index
+        """
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
             # Determine if the default stream is a playlist
             self.is_playlist = Stream.is_stream_playlist(self.default_stream)
         else:
             self.default_stream = None
-            print("Stream index is out of range!")
+            raise IndexError
 
     def add_stream_manual(self, stream_url: str, default: bool=True) -> int:
         """Manually add a stream and check if it is valid"""
