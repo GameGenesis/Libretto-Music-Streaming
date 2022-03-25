@@ -76,7 +76,7 @@ class Stream:
         ----------
         stream_url : str
             The url of the stream
-        
+
         Returns
         -------
         bool
@@ -101,7 +101,7 @@ class Stream:
         ----------
         stream_url : str
             The url of the stream
-        
+
         Returns
         -------
         bool
@@ -165,12 +165,12 @@ class Stream:
     def get_streams(url: str) -> tuple[list[str], Optional[Any]]:
         """
         Returns a list of stream urls (and optionally, a list of YouTube audio streams) from a URL.
-        
+
         Parameters
         ----------
         url : str
             The url of website to extract the streams from
-        
+
         Returns
         -------
         list[str]
@@ -220,12 +220,12 @@ class Stream:
     def get_youtube_audio_streams(url: str) -> tuple[list[str], list[Any]]:
         """
         Get streams and stream urls ordered by bitrate in descending order (highest bitrate first).
-        
+
         Parameters
         ----------
         url : str
             The YouTube video url to extract the streams from
-        
+
         Returns
         -------
         list[str]
@@ -250,14 +250,14 @@ class Stream:
 
         while condition:
             condition, current_time = Stream.wait_while(condition, current_time, ...)
-        
+
         Parameters
         ----------
         condition : bool
             The condition to check for
         current_time : float
             The current time counter (to check for a time out)
-        
+
         Returns
         -------
         bool
@@ -277,7 +277,7 @@ class Stream:
     def get_youtube_stream_bitrates(self) -> Optional[list[str]]:
         """
         Returns a list of the average bitrate of the streams in the same order (if there are supported YouTube streams)
-        
+
         Returns
         -------
         list[str], optional
@@ -311,7 +311,23 @@ class Stream:
             raise IndexError
 
     def add_stream_manual(self, stream_url: str, default: bool=True) -> int:
-        """Manually add a stream and check if it is valid"""
+        """
+        Manually add a stream and check if it is valid
+
+        Parameters
+        ----------
+        stream_url : str
+            The stream url to add
+        default : bool, optional
+            Set the added stream as the default stream to use.
+            If nor specified, it is defaulted to True
+
+        Returns
+        -------
+        int
+            The index of the added stream.
+            Returns 1 if the stream could not be added
+        """
 
         # Return -1 if the stream could not be added
         index = -1
@@ -399,7 +415,27 @@ class Stream:
                 print("Genre:", genre)
 
     def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> Optional[str]:
-        """Download the default or supported stream to a playlist"""
+        """
+        Download the default or supported stream to a playlist
+
+        Parameters
+        ----------
+        file_name : str, optional
+            The name of the downloaded music file.
+            If not specified, the extracted url title or YouTube video title is used instead.
+            It is preferable to override the default if the input is a stream url override, otherwise, the title can be extracted from the website or YouTube url
+        playlist_name : str, optional
+            The name of the playlist that the downloaded track is a part of.
+            If not specified, it will be defaulted to either "Downloaded Tracks" or "Podcasts"
+        download_only_default : bool, optional
+            If set to false, other supported streams will be checked for compatibility if the default stream is not a supported type.
+            Otherwise, the program will only attempt to download the default stream
+
+        Returns
+        -------
+        string, optional
+            The downloaded file path
+        """
         # Return if there is no default stream
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
