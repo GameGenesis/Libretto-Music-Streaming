@@ -1,4 +1,3 @@
-# Imports
 from typing import Callable, Optional
 from datetime import datetime
 import os
