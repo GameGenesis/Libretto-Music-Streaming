@@ -86,25 +86,25 @@ class LocalAudio:
         return 0 if index <= 0 else index - 1
 
     @staticmethod
-    def is_compatible_file(file: str):
+    def is_compatible_file(file: str) -> bool:
         extensions = [".mp3", ".wav", ".ogg"]
         # Return true if the file ends with any of the compatible file extensions
         return any([file.endswith(e) for e in extensions])
 
     @staticmethod
-    def pause():
+    def pause() -> None:
         mixer.music.pause()
 
     @staticmethod
-    def unpause():
+    def unpause() -> None:
         mixer.music.unpause()
 
     @staticmethod
-    def stop():
+    def stop() -> None:
         mixer.music.stop()
 
     @staticmethod
-    def rewind(self):
+    def rewind(self) -> None:
         mixer.music.rewind()
         self.current_pos = 0
         self.elapsed_time_change = mixer.music.get_pos() // 1000
@@ -114,7 +114,7 @@ class LocalAudio:
         return round(mixer.music.get_volume(), 2), cls.muted
 
     @classmethod
-    def set_volume(cls, volume: float):
+    def set_volume(cls, volume: float) -> None:
         if volume <= 0:
             cls.muted = True
         elif cls.muted:
@@ -123,15 +123,16 @@ class LocalAudio:
         mixer.music.set_volume(volume)
 
     @classmethod
-    def toggle_mute(cls):
+    def toggle_mute(cls) -> bool:
         cls.muted = not cls.muted
         if cls.muted:
             saved_volume = cls.volume
             mixer.music.set_volume(cls.MIN_VOLUME)
         else:
             mixer.music.set_volume(saved_volume)
+        return cls.muted
 
-    def play(self, start_time: Optional[int]=0):
+    def play(self, start_time: Optional[int]=0) -> None:
         try:
             # Loading the track
             mixer.music.load(self.path)
@@ -143,7 +144,7 @@ class LocalAudio:
         except Exception:
             print("Can't play track! File format not supported!")
 
-    def on_end_callback(self, end_event: Optional[Callable]=None, *args, **kwargs):
+    def on_end_callback(self, end_event: Optional[Callable]=None, *args, **kwargs) -> bool:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -152,7 +153,7 @@ class LocalAudio:
                 end_event(*args, **kwargs)
         return True
     
-    def queue_track(self, track):
+    def queue_track(self, track) -> bool:
         return self.on_end_callback(end_event=lambda: track.play())
 
 
