@@ -38,6 +38,15 @@ class LocalAudio:
         self.current_pos = 0
 
     @staticmethod
+    def get_next_index(index, length):
+        # Supports looping
+        return 0 if index >= length - 1 else index + 1
+
+    @staticmethod
+    def get_previous_index(index):
+        return 0 if index <= 0 else index - 1
+
+    @staticmethod
     def is_compatible_file(file: str):
         extensions = [".mp3", ".wav", ".ogg"]
         # Return true if the file ends with any of the compatible file extensions
@@ -109,8 +118,10 @@ class LocalAudio:
 
 
 if __name__ == "__main__":
-    first_track = LocalAudio("data\playlists\Bazzi\Bazzi - Mine [Official Music Video].mp3", "Mine", "Album")
-    second_track = LocalAudio("data\playlists\Post Malone\Post Malone - Circles.mp3", "Circles", "Album")
-    first_track.play()
-    while first_track.queue_track(second_track):
-        pass
+    tracks = [LocalAudio("data\playlists\Bazzi\Bazzi - Mine [Official Music Video].mp3", "Mine", "Album"),
+    LocalAudio("data\playlists\Post Malone\Post Malone - Circles.mp3", "Circles", "Album")]
+    for index, track in enumerate(tracks):
+        track.play()
+        second_track = tracks[LocalAudio.get_next_index(index, len(tracks))]
+        while track.queue_track(second_track):
+            pass
