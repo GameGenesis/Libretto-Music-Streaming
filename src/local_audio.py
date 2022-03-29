@@ -50,12 +50,39 @@ class LocalAudio:
         self.current_pos = 0
 
     @staticmethod
-    def get_next_index(index, length):
-        # Supports looping
+    def get_next_index(index: int, length: int) -> int:
+        """
+        Gets the next index, then loops at the last index
+
+        Parameters
+        ----------
+        index : int
+            The current index
+        length : int
+            The length of a list
+
+        Returns
+        -------
+        int
+            The next index
+        """
         return 0 if index >= length - 1 else index + 1
 
     @staticmethod
-    def get_previous_index(index):
+    def get_previous_index(index: int) -> int:
+        """
+        Gets the previous index, except when the index is 0, returns the same index
+
+        Parameters
+        ----------
+        index : int
+            The current index
+
+        Returns
+        -------
+        int
+            The previous index
+        """
         return 0 if index <= 0 else index - 1
 
     @staticmethod
