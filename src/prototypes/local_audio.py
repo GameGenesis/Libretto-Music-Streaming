@@ -10,9 +10,21 @@ from mutagen.mp3 import MP3
 class LocalAudio:
     MUSIC_END = pygame.USEREVENT+1
     muted = False
-    MIN_VOLUME, MAX_VOLUME = 0, 1
+    MIN_VOLUME, MAX_VOLUME = 0.0, 1.0
 
     def __init__(self, path: str, title: str, album: str, volume: Optional[float]=1.0) -> None:
+        """
+        Parameters
+        ----------
+        path : str
+            The local track file path
+        title : str
+            The title of the track
+        album : str
+            The album of the track
+        volume : float, optional
+            The default track volume (between MIN_VOLUME and MAX_VOLUME). If not set, it defaults to the max (1.0)
+        """
         self.path = path
         self.title = title
         self.album = album
