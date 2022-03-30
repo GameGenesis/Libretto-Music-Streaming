@@ -1,43 +1,27 @@
-from typing import Optional
-from datetime import datetime
+import inspect
 import os
+import sys
 
-from mutagen import File
-from mutagen.mp3 import MP3
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
 
 from stream import Stream
+from local_audio import LocalAudio
+from audio import Audio
 
 class Track:
-    def __init__(self, title: str, album: str, local: bool, path: Optional[str]=None, stream: Optional[Stream]=None) -> None:
-        self.title = title
+    def __init__(self, album: str, audio: Audio | list[Audio], default_index: int=0) -> None:
+        # self.title = audio.title
         self.album = album
-        self.path = path
-        self.stream = stream
-
-        self.date_added = datetime.fromtimestamp(os.path.getctime(self.path))
-
-        mp3 = MP3(self.path)
-        self.duration = int(mp3.info.length)
-        self.sample_rate = mp3.info.sample_rate
-
-        file = File(self.path, easy=True)
-
-        try:
-            self.artist = file["artist"][0]
-        except Exception:
-            self.artist = "Unknown Artist"
-
-    def set_play_method(self, local: bool):
-        self.local = local
+        self.audio = audio
+        self.default_index = default_index
 
     def play(self):
-        if self.local:
-            self.play_local()
+        if type(self.audio) == list:
+            self.audio[self.default_index].play()
         else:
-            self.play_stream()
+            self.audio.play()
 
-    def play_local(self):
-        pass
-
-    def play_stream(self):
-        self.stream.play_default_stream()
+track = Track("Album", Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc"))
+track.play()
