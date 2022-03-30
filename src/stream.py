@@ -14,7 +14,9 @@ from pytube import YouTube
 from moviepy.editor import AudioFileClip
 import mutagen
 
-class Stream:
+from audio import Audio
+
+class Stream(Audio):
     """
     Supports radio streaming, podcast streaming, and YouTube audio streams.
     Also supports downloading streams
@@ -181,7 +183,6 @@ class Stream:
         list[Stream], optional
             an optional list of YouTube streams
         """
-        # Inititalize empty streams list
         streams = []
         youtube_streams = None
         youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
@@ -353,6 +354,9 @@ class Stream:
 
         # Return the added stream index
         return index
+
+    def play(self) -> None:
+        self.play_default_stream()
 
     def play_default_stream(self) -> None:
         """Play the default stream using the VLC media player"""

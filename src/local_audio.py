@@ -7,12 +7,14 @@ from pygame import mixer
 from mutagen import File
 from mutagen.mp3 import MP3
 
-class LocalAudio:
+from audio import Audio
+
+class LocalAudio(Audio):
     MUSIC_END = pygame.USEREVENT+1
     muted = False
     MIN_VOLUME, MAX_VOLUME = 0.0, 1.0
 
-    def __init__(self, path: str, title: str, album: str, volume: Optional[float]=1.0) -> None:
+    def __init__(self, path: str, title: str, volume: Optional[float]=1.0) -> None:
         """
         Parameters
         ----------
@@ -27,7 +29,6 @@ class LocalAudio:
         """
         self.path = path
         self.title = title
-        self.album = album
 
         self.date_added = datetime.fromtimestamp(os.path.getctime(self.path))
 
