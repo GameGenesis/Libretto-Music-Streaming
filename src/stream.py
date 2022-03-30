@@ -38,7 +38,7 @@ class Stream:
         if not streams_override:
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
-            self.streams, self.youtube_streams, self.captions = Stream.get_streams(url)
+            self.streams, self.youtube_streams = Stream.get_streams(url)
             self.set_default_stream()
 
             if not self.youtube_streams:
@@ -165,7 +165,7 @@ class Stream:
         return any(extension in stream_url for extension in supported_extensions)
 
     @staticmethod
-    def get_streams(url: str) -> tuple[list[str], Optional[Any], str]:
+    def get_streams(url: str) -> tuple[list[str], Optional[Any]]:
         """
         Returns a list of stream urls (and optionally, a list of YouTube audio streams) from a URL.
 
@@ -180,17 +180,14 @@ class Stream:
             a list of stream urls
         list[Stream], optional
             an optional list of YouTube streams
-        str, optional
-            the youtube video captions
         """
         # Inititalize empty streams list
         streams = []
         youtube_streams = None
-        captions = None
         youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
         if re.search(youtube_regex, url):
-            streams, youtube_streams, captions = Stream.get_youtube_audio_streams(url)
-            return streams, youtube_streams, captions
+            streams, youtube_streams = Stream.get_youtube_audio_streams(url)
+            return streams, youtube_streams
 
         # Try opening the url
         request = urllib.request.Request(url)
@@ -198,7 +195,7 @@ class Stream:
             response = urllib.request.urlopen(request)
         except Exception as e:
             print(f"Could not open the specified URL. Error: {e}")
-            return streams, youtube_streams, captions
+            return streams, youtube_streams
 
         # Decoding the page source
         raw_file = response.read().decode("utf-8")
@@ -207,7 +204,7 @@ class Stream:
         # Return the stream urls that match the regular expressions
         for term in regex_terms:
             if streams:
-                return streams, youtube_streams, captions
+                return streams, youtube_streams
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
 
         # Search terms for Apple Podcasts, Google Podcasts, etc.
@@ -220,10 +217,10 @@ class Stream:
             for stream in streams:
                 if ".mp3" not in stream:
                     streams.remove(stream)
-        return streams, youtube_streams, captions
+        return streams, youtube_streams
 
     @staticmethod
-    def get_youtube_audio_streams(url: str) -> tuple[list[str], list[Any], str]:
+    def get_youtube_audio_streams(url: str) -> tuple[list[str], list[Any]]:
         """
         Get streams and stream urls ordered by bitrate in descending order (highest bitrate first).
 
@@ -238,14 +235,11 @@ class Stream:
             a list of stream urls
         list[Stream]
             a list of YouTube streams
-        str
-            the youtube video captions
         """
         yt = YouTube(url)
-        captions = yt.captions[0].generate_srt_captions()
         youtube_streams = yt.streams.filter(only_audio=True).order_by("bitrate").desc()
         streams = [stream.url for stream in youtube_streams]
-        return streams, youtube_streams, captions
+        return streams, youtube_streams
 
     @staticmethod # Move to another class/file
     def wait_while(condition: bool, current_time: float, time_out: float=5, increment_steps: int=100) -> tuple[bool, float]:
@@ -547,7 +541,6 @@ class AudioQuality(Enum):
 
 def main():
     youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-    print(youtube.captions)
     youtube.download_stream()
     youtube.play_default_stream()
 
