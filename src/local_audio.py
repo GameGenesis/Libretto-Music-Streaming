@@ -153,7 +153,7 @@ class LocalAudio(Audio):
             if event.type == self.MUSIC_END:
                 end_event(*args, **kwargs)
         return True
-    
+
     def queue_track(self, track) -> bool:
         return self.on_end_callback(end_event=lambda: track.play())
 

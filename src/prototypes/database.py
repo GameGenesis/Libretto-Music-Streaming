@@ -1,3 +1,7 @@
+# https://auth0.com/blog/sqlalchemy-orm-tutorial-for-python-developers/
+# https://towardsdatascience.com/sqlalchemy-python-tutorial-79a577141a91
+# https://realpython.com/python-sqlite-sqlalchemy/#working-with-sqlalchemy-and-python-objects
+
 from datetime import date
 
 import sqlalchemy as db

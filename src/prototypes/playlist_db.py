@@ -7,8 +7,6 @@ class Playlist:
         """
         Parameters
         ----------
-        path : str
-            The playlist directory path
         title : str
             The title of the playlist
         album : str
