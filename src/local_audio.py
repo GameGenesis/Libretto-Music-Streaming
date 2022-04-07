@@ -14,21 +14,22 @@ class LocalAudio(Audio):
     muted = False
     MIN_VOLUME, MAX_VOLUME = 0.0, 1.0
 
-    def __init__(self, path: str, title: str, volume: Optional[float]=1.0) -> None:
+    def __init__(self, path: str, title: Optional[str]=None, volume: Optional[float]=1.0) -> None:
         """
         Parameters
         ----------
         path : str
             The local track file path
-        title : str
-            The title of the track
-        album : str
-            The album of the track
+        title : str, optional
+            The title of the track. If not specified, uses the file name from the track path
         volume : float, optional
             The default track volume (between MIN_VOLUME and MAX_VOLUME). If not set, it defaults to the max (1.0)
         """
         self.path = path
-        self.title = title
+        if title:
+            self.title = title
+        else:
+            title = os.path.basename(path)
 
         self.date_added = datetime.fromtimestamp(os.path.getctime(self.path))
 
@@ -159,8 +160,8 @@ class LocalAudio(Audio):
 
 
 if __name__ == "__main__":
-    tracks = [LocalAudio("data\playlists\Bazzi\Bazzi - Mine [Official Music Video].mp3", "Mine", "Album"),
-    LocalAudio("data\playlists\Post Malone\Post Malone - Circles.mp3", "Circles", "Album")]
+    tracks = [LocalAudio("data\playlists\Bazzi\Bazzi - Mine [Official Music Video].mp3"),
+    LocalAudio("data\playlists\Post Malone\Post Malone - Circles.mp3")]
     for index, track in enumerate(tracks):
         track.play()
         second_track = tracks[LocalAudio.get_next_index(index, len(tracks))]
