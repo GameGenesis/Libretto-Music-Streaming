@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 
-from track import Track
+from old.track import Track
 
 class Playlist:
     def __init__(self, path: str, title: str, artist: str, tracks: list[Track]) -> None:

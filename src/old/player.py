@@ -5,8 +5,8 @@ from pygame import mixer
 import os
 from pathlib import Path
 
-from playlist import Playlist
-from track import Track
+from old.playlist import Playlist
+from old.track import Track
 
 def is_compatible_file(file: str):
     extensions = [".mp3", ".wav", ".ogg"]
