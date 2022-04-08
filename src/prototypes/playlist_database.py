@@ -1,11 +1,14 @@
 from datetime import datetime
-import sqlalchemy as db
+import os
 
+import sqlalchemy as db
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = db.create_engine('sqlite:///database.db')
+FILE_PATH = os.path.join("data", "appdata.db")
+
+engine = db.create_engine(f"sqlite:///{FILE_PATH}")
 Base = declarative_base()
 
 playlist_track = Table(
@@ -29,14 +32,14 @@ class Track(Base):
     __tablename__ = "track"
     id = Column(Integer, primary_key=True)
     title = Column(String)
-    stream_id = Column(Integer, ForeignKey('stream.id'))
+    stream_id = Column(Integer, ForeignKey("stream.id"))
     stream = relationship("Stream", backref="track")
     playlists = relationship(
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
 class Stream(Base):
-    __tablename__ = 'stream'
+    __tablename__ = "stream"
 
     id = Column(Integer, primary_key=True)
     url = Column(String)
