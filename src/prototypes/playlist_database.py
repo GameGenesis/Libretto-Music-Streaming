@@ -29,6 +29,8 @@ class Track(Base):
     __tablename__ = "track"
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    stream_id = Column(Integer, ForeignKey('stream.id'))
+    stream = relationship("Stream", backref="track")
     playlists = relationship(
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
@@ -39,7 +41,7 @@ class Stream(Base):
     id = Column(Integer, primary_key=True)
     url = Column(String)
 
-    def __init__(self, url):
+    def __init__(self, url: str):
         self.url = url
 
 Base.metadata.create_all(engine)
@@ -49,22 +51,26 @@ session = Session()
 
 post_playlist = Playlist(title="Post Playlist", artist="Post Malone", date_created=datetime.now())
 
-circles = Track(title="Circles", playlists=[post_playlist])
-rockstar = Track(title="Rockstar", playlists=[post_playlist])
+circles = Track(title="Circles", stream=Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc"), playlists=[post_playlist])
+rockstar = Track(title="Rockstar", stream=Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc"), playlists=[post_playlist])
 
 post_playlist.tracks = [circles, rockstar]
 
+# Playlist
+session.add(post_playlist)
+
+# Optional (tracks)
 session.add(circles)
 session.add(rockstar)
-session.add(post_playlist)
 
 session.commit()
 session.close()
 
 playlists = session.query(Playlist).all()
 
-print('\n### All movies:')
 for playlist in playlists:
     print(playlist.title)
-    for track in playlist.tracks:
-        print(f"Track: {track.title}")
+    for i, track in enumerate(playlist.tracks):
+        print(f"{i+1}. Track: {track.title}")
+        print(f"{i+1}. Url: {track.stream.url}")
+        print()
