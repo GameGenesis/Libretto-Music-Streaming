@@ -1,3 +1,4 @@
+from datetime import datetime
 import sqlalchemy as db
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean
@@ -15,7 +16,7 @@ playlist_track = Table(
 )
 
 class Playlist(Base):
-    __tablename__ = "author"
+    __tablename__ = "playlist"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     artist = Column(String)
@@ -29,7 +30,7 @@ class Track(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     playlists = relationship(
-        "Playlists", secondary=playlist_track, back_populates="tracks"
+        "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
 class Stream(Base):
@@ -40,3 +41,30 @@ class Stream(Base):
 
     def __init__(self, url):
         self.url = url
+
+Base.metadata.create_all(engine)
+Session = sessionmaker()
+Session.configure(bind=engine)
+session = Session()
+
+post_playlist = Playlist(title="Post Playlist", artist="Post Malone", date_created=datetime.now())
+
+circles = Track(title="Circles", playlists=[post_playlist])
+rockstar = Track(title="Rockstar", playlists=[post_playlist])
+
+post_playlist.tracks = [circles, rockstar]
+
+session.add(circles)
+session.add(rockstar)
+session.add(post_playlist)
+
+session.commit()
+session.close()
+
+playlists = session.query(Playlist).all()
+
+print('\n### All movies:')
+for playlist in playlists:
+    print(playlist.title)
+    for track in playlist.tracks:
+        print(f"Track: {track.title}")
