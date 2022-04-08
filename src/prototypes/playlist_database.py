@@ -6,7 +6,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boo
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-FILE_PATH = os.path.join("data", "appdata.db")
+FILE_PATH = os.path.abspath(os.path.join("data", "appdata.db"))
 
 engine = db.create_engine(f"sqlite:///{FILE_PATH}")
 Base = declarative_base()
@@ -37,6 +37,7 @@ class Track(Base):
     __tablename__ = "track"
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    path = Column(String)
     stream_id = Column(Integer, ForeignKey("stream.id"))
     stream = relationship("Stream", backref="track")
     playlists = relationship(
@@ -48,7 +49,7 @@ class Track(Base):
         self.playlists = playlists
 
         if path:
-            pass
+            self.path = path
         else:
             self.stream = Stream(stream_url)
 
@@ -68,7 +69,7 @@ session = Session()
 
 post_playlist = Playlist("Post Playlist", "Post Malone", datetime.now())
 
-circles = Track("Circles", [post_playlist], stream_url="https://www.youtube.com/watch?v=wEGOxgfdRVc")
+circles = Track("Circles", [post_playlist], path="data\\tracks\\Post Malone - Circles.mp3")
 rockstar = Track("Rockstar", [post_playlist], stream_url="https://www.youtube.com/watch?v=wEGOxgfdRVc")
 
 post_playlist.tracks = [circles, rockstar]
@@ -89,5 +90,5 @@ for playlist in playlists:
     print(playlist.title)
     for i, track in enumerate(playlist.tracks):
         print(f"{i+1}. Track: {track.title}")
-        print(f"{i+1}. Url: {track.stream.url}")
+        print(f"{i+1}. Url/Path: {track.stream.url if track.stream else track.path}")
         print()

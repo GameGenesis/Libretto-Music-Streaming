@@ -449,19 +449,15 @@ class Stream(Audio):
             return None
 
         # Playlist defaults to "Downloaded Tracks" for YouTube audio streams and "Podcasts" for other stream types
-        if not playlist_name:
-            playlist_name = "Downloaded Tracks" if self.youtube_streams else "Podcasts"
+        # if not playlist_name:
+        #     playlist_name = "Downloaded Tracks" if self.youtube_streams else "Podcasts"
 
-        base_path = str(Path(os.getcwd()).parent.absolute()) if "src" in os.getcwd() else os.getcwd()
-        playlist_dir = os.path.join(base_path, "data", "playlists", playlist_name)
-        # If the directory does not exist, create a new directory
-        if not os.path.exists(playlist_dir):
-            os.makedirs(playlist_dir)
+        download_dir = os.path.abspath(os.path.join("data", "tracks"))
 
         if self.youtube_streams:
             # Download best stream and set filepath
             video = self.youtube_streams[AudioQuality.ULTRA.value]
-            file_path = os.path.join(playlist_dir, video.default_filename)
+            file_path = os.path.join(download_dir, video.default_filename)
             file_extension = os.path.splitext(video.default_filename)[-1]
             file_path_mp3 = file_path.replace(file_extension, ".mp3")
 
@@ -470,7 +466,7 @@ class Stream(Audio):
                 print("This track was already downloaded to the specified playlist!")
                 return file_path_mp3
 
-            video.download(playlist_dir)
+            video.download(download_dir)
 
             # Use moviepy to convert an mp4 to an mp3 with metadata support. Delete mp4 afterwards
             audio_clip = AudioFileClip(file_path)
@@ -492,7 +488,7 @@ class Stream(Audio):
         # If file name is not overriden, use webite title from specified URL
         if not file_name:
             file_name = self.title
-        file_path = os.path.join(playlist_dir, f"{file_name}.mp3")
+        file_path = os.path.join(download_dir, f"{file_name}.mp3")
 
         # Check if the file already exists
         if os.path.exists(file_path):

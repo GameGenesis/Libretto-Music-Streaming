@@ -160,8 +160,8 @@ class LocalAudio(Audio):
 
 
 if __name__ == "__main__":
-    tracks = [LocalAudio("data\playlists\Bazzi\Bazzi - Mine [Official Music Video].mp3"),
-    LocalAudio("data\playlists\Post Malone\Post Malone - Circles.mp3")]
+    tracks = [LocalAudio("data\\tracks\\Bazzi - Mine [Official Music Video].mp3"),
+    LocalAudio("data\\tracks\\Post Malone - Circles.mp3")]
     for index, track in enumerate(tracks):
         track.play()
         second_track = tracks[LocalAudio.get_next_index(index, len(tracks))]
