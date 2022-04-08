@@ -28,6 +28,11 @@ class Playlist(Base):
         "Track", secondary=playlist_track, back_populates="playlists"
     )
 
+    def __init__(self, title: str, artist: str, date_created: datetime):
+        self.title = title
+        self.artist = artist
+        self.date_created = date_created
+
 class Track(Base):
     __tablename__ = "track"
     id = Column(Integer, primary_key=True)
@@ -37,6 +42,15 @@ class Track(Base):
     playlists = relationship(
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
+    
+    def __init__(self, title: str, playlists: list[Playlist], path: str=None, stream_url: str=None):
+        self.title = title
+        self.playlists = playlists
+
+        if path:
+            pass
+        else:
+            self.stream = Stream(stream_url)
 
 class Stream(Base):
     __tablename__ = "stream"
@@ -52,10 +66,10 @@ Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-post_playlist = Playlist(title="Post Playlist", artist="Post Malone", date_created=datetime.now())
+post_playlist = Playlist("Post Playlist", "Post Malone", datetime.now())
 
-circles = Track(title="Circles", stream=Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc"), playlists=[post_playlist])
-rockstar = Track(title="Rockstar", stream=Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc"), playlists=[post_playlist])
+circles = Track("Circles", [post_playlist], stream_url="https://www.youtube.com/watch?v=wEGOxgfdRVc")
+rockstar = Track("Rockstar", [post_playlist], stream_url="https://www.youtube.com/watch?v=wEGOxgfdRVc")
 
 post_playlist.tracks = [circles, rockstar]
 
