@@ -421,7 +421,7 @@ class Stream(Audio):
             if genre:
                 print("Genre:", genre)
 
-    def download_stream(self, file_name: str="", playlist_name: str="", download_only_default: bool=False) -> Optional[str]:
+    def download_stream(self, file_name: str="", download_only_default: bool=False) -> Optional[str]:
         """
         Download the default or supported stream to a playlist
 
@@ -447,10 +447,6 @@ class Stream(Audio):
         if not self.default_stream:
             print("Can't download radio stream; there is no default stream!")
             return None
-
-        # Playlist defaults to "Downloaded Tracks" for YouTube audio streams and "Podcasts" for other stream types
-        # if not playlist_name:
-        #     playlist_name = "Downloaded Tracks" if self.youtube_streams else "Podcasts"
 
         download_dir = os.path.abspath(os.path.join("data", "tracks"))
 

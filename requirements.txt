@@ -8,6 +8,7 @@ mypy==0.941
 mypy-extensions==0.4.3
 pafy==0.5.5
 pygame==2.1.2
+-e git+https://github.com/GameGenesis/pytube@72075dddb2153bde89a8de9eb8def91d41da3655#egg=pytube
 pyinstaller==4.10
 pyinstaller-hooks-contrib==2022.2
 python-vlc==3.0.16120
