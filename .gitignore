@@ -1,3 +1,7 @@
+# Project-specific
+*.mp3
+*.db
+
 # Config file with API access token
 config.py
 
