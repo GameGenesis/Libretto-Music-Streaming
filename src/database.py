@@ -24,14 +24,16 @@ class Playlist(Base):
     title = Column(String)
     artist = Column(String)
     date_created = Column(DateTime)
+    downloaded = Column(Boolean)
     tracks = relationship(
         "Track", secondary=playlist_track, back_populates="playlists"
     )
 
-    def __init__(self, title: str, artist: str, date_created: datetime):
+    def __init__(self, title: str, artist: str, date_created: datetime, downloaded: bool=False):
         self.title = title
         self.artist = artist
         self.date_created = date_created
+        self.downloaded = downloaded
 
 class Track(Base):
     __tablename__ = "track"
@@ -40,13 +42,15 @@ class Track(Base):
     path = Column(String)
     stream_id = Column(Integer, ForeignKey("stream.id"))
     stream = relationship("Stream", backref="track")
+    liked = Column(Boolean)
     playlists = relationship(
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
-    
-    def __init__(self, title: str, playlists: list[Playlist], path: str=None, stream_url: str=None):
+
+    def __init__(self, title: str, playlists: list[Playlist], path: str=None, stream_url: str=None, liked: bool=False):
         self.title = title
         self.playlists = playlists
+        self.liked = liked
 
         if path:
             self.path = path
@@ -63,13 +67,14 @@ class Stream(Base):
         self.url = url
 
 Base.metadata.create_all(engine)
+
 Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
 post_playlist = Playlist("Post Playlist", "Post Malone", datetime.now())
 
-circles = Track("Circles", [post_playlist], path="data\\tracks\\Post Malone - Circles.mp3")
+circles = Track("Circles", [post_playlist], path="data\\tracks\\Post Malone - Circles.mp3", liked=True)
 rockstar = Track("Rockstar", [post_playlist], stream_url="https://www.youtube.com/watch?v=wEGOxgfdRVc")
 
 post_playlist.tracks = [circles, rockstar]
