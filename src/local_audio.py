@@ -152,7 +152,9 @@ class LocalAudio(Audio):
                 return False
 
             if event.type == self.MUSIC_END:
-                end_event(*args, **kwargs)
+                if end_event != None:
+                    end_event(*args, **kwargs)
+                return False
         return True
 
     def queue_track(self, track) -> bool:
@@ -162,8 +164,17 @@ class LocalAudio(Audio):
 if __name__ == "__main__":
     tracks = [LocalAudio("data\\tracks\\Bazzi - Mine [Official Music Video].mp3"),
     LocalAudio("data\\tracks\\Post Malone - Circles.mp3")]
-    for index, track in enumerate(tracks):
-        track.play()
-        second_track = tracks[LocalAudio.get_next_index(index, len(tracks))]
-        while track.queue_track(second_track):
-            pass
+    index = 0
+    while True:
+        print(index)
+        tracks[index].play()
+        while tracks[index].on_end_callback():
+            command = input()
+            if command == "n":
+                index = LocalAudio.get_next_index(index, len(tracks))
+                break
+            elif command == "b":
+                index = LocalAudio.get_previous_index(index)
+                break
+        else:
+            index += 1
