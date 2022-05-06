@@ -92,17 +92,21 @@ class PlaylistManager:
             playlists.append(playlist)
             self.session.add(track)
 
+    def add_to_liked_songs(self, name: str, artist: str, stream_url: str):
+        liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
+        self.add_track_to_playlist(name, artist, stream_url, liked_songs_playlist)
+
     def close_session(self):
         self.session.commit()
         self.session.close()
 
 playlist_manager = PlaylistManager()
-liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
 
-playlist_manager.add_track_to_playlist("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo", liked_songs_playlist)
-playlist_manager.add_track_to_playlist("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U", liked_songs_playlist)
+playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo")
+playlist_manager.add_to_liked_songs("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
 
 playlist_manager.close_session()
+
 playlists = playlist_manager.session.query(Playlist).all()
 
 for playlist in playlists:
