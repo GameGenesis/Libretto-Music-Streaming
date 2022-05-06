@@ -22,16 +22,14 @@ class Playlist(Base):
     __tablename__ = "playlist"
     id = Column(Integer, primary_key=True)
     title = Column(String)
-    artist = Column(String)
     date_created = Column(DateTime)
     downloaded = Column(Boolean)
     tracks = relationship(
         "Track", secondary=playlist_track, back_populates="playlists"
     )
 
-    def __init__(self, title: str, artist: str, date_created: datetime, downloaded: bool=False):
+    def __init__(self, title: str, date_created: datetime, downloaded: bool=False):
         self.title = title
-        self.artist = artist
         self.date_created = date_created
         self.downloaded = downloaded
 
@@ -39,6 +37,7 @@ class Track(Base):
     __tablename__ = "track"
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    artist = Column(String)
     path = Column(String)
     stream_id = Column(Integer, ForeignKey("stream.id"))
     stream = relationship("Stream", backref="track")
@@ -47,8 +46,9 @@ class Track(Base):
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
-    def __init__(self, title: str, playlists: list[Playlist], path: str=None, stream_url: str=None, liked: bool=False):
+    def __init__(self, title: str, artist: str, playlists: list[Playlist], path: str=None, stream_url: str=None, liked: bool=False):
         self.title = title
+        self.artist = artist
         self.playlists = playlists
         self.liked = liked
 
@@ -66,30 +66,44 @@ class Stream(Base):
     def __init__(self, url: str):
         self.url = url
 
-Base.metadata.create_all(engine)
+class PlaylistManager:
+    def __init__(self) -> None:
+        Base.metadata.create_all(engine)
+        Session = sessionmaker()
+        Session.configure(bind=engine)
+        self.session = Session()
 
-Session = sessionmaker()
-Session.configure(bind=engine)
-session = Session()
+    def get_or_create_playlist(self, name: str="New Playlist") -> Playlist:
+        playlist = self.session.query(Playlist).filter_by(title=name).first()
+        if playlist != None:
+            return playlist
 
-post_playlist = Playlist("Post Playlist", "Post Malone", datetime.now())
+        playlist = Playlist(title=name, date_created=datetime.now())
 
-circles = Track("Circles", [post_playlist], path="data\\tracks\\Post Malone - Circles.mp3", liked=True)
-rockstar = Track("Rockstar", [post_playlist], stream_url="https://www.youtube.com/watch?v=wEGOxgfdRVc")
+        self.session.add(playlist)
+        return playlist
 
-post_playlist.tracks = [circles, rockstar]
+    def add_track_to_playlist(self, name: str, artist: str, stream_url: str, playlist: Playlist):
+        track = self.session.query(Track).filter_by(title=name).first()
+        if track == None:
+            track = Track(title=name, artist=artist, playlists=[playlist], stream_url=stream_url)
+        else:
+            playlists = track.playlists
+            playlists.append(playlist)
+            self.session.add(track)
 
-# Playlist
-session.add(post_playlist)
+    def close_session(self):
+        self.session.commit()
+        self.session.close()
 
-# Optional (tracks)
-session.add(circles)
-session.add(rockstar)
+playlist_manager = PlaylistManager()
+liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
 
-session.commit()
-session.close()
+playlist_manager.add_track_to_playlist("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo", liked_songs_playlist)
+playlist_manager.add_track_to_playlist("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U", liked_songs_playlist)
 
-playlists = session.query(Playlist).all()
+playlist_manager.close_session()
+playlists = playlist_manager.session.query(Playlist).all()
 
 for playlist in playlists:
     print(playlist.title)
