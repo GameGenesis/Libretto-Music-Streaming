@@ -534,8 +534,17 @@ class AudioQuality(Enum):
     MEDIUM = 2
     LOW = -1
 
+from database import PlaylistManager
 
 def main():
+    playlist_manager = PlaylistManager()
+    playlist_manager.close_session(False)
+    liked_songs = playlist_manager.get_or_create_playlist("Liked Songs")
+
+    for track in liked_songs.tracks:
+        print(track.title)
+        Stream(track.stream.url).play_default_stream()
+
     youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
     youtube.download_stream()
     youtube.play_default_stream()

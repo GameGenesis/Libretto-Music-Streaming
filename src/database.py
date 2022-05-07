@@ -28,10 +28,13 @@ class Playlist(Base):
         "Track", secondary=playlist_track, back_populates="playlists"
     )
 
-    def __init__(self, title: str, date_created: datetime, downloaded: bool=False):
+    def __init__(self, title: str, date_created: datetime, downloaded: bool=False) -> None:
         self.title = title
         self.date_created = date_created
         self.downloaded = downloaded
+
+    def get_length(self) -> int:
+        return len(self.tracks)
 
 class Track(Base):
     __tablename__ = "track"
@@ -93,25 +96,31 @@ class PlaylistManager:
             self.session.add(track)
 
     def add_to_liked_songs(self, name: str, artist: str, stream_url: str):
-        liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
+        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.add_track_to_playlist(name, artist, stream_url, liked_songs_playlist)
 
-    def close_session(self):
-        self.session.commit()
+    def close_session(self, commit: bool=True):
+        if commit:
+            self.session.commit()
         self.session.close()
 
-playlist_manager = PlaylistManager()
+def test():
+    playlist_manager = PlaylistManager()
 
-playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo")
-playlist_manager.add_to_liked_songs("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
+    playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo")
+    playlist_manager.add_to_liked_songs("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
 
-playlist_manager.close_session()
+    playlist_manager.close_session()
 
-playlists = playlist_manager.session.query(Playlist).all()
+    playlists = playlist_manager.session.query(Playlist).all()
 
-for playlist in playlists:
-    print(playlist.title)
-    for i, track in enumerate(playlist.tracks):
-        print(f"{i+1}. Track: {track.title}")
-        print(f"{i+1}. Url/Path: {track.stream.url if track.stream else track.path}")
-        print()
+    for playlist in playlists:
+        print(playlist.title)
+        print(f"Number of Tracks: {playlist.get_length()}")
+        for i, track in enumerate(playlist.tracks):
+            print(f"{i+1}. Track: {track.title}")
+            print(f"{i+1}. Url/Path: {track.stream.url if track.stream else track.path}")
+            print()
+
+if __name__ == "__main__":
+    test()
