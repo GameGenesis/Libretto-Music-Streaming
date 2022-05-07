@@ -84,31 +84,35 @@ class PlaylistManager:
         playlist = Playlist(title=name, date_created=datetime.now())
 
         self.session.add(playlist)
+        self.session.commit()
         return playlist
 
     def add_track_to_playlist(self, name: str, artist: str, stream_url: str, playlist: Playlist):
         track = self.session.query(Track).filter_by(title=name).first()
         if track == None:
             track = Track(title=name, artist=artist, playlists=[playlist], stream_url=stream_url)
+            self.session.add(track)
         else:
             playlists = track.playlists
-            playlists.append(playlist)
-            self.session.add(track)
+            if playlist not in playlists:
+                playlists.append(playlist)
+                track.playlists = playlists
+        self.session.commit()
 
     def add_to_liked_songs(self, name: str, artist: str, stream_url: str):
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.add_track_to_playlist(name, artist, stream_url, liked_songs_playlist)
 
-    def close_session(self, commit: bool=True):
-        if commit:
-            self.session.commit()
+    def close_session(self):
         self.session.close()
 
 def test():
     playlist_manager = PlaylistManager()
+    post_playlist = playlist_manager.get_or_create_playlist("Post Malone")
 
     playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo")
     playlist_manager.add_to_liked_songs("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
+    playlist_manager.add_track_to_playlist("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U", post_playlist)
 
     playlist_manager.close_session()
 
