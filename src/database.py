@@ -76,21 +76,21 @@ class PlaylistManager:
         Session.configure(bind=engine)
         self.session = Session()
 
-    def get_or_create_playlist(self, name: str="New Playlist") -> Playlist:
-        playlist = self.session.query(Playlist).filter_by(title=name).first()
+    def get_or_create_playlist(self, title: str="New Playlist") -> Playlist:
+        playlist = self.session.query(Playlist).filter_by(title=title).first()
         if playlist != None:
             return playlist
 
-        playlist = Playlist(title=name, date_created=datetime.now())
+        playlist = Playlist(title=title, date_created=datetime.now())
 
         self.session.add(playlist)
         self.session.commit()
         return playlist
 
-    def add_track_to_playlist(self, name: str, artist: str, stream_url: str, playlist: Playlist):
-        track = self.session.query(Track).filter_by(title=name).first()
+    def add_track_to_playlist(self, title: str, artist: str, stream_url: str, playlist: Playlist) -> Track:
+        track = self.session.query(Track).filter_by(title=title).first()
         if track == None:
-            track = Track(title=name, artist=artist, playlists=[playlist], stream_url=stream_url)
+            track = Track(title=title, artist=artist, playlists=[playlist], stream_url=stream_url)
             self.session.add(track)
         else:
             playlists = track.playlists
@@ -98,10 +98,14 @@ class PlaylistManager:
                 playlists.append(playlist)
                 track.playlists = playlists
         self.session.commit()
+        return track
 
-    def add_to_liked_songs(self, name: str, artist: str, stream_url: str):
+    def add_to_liked_songs(self, title: str, artist: str, stream_url: str):
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
-        self.add_track_to_playlist(name, artist, stream_url, liked_songs_playlist)
+        self.add_track_to_playlist(title, artist, stream_url, liked_songs_playlist)
+
+    def commit_session(self):
+        self.session.commit()
 
     def close_session(self):
         self.session.close()
