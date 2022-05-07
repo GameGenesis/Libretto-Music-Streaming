@@ -15,6 +15,7 @@ from moviepy.editor import AudioFileClip
 import mutagen
 
 from audio import Audio
+from database import PlaylistManager
 
 class Stream(Audio):
     """
@@ -523,6 +524,22 @@ class Stream(Audio):
                 f.write(block)
             return file_path
 
+    def add_to_playlist(self, playlist_name: str) -> None:
+        playlist_manager = PlaylistManager()
+        playlist = playlist_manager.get_or_create_playlist(playlist_name)
+        track = playlist_manager.add_track_to_playlist(self.title, self.artist, self.url, playlist)
+
+        if playlist.downloaded:
+            path = self.download_stream()
+            if path:
+                track.path = path
+
+        playlist_manager.commit_session()
+        playlist_manager.close_session()
+
+    def add_to_liked_songs(self) -> None:
+        self.add_to_playlist("Liked Songs")
+
 
 class AudioQuality(Enum):
     """
@@ -534,29 +551,16 @@ class AudioQuality(Enum):
     MEDIUM = 2
     LOW = -1
 
-from database import PlaylistManager
-
 def main():
-    playlist_manager = PlaylistManager()
-
     youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-    playlist_manager.add_to_liked_songs(youtube.title, youtube.artist, youtube.url)
-    downloaded_songs = playlist_manager.get_or_create_playlist("Downloaded Songs")
-    downloaded_songs.downloaded = True
+    youtube.add_to_liked_songs()
+    youtube.add_to_playlist("Downloaded Songs")
 
-    liked_songs = playlist_manager.get_or_create_playlist("Liked Songs")
-    playlist_manager.add_track_to_playlist(youtube.title, youtube.artist, youtube.url, downloaded_songs)
+    playlist_manager = PlaylistManager()
+    playlist_manager.close_session()
+    downloaded_songs = playlist_manager.get_or_create_playlist("Downloaded Songs")
 
     for track in downloaded_songs.tracks:
-        print(f"Downloading {track.title}...")
-        path = Stream(track.stream.url).download_stream()
-        if path:
-            track.path = path
-
-    playlist_manager.close_session()
-    liked_songs = playlist_manager.get_or_create_playlist("Liked Songs")
-
-    for track in liked_songs.tracks:
         print(track.title)
         Stream(track.stream.url).play_default_stream()
 
