@@ -538,20 +538,27 @@ from database import PlaylistManager
 
 def main():
     playlist_manager = PlaylistManager()
-    playlist_manager.close_session(False)
+
+    youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
+    playlist_manager.add_to_liked_songs(youtube.title, youtube.artist, youtube.url)
+    downloaded_songs = playlist_manager.get_or_create_playlist("Downloaded Songs")
+    downloaded_songs.downloaded = True
+
+    liked_songs = playlist_manager.get_or_create_playlist("Liked Songs")
+    playlist_manager.add_track_to_playlist(youtube.title, youtube.artist, youtube.url, downloaded_songs)
+
+    for track in downloaded_songs.tracks:
+        print(f"Downloading {track.title}...")
+        path = Stream(track.stream.url).download_stream()
+        if path:
+            track.path = path
+
+    playlist_manager.close_session()
     liked_songs = playlist_manager.get_or_create_playlist("Liked Songs")
 
     for track in liked_songs.tracks:
         print(track.title)
         Stream(track.stream.url).play_default_stream()
-
-    youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-    youtube.download_stream()
-    youtube.play_default_stream()
-
-    nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
-    nytimes_podcast.download_stream()
-    nytimes_podcast.play_default_stream()
 
     google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
     google_podcast.download_stream()
@@ -594,6 +601,9 @@ def main():
 
     virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
     virgin_radio_broken.play_default_stream()
+
+    # NYTimes Podcasts are now inaccessible
+    # nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
 
 
 if __name__ == "__main__":
