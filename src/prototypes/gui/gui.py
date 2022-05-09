@@ -1,11 +1,20 @@
-# Basic UI imported from Figma using Tkinter Designer
-# https://github.com/ParthJadhav/Tkinter-Designer
+"""
+Most of the basic GUI code was generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer,
+and was later modified to fit the specific needs of the application
+
+Most of the icons used are Google's Material Icons: https://developers.google.com/fonts/docs/material_icons, inserted into
+Figma using the Material Design Icons Plugin
+
+Most of the title bar code was derived from these Stack Overflow threads and later modified:
+https://stackoverflow.com/questions/23836000/can-i-change-the-title-bar-in-tkinter
+https://stackoverflow.com/questions/49621671/trouble-making-a-custom-title-bar-in-tkinter
+"""
 
 from ctypes.wintypes import BOOL, HWND, LONG
 import ctypes
 from pathlib import Path
 
-from tkinter import Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Frame, Tk, Canvas, Entry, Text, Button, PhotoImage
 
 HIGH_RES = False
 
@@ -47,7 +56,7 @@ def get_handle(root) -> int:
 
 fullscreen = False
 
-def toggle_fullscreen():
+def toggle_fullscreen(event=None):
     global fullscreen
     if fullscreen == False:
         window.wm_state('zoomed')
@@ -66,9 +75,10 @@ if HIGH_RES:
     ctypes.windll.shcore.SetProcessDpiAwareness(1)
     window.geometry("1006x673")
 else:
+    window.geometry("+0+0")
     window.geometry("1008x680")
 
-window.configure(bg = "#FFFFFF")
+window.configure(bg = "#202020")
 
 hwnd = get_handle(window)
 style = GetWindowLongPtrW(hwnd, GWL_STYLE)
@@ -77,7 +87,7 @@ SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 canvas = Canvas(
     window,
-    bg = "#FFFFFF",
+    bg = "#202020",
     height = 720,
     width = 1024,
     bd = 0,
@@ -101,6 +111,44 @@ canvas.create_rectangle(
     720.0,
     fill="#303030",
     outline="")
+
+def start_move(event):
+    global x, y
+    window.geometry("1024x720")
+    window.wm_overrideredirect(True)
+    x = event.x
+    y = event.y
+
+def stop_move(event):
+    global x, y
+    if HIGH_RES:
+        window.geometry("1006x673")
+    else:
+        window.geometry("1008x680")
+    window.wm_overrideredirect(False)
+    hwnd = get_handle(window)
+    style = GetWindowLongPtrW(hwnd, GWL_STYLE)
+    style &= ~(WS_CAPTION | WS_THICKFRAME)
+    SetWindowLongPtrW(hwnd, GWL_STYLE, style)
+    x = None
+    y = None
+
+def do_move(event):
+    global fullscreen, x, y
+    window.geometry(f'+{event.x_root - x}+{event.y_root - y}')
+
+title_bar_frame = canvas.create_rectangle(
+    0.0,
+    0.0,
+    1024.0,
+    33.0,
+    fill="#202020",
+    outline="")
+
+canvas.tag_bind(title_bar_frame, "<ButtonPress-1>", start_move)
+canvas.tag_bind(title_bar_frame, "<ButtonRelease-1>", stop_move)
+canvas.tag_bind(title_bar_frame, "<B1-Motion>", do_move)
+canvas.tag_bind(title_bar_frame, '<Double-1>', toggle_fullscreen)
 
 image_image_1 = PhotoImage(
     file=relative_to_assets("image_1.png"))
