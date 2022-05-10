@@ -14,7 +14,7 @@ from ctypes.wintypes import BOOL, HWND, LONG
 import ctypes
 from pathlib import Path
 
-from tkinter import Frame, Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
 
 HIGH_RES = False
 
@@ -104,6 +104,38 @@ canvas.create_rectangle(
     fill="#202020",
     outline=""
 )
+
+# ------------------- Test Code -------------------
+
+def populate(frame):
+    '''Put in some fake data'''
+    for row in range(100):
+        Label(frame, text="%s" % row, width=3, borderwidth="1",
+                 relief="solid").grid(row=row, column=0)
+        t="this is the second column for row %s" %row
+        Label(frame, text=t).grid(row=row, column=1)
+
+def onFrameConfigure(canvas):
+    '''Reset the scroll region to encompass the inner frame'''
+    canvas.configure(scrollregion=canvas.bbox("all"))
+
+canvas_2 = Canvas(window, borderwidth=0, background="#ffffff")
+
+frame = Frame(canvas_2, background="#ffffff")
+vsb = Scrollbar(window, orient="vertical", command=canvas_2.yview)
+vsb.lift(frame)
+vsb.place(x=1007.0, y=33.0, height=600.0)
+
+canvas_2.configure(yscrollcommand=vsb.set)
+
+canvas_2.place(x=218.0, y=33.0, width=806.0, height=607.0)
+canvas_2.create_window((300,33), window=frame, anchor="nw")
+
+frame.bind("<Configure>", lambda event, canvas=canvas_2: onFrameConfigure(canvas_2))
+
+populate(frame)
+
+# -------------------------------------------------
 
 canvas.create_rectangle(
     0.0,
