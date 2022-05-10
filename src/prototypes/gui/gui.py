@@ -119,19 +119,34 @@ def onFrameConfigure(canvas):
     '''Reset the scroll region to encompass the inner frame'''
     canvas.configure(scrollregion=canvas.bbox("all"))
 
-canvas_2 = Canvas(window, borderwidth=0, background="#ffffff")
+def bound_to_mousewheel(event):
+    global scroll_view_canvas
+    scroll_view_canvas.bind_all("<MouseWheel>", on_mousewheel)
 
-frame = Frame(canvas_2, background="#ffffff")
-vsb = Scrollbar(window, orient="vertical", command=canvas_2.yview)
+def unbound_to_mousewheel(event):
+    global scroll_view_canvas
+    scroll_view_canvas.unbind_all("<MouseWheel>")
+
+def on_mousewheel(event):
+    global scroll_view_canvas
+    scroll_view_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+
+scroll_view_canvas = Canvas(window, borderwidth=0, background="#ffffff")
+
+frame = Frame(scroll_view_canvas, background="#ffffff")
+vsb = Scrollbar(window, orient="vertical", command=scroll_view_canvas.yview)
 vsb.lift(frame)
 vsb.place(x=1007.0, y=33.0, height=600.0)
 
-canvas_2.configure(yscrollcommand=vsb.set)
+scroll_view_canvas.bind('<Enter>', bound_to_mousewheel)
+scroll_view_canvas.bind('<Leave>', unbound_to_mousewheel)
 
-canvas_2.place(x=218.0, y=33.0, width=806.0, height=607.0)
-canvas_2.create_window((300,33), window=frame, anchor="nw")
+scroll_view_canvas.configure(yscrollcommand=vsb.set)
 
-frame.bind("<Configure>", lambda event, canvas=canvas_2: onFrameConfigure(canvas_2))
+scroll_view_canvas.place(x=218.0, y=33.0, width=806.0, height=607.0)
+scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
+
+frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
 populate(frame)
 
