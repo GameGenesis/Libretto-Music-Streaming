@@ -14,10 +14,9 @@ from pytube import YouTube
 from moviepy.editor import AudioFileClip
 import mutagen
 
-from audio import Audio
 from database import PlaylistManager
 
-class Stream(Audio):
+class Stream:
     """
     Supports radio streaming, podcast streaming, and YouTube audio streams.
     Also supports downloading streams

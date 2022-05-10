@@ -7,9 +7,7 @@ from pygame import mixer
 from mutagen import File
 from mutagen.mp3 import MP3
 
-from audio import Audio
-
-class LocalAudio(Audio):
+class LocalAudio:
     MUSIC_END = pygame.USEREVENT+1
     muted = False
     MIN_VOLUME, MAX_VOLUME = 0.0, 1.0
