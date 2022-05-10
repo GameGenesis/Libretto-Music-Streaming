@@ -116,18 +116,24 @@ canvas.create_rectangle(
 
 # ------------------- Test Code -------------------
 
+def populate_tracks(song):
+    global widgets
+    for widget in widgets:
+        widget.destroy()
+
+    for row, track in enumerate(song.tracks):
+        label = Label(frame, text=track.title, borderwidth="1", relief="solid")
+        label.grid(row=row, column=2)
+        widgets.append(label)
+
 def populate(frame):
+    global widgets
     pm = PlaylistManager()
     songs = pm.session.query(Playlist).all()
-    row = 0
-    playlist_row = 0
-    for song in songs:
-        Label(frame, text=playlist_row, width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
-        Button(frame, text=song.title).grid(row=row, column=1)
-        playlist_row += 1
-        for track in song.tracks:
-            Label(frame, text=track.title, borderwidth="1", relief="solid").grid(row=row, column=2)
-            row += 1
+    for row, song in enumerate(songs):
+        Label(frame, text=row, width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
+        Button(frame, text=song.title, borderwidth=0, highlightthickness=0,
+            command=lambda s=song: populate_tracks(s), relief="flat").grid(row=row, column=1)
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
@@ -147,7 +153,7 @@ def on_mousewheel(event):
 
 scroll_view_canvas = Canvas(window, borderwidth=0, background="#202020", bd = 0, highlightthickness = 0, relief = "ridge")
 
-frame = Frame(scroll_view_canvas, background="#202020", width=806.0, height=607.0, padx=20.0, pady=20.0)
+frame = Frame(scroll_view_canvas, background="#202020", width=806.0, padx=20.0, pady=20.0)
 vsb = Scrollbar(window, orient="vertical", command=scroll_view_canvas.yview)
 vsb.lift(frame)
 vsb.place(x=1007.0, y=33.0, height=607.0)
@@ -162,6 +168,7 @@ scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
 
 frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
+widgets = []
 populate(frame)
 
 # -------------------------------------------------
