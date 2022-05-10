@@ -12,10 +12,18 @@ https://stackoverflow.com/questions/49621671/trouble-making-a-custom-title-bar-i
 
 from ctypes.wintypes import BOOL, HWND, LONG
 import ctypes
+import inspect
 import os
 from pathlib import Path
+import sys
 
 from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+
+from database import Playlist, PlaylistManager
 
 HIGH_RES = False
 
@@ -109,12 +117,17 @@ canvas.create_rectangle(
 # ------------------- Test Code -------------------
 
 def populate(frame):
-    os.chdir("data/tracks")
-    songs = os.listdir()
-    for row, song in enumerate(songs):
-        Label(frame, text="%s" % row, width=3, borderwidth="1",
-                 relief="solid").grid(row=row, column=0)
-        Label(frame, text=song).grid(row=row, column=1)
+    pm = PlaylistManager()
+    songs = pm.session.query(Playlist).all()
+    row = 0
+    playlist_row = 0
+    for song in songs:
+        Label(frame, text=playlist_row, width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
+        Button(frame, text=song.title).grid(row=row, column=1)
+        playlist_row += 1
+        for track in song.tracks:
+            Label(frame, text=track.title, borderwidth="1", relief="solid").grid(row=row, column=2)
+            row += 1
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
