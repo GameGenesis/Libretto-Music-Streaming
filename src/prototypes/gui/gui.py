@@ -102,7 +102,8 @@ canvas.create_rectangle(
     1024.0,
     640.0,
     fill="#202020",
-    outline="")
+    outline=""
+)
 
 canvas.create_rectangle(
     0.0,
@@ -110,7 +111,8 @@ canvas.create_rectangle(
     1024.0,
     720.0,
     fill="#303030",
-    outline="")
+    outline=""
+)
 
 def start_move(event):
     global x, y
@@ -134,8 +136,10 @@ def stop_move(event):
     y = None
 
 def do_move(event):
-    global fullscreen, x, y
-    window.geometry(f'+{event.x_root - x}+{event.y_root - y}')
+    global x, y
+
+    if x is not None and y is not None:
+        window.geometry(f'+{event.x_root - x}+{event.y_root - y}')
 
 title_bar_frame = canvas.create_rectangle(
     0.0,
@@ -143,7 +147,8 @@ title_bar_frame = canvas.create_rectangle(
     1024.0,
     33.0,
     fill="#202020",
-    outline="")
+    outline=""
+)
 
 canvas.tag_bind(title_bar_frame, "<ButtonPress-1>", start_move)
 canvas.tag_bind(title_bar_frame, "<ButtonRelease-1>", stop_move)
