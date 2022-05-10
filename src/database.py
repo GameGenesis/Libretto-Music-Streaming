@@ -32,12 +32,46 @@ class Playlist(Base):
     )
 
     def __init__(self, title: str, date_created: datetime, downloaded: bool=False) -> None:
+        """
+        Parameters
+        ----------
+        title : str
+            The title of the playlist
+        date_created : datetime
+            The date and time the playlist was created
+        downloaded : bool
+            Whether the contents of the playlist should be downloaded
+
+        Returns
+        -------
+        None
+        """
         self.title = title
         self.date_created = date_created
         self.downloaded = downloaded
 
     def get_length(self) -> int:
+        """
+        Returns the number of tracks in the playlist
+
+        Returns
+        -------
+        int
+            The number of tracks in the playlist
+        """
         return len(self.tracks)
+
+    def get_total_duration(self) -> int:
+        """
+        Get the total duration of all the tracks in the playlist.
+
+        Returns
+        -------
+        int
+            the total duration duration of all the tracks in the playlist
+        """
+        # return sum([t.duration for t in self.tracks])
+        pass
 
 class Track(Base):
     __tablename__ = "track"
