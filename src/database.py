@@ -6,11 +6,14 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boo
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+# Database file path
 FILE_PATH = os.path.abspath(os.path.join("data", "appdata.db"))
 
+# Creating the database engine and a base class for table creation
 engine = db.create_engine(f"sqlite:///{FILE_PATH}")
 Base = declarative_base()
 
+# A table to store playlist-track relationships (many-to-many)
 playlist_track = Table(
     "playlist_track",
     Base.metadata,
@@ -49,7 +52,8 @@ class Track(Base):
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
-    def __init__(self, title: str, artist: str, playlists: list[Playlist], path: str=None, stream_url: str=None, liked: bool=False):
+    def __init__(self, title: str, artist: str, playlists: list[Playlist], path: str=None, stream_url: str=None,
+        liked: bool=False) -> None:
         self.title = title
         self.artist = artist
         self.playlists = playlists
@@ -66,7 +70,7 @@ class Stream(Base):
     id = Column(Integer, primary_key=True)
     url = Column(String)
 
-    def __init__(self, url: str):
+    def __init__(self, url: str) -> None:
         self.url = url
 
 class PlaylistManager:
@@ -100,14 +104,14 @@ class PlaylistManager:
         self.session.commit()
         return track
 
-    def add_to_liked_songs(self, title: str, artist: str, stream_url: str):
+    def add_to_liked_songs(self, title: str, artist: str, stream_url: str) -> None:
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.add_track_to_playlist(title, artist, stream_url, liked_songs_playlist)
 
-    def commit_session(self):
+    def commit_session(self) -> None:
         self.session.commit()
 
-    def close_session(self):
+    def close_session(self) -> None:
         self.session.close()
 
 def test():
