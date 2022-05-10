@@ -12,6 +12,7 @@ https://stackoverflow.com/questions/49621671/trouble-making-a-custom-title-bar-i
 
 from ctypes.wintypes import BOOL, HWND, LONG
 import ctypes
+import os
 from pathlib import Path
 
 from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
@@ -108,15 +109,15 @@ canvas.create_rectangle(
 # ------------------- Test Code -------------------
 
 def populate(frame):
-    '''Put in some fake data'''
-    for row in range(100):
+    os.chdir("data/tracks")
+    songs = os.listdir()
+    for row, song in enumerate(songs):
         Label(frame, text="%s" % row, width=3, borderwidth="1",
                  relief="solid").grid(row=row, column=0)
-        t="this is the second column for row %s" %row
-        Label(frame, text=t).grid(row=row, column=1)
+        Label(frame, text=song).grid(row=row, column=1)
 
 def onFrameConfigure(canvas):
-    '''Reset the scroll region to encompass the inner frame'''
+    """Reset the scroll region to encompass the inner frame"""
     canvas.configure(scrollregion=canvas.bbox("all"))
 
 def bound_to_mousewheel(event):
@@ -131,12 +132,12 @@ def on_mousewheel(event):
     global scroll_view_canvas
     scroll_view_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
-scroll_view_canvas = Canvas(window, borderwidth=0, background="#ffffff")
+scroll_view_canvas = Canvas(window, borderwidth=0, background="#202020", bd = 0, highlightthickness = 0, relief = "ridge")
 
-frame = Frame(scroll_view_canvas, background="#ffffff")
+frame = Frame(scroll_view_canvas, background="#202020", width=806.0, height=607.0, padx=20.0, pady=20.0)
 vsb = Scrollbar(window, orient="vertical", command=scroll_view_canvas.yview)
 vsb.lift(frame)
-vsb.place(x=1007.0, y=33.0, height=600.0)
+vsb.place(x=1007.0, y=33.0, height=607.0)
 
 scroll_view_canvas.bind('<Enter>', bound_to_mousewheel)
 scroll_view_canvas.bind('<Leave>', unbound_to_mousewheel)
