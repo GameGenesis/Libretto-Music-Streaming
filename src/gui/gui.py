@@ -138,7 +138,7 @@ def play_track(title, artist, url):
     music_thread.daemon = True 
     music_thread.start()
 
-def populate_tracks(event, playlist_title, tracks):
+def populate_tracks(event, playlist, tracks):
     global scroll_view_canvas
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("playlist_element")
@@ -152,13 +152,14 @@ def populate_tracks(event, playlist_title, tracks):
         outline="")
 
     playlist_image = PhotoImage(
-        file=relative_to_assets("image_27.png" if playlist_title == "Liked Songs" else "image_26.png"))
+        file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
     scroll_view_canvas.create_image(
         326.0+82,
         135.99999999999994,
         image=playlist_image
     )
 
+    playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
     scroll_view_canvas.create_text(
         432.0+82,
         85.0,
@@ -177,11 +178,21 @@ def populate_tracks(event, playlist_title, tracks):
         font=("RobotoRoman Light", 14)
     )
 
+    total_duration = playlist.get_total_duration()
+    hours = total_duration // 3600
+    mins = (total_duration - (hours * 3600)) // 60
+    secs = (total_duration - (hours * 3600) - (mins * 60))
+
+    playlist_length = playlist.get_length()
+    formatted_length = f"{playlist_length} songs" if playlist_length > 1 else f"{playlist_length} song"
+    formatted_time = f"{hours} hr {mins} min" if hours > 0 else f"{mins} min {secs} sec"
+    playlist_information = f"{formatted_length}, {formatted_time}"
+
     scroll_view_canvas.create_text(
         433.0+82,
         165.0,
         anchor="nw",
-        text="5 Songs, 42 min",
+        text=playlist_information,
         fill="#BBBBBB",
         font=("RobotoRoman Light", 12)
     )
@@ -328,7 +339,7 @@ def populate_tracks(event, playlist_title, tracks):
             font=("RobotoRoman Light", 11)
         )
 
-        track_duration = time.strftime('%M:%S', time.gmtime(track.duration))
+        track_duration = time.strftime('%#M:%S', time.gmtime(track.duration))
         scroll_view_canvas.create_text(
             947.0+82,
             314.99999999999994 + (row * 52),
@@ -399,7 +410,7 @@ def populate(frame):
             scroll_view_canvas.images.append(playlist_image)
             for obj in objs:
                 scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
-                    lambda event, title=playlist_title, tracks=playlist.tracks: populate_tracks(event, title, tracks))
+                    lambda event, playlist=playlist, tracks=playlist.tracks: populate_tracks(event, playlist, tracks))
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""

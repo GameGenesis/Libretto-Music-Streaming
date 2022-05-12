@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import time
 
 import sqlalchemy as db
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean
@@ -70,8 +71,7 @@ class Playlist(Base):
         int
             the total duration duration of all the tracks in the playlist
         """
-        # return sum([t.duration for t in self.tracks])
-        pass
+        return sum([t.duration for t in self.tracks])
 
 class Track(Base):
     __tablename__ = "track"
@@ -167,6 +167,7 @@ def test():
     for playlist in playlists:
         print(playlist.title)
         print(f"Number of Tracks: {playlist.get_length()}")
+        print(f"Total duration: {time.strftime('%M:%S', time.gmtime(playlist.get_total_duration()))}")
         for i, track in enumerate(playlist.tracks):
             print(f"{i+1}. Track: {track.title}")
             print(f"{i+1}. Url/Path: {track.stream.url if track.stream else track.path}")
