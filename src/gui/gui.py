@@ -138,30 +138,271 @@ def play_track(title, artist, url):
     music_thread.start()
 
 def populate_tracks(event, tracks):
-    global widgets, scroll_view_canvas
+    global scroll_view_canvas
     scroll_view_canvas.delete("playlist_element")
-    for widget in widgets:
-        widget.destroy()
 
-    for row, track in enumerate(tracks):
-        button = Button(
-            frame,
-            text=track.title,
-            borderwidth=0,
-            relief="flat",
-            command=lambda t=track.title, a=track.artist, u=track.stream.url: play_track(t, a, u)
-            )
-        button.grid(row=row, column=2)
-        widgets.append(button)
+    # for row, track in enumerate(tracks):
+    scroll_view_canvas.create_rectangle(
+        218.0+82,
+        32.99999999999994,
+        1024.0+82,
+        240.99999999999994,
+        fill="#292929",
+        outline="")
+
+    playlist_image = PhotoImage(
+        file=relative_to_assets("image_26.png"))
+    image_25 = scroll_view_canvas.create_image(
+        326.0+82,
+        135.99999999999994,
+        image=playlist_image
+    )
+
+    scroll_view_canvas.create_text(
+        432.0+82,
+        76.99999999999994,
+        anchor="nw",
+        text="Liked Songs",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 36 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        433.0+82,
+        115.99999999999994,
+        anchor="nw",
+        text="Ryan",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 20 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        433.0+82,
+        155.99999999999994,
+        anchor="nw",
+        text="5 Songs, 42 min",
+        fill="#BBBBBB",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    play_image = PhotoImage(
+        file=relative_to_assets("image_32.png"))
+    image_26 = scroll_view_canvas.create_image(
+        910.0+82,
+        143.99999999999994,
+        image=play_image
+    )
+
+    pause_image = PhotoImage(
+        file=relative_to_assets("image_33.png"))
+    image_27 = scroll_view_canvas.create_image(
+        910.0+82,
+        143.99999999999994,
+        image=pause_image
+    )
+
+    shuffle_image = PhotoImage(
+        file=relative_to_assets("image_34.png"))
+    image_28 = scroll_view_canvas.create_image(
+        960.0+82,
+        143.99999999999994,
+        image=shuffle_image
+    )
+
+    scroll_view_canvas.create_text(
+        270.0+82,
+        265.99999999999994,
+        anchor="nw",
+        text="#",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        331.0+82,
+        265.99999999999994,
+        anchor="nw",
+        text="Title",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        496.0+82,
+        265.99999999999994,
+        anchor="nw",
+        text="Artist",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        645.0+82,
+        265.99999999999994,
+        anchor="nw",
+        text="Album",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        791.0+82,
+        265.99999999999994,
+        anchor="nw",
+        text="Date Added",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    duration_image = PhotoImage(
+        file=relative_to_assets("image_29.png"))
+    image_29 = scroll_view_canvas.create_image(
+        948.0+82,
+        273.99999999999994,
+        image=duration_image
+    )
+
+    scroll_view_canvas.create_rectangle(
+        246.0+82,
+        292.99999999999994,
+        996.0+82,
+        293.99999999999994,
+        fill="#5B5B5B",
+        outline="")
+
+    track_frame_image = PhotoImage(
+        file=relative_to_assets("image_30.png"))
+    image_30 = scroll_view_canvas.create_image(
+        621.0+82,
+        324.99999999999994,
+        image=track_frame_image
+    )
+
+    scroll_view_canvas.create_text(
+        331.0+82,
+        314.99999999999994,
+        anchor="nw",
+        text="God's Plan",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        270.0+82,
+        314.99999999999994,
+        anchor="nw",
+        text="1",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        496.0+82,
+        314.99999999999994,
+        anchor="nw",
+        text="Drake",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        645.0+82,
+        314.99999999999994,
+        anchor="nw",
+        text="Scorpion",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        791.0+82,
+        315.99999999999994,
+        anchor="nw",
+        text="2018-12-04",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 14 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        931.0+82,
+        314.99999999999994,
+        anchor="nw",
+        text="3:48",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 14 * -1)
+    )
+
+    image_31 = scroll_view_canvas.create_image(
+        621.0+82,
+        377.99999999999994,
+        image=track_frame_image
+    )
+
+    scroll_view_canvas.create_text(
+        331.0+82,
+        367.99999999999994,
+        anchor="nw",
+        text="Circles",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        270.0+82,
+        367.99999999999994,
+        anchor="nw",
+        text="2",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        496.0+82,
+        367.99999999999994,
+        anchor="nw",
+        text="Post Malone",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        645.0+82,
+        367.99999999999994,
+        anchor="nw",
+        text="Hollywood's B..",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        791.0+82,
+        368.99999999999994,
+        anchor="nw",
+        text="2018-12-09",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 14 * -1)
+    )
+
+    scroll_view_canvas.create_text(
+        931.0+82,
+        367.99999999999994,
+        anchor="nw",
+        text="2:31",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 14 * -1)
+    )
+    scroll_view_canvas.images.append(playlist_image)
+    scroll_view_canvas.images.append(play_image)
+    scroll_view_canvas.images.append(pause_image)
+    scroll_view_canvas.images.append(shuffle_image)
+    scroll_view_canvas.images.append(duration_image)
+    scroll_view_canvas.images.append(track_frame_image)
 
 def split(a, n):
     return (a[x:x+n] for x in range(0, len(a), n))
 
 def populate(frame):
-    global widgets, scroll_view_canvas
-    for widgets in frame.winfo_children():
-      widgets.destroy()
-    widgets = []
+    global scroll_view_canvas
     scroll_view_canvas.images = list()
     pm = PlaylistManager()
     playlist_rows = split(pm.session.query(Playlist).all(), 3)
@@ -171,7 +412,7 @@ def populate(frame):
             frame_image = PhotoImage(
                 file=relative_to_assets("image_25.png"))
             objs.append(scroll_view_canvas.create_image(
-                416.0 + (column * 208),
+                418.0 + (column * 208),
                 177.99999999999994 + (row * 260),
                 image=frame_image,
                 tag="playlist_element"
@@ -179,7 +420,7 @@ def populate(frame):
 
             playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
             objs.append(scroll_view_canvas.create_text(
-                350.0 + (column * 208),
+                352.0 + (column * 208),
                 230.99999999999994 + (row * 260),
                 anchor="nw",
                 text=playlist_title,
@@ -189,7 +430,7 @@ def populate(frame):
             ))
 
             objs.append(scroll_view_canvas.create_text(
-                350.0 + (column * 208),
+                352.0 + (column * 208),
                 254.99999999999994 + (row * 260),
                 anchor="nw",
                 text="Ryan",
@@ -201,7 +442,7 @@ def populate(frame):
             playlist_image = PhotoImage(
                 file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
             objs.append(scroll_view_canvas.create_image(
-                416.0 + (column * 208),
+                418.0 + (column * 208),
                 149.99999999999994 + (row * 260),
                 image=playlist_image,
                 tag="playlist_element"
