@@ -188,7 +188,109 @@ scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
 frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
 widgets = []
-populate(frame)
+# populate(frame)
+
+image_image_25 = PhotoImage(
+    file=relative_to_assets("image_25.png"))
+image_25 = scroll_view_canvas.create_image(
+    336.0+80,
+    177.99999999999994,
+    image=image_image_25
+)
+
+image_image_26 = PhotoImage(
+    file=relative_to_assets("image_26.png"))
+image_26 = scroll_view_canvas.create_image(
+    336.0+80,
+    147.99999999999994,
+    image=image_image_26
+)
+
+scroll_view_canvas.create_text(
+    270.0+80,
+    230.99999999999994,
+    anchor="nw",
+    text="Post Malone",
+    fill="#FFFFFF",
+    font=("RobotoRoman Medium", 12, "bold")
+)
+
+scroll_view_canvas.create_text(
+    270.0+80,
+    254.99999999999994,
+    anchor="nw",
+    text="Author",
+    fill="#DDDDDD",
+    font=("RobotoRoman Light", 10)
+)
+
+image_image_27 = PhotoImage(
+    file=relative_to_assets("image_27.png"))
+image_27 = scroll_view_canvas.create_image(
+    544.0+80,
+    177.99999999999994,
+    image=image_image_27
+)
+
+scroll_view_canvas.create_text(
+    478.0+80,
+    230.99999999999994,
+    anchor="nw",
+    text="Favorite Tracks",
+    fill="#FFFFFF",
+    font=("RobotoRoman Medium", 12, "bold")
+)
+
+scroll_view_canvas.create_text(
+    478.0+80,
+    254.99999999999994,
+    anchor="nw",
+    text="Ryan",
+    fill="#DDDDDD",
+    font=("RobotoRoman Light", 10)
+)
+
+image_image_28 = PhotoImage(
+    file=relative_to_assets("image_28.png"))
+image_28 = scroll_view_canvas.create_image(
+    544.0+80,
+    149.99999999999994,
+    image=image_image_28
+)
+
+image_image_29 = PhotoImage(
+    file=relative_to_assets("image_29.png"))
+image_29 = scroll_view_canvas.create_image(
+    752.0+80,
+    177.99999999999994,
+    image=image_image_29
+)
+
+scroll_view_canvas.create_text(
+    686.0+80,
+    230.99999999999994,
+    anchor="nw",
+    text="Favorite Tracks",
+    fill="#FFFFFF",
+    font=("RobotoRoman Medium", 12, "bold")
+)
+
+scroll_view_canvas.create_text(
+    686.0+80,
+    254.99999999999994,
+    anchor="nw",
+    text="Ryan",
+    fill="#DDDDDD",
+    font=("RobotoRoman Light", 10)
+)
+
+image_image_30 = PhotoImage(
+    file=relative_to_assets("image_30.png"))
+image_30 = scroll_view_canvas.create_image(
+    752.0+80,
+    149.99999999999994,
+    image=image_image_30
+)
 
 # -------------------------------------------------
 
