@@ -121,13 +121,15 @@ canvas.create_rectangle(
 music_thread = None
 stream = None
 
-def play_track(url):
-    global music_thread, stream
+def play_track(title, artist, url):
+    global music_thread, stream, canvas, track_title_text, track_artist_text
     if stream:
         stream.stop()
     if music_thread:
         music_thread.join()
 
+    canvas.itemconfig(track_title_text, text=title)
+    canvas.itemconfig(track_artist_text, text=artist)
     stream = Stream(url)
     music_thread = threading.Thread(target=lambda: stream.play(False))
     #make test_loop terminate when the user exits the window
@@ -140,7 +142,13 @@ def populate_tracks(event, tracks):
         widget.destroy()
 
     for row, track in enumerate(tracks):
-        button = Button(frame, text=track.title, borderwidth=0, relief="flat", command=lambda t=track.stream.url: play_track(t))
+        button = Button(
+            frame,
+            text=track.title,
+            borderwidth=0,
+            relief="flat",
+            command=lambda t=track.title, a=track.artist, u=track.stream.url: play_track(t, a, u)
+            )
         button.grid(row=row, column=2)
         widgets.append(button)
 
@@ -399,7 +407,7 @@ image_12 = canvas.create_image(
     image=image_image_12
 )
 
-canvas.create_text(
+track_artist_text = canvas.create_text(
     85.0,
     683.0,
     anchor="nw",
@@ -408,7 +416,7 @@ canvas.create_text(
     font=("RobotoRoman Light", 10)
 )
 
-canvas.create_text(
+track_title_text = canvas.create_text(
     85.0,
     663.0,
     anchor="nw",
