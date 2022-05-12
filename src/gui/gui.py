@@ -23,7 +23,7 @@ from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, Ph
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
+sys.path.insert(0, parentdir)
 
 from database import Playlist, PlaylistManager
 from stream import Stream
@@ -122,7 +122,7 @@ canvas.create_rectangle(
 music_thread = None
 stream = None
 
-def play_track(title, artist, url):
+def play_track(event, title, artist, url):
     global music_thread, stream, canvas, track_title_text, track_artist_text
     if stream:
         stream.stop()
@@ -135,12 +135,13 @@ def play_track(title, artist, url):
     stream = Stream(url)
     music_thread = threading.Thread(target=lambda: stream.play(False))
     #make test_loop terminate when the user exits the window
-    music_thread.daemon = True 
+    music_thread.daemon = True
     music_thread.start()
 
 def populate_tracks(event, playlist, tracks):
     global scroll_view_canvas
     scroll_view_canvas.yview_moveto(0)
+    scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
 
     scroll_view_canvas.create_rectangle(
@@ -149,14 +150,17 @@ def populate_tracks(event, playlist, tracks):
         1024.0+82,
         240.99999999999994,
         fill="#292929",
-        outline="")
+        outline="",
+        tag="track_element"
+        )
 
     playlist_image = PhotoImage(
         file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
     scroll_view_canvas.create_image(
         326.0+82,
         135.99999999999994,
-        image=playlist_image
+        image=playlist_image,
+        tag="track_element"
     )
 
     playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
@@ -166,7 +170,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text=playlist_title,
         fill="#FFFFFF",
-        font=("RobotoRoman Medium", 32, "bold")
+        font=("RobotoRoman Medium", 32, "bold"),
+        tag="track_element"
     )
 
     scroll_view_canvas.create_text(
@@ -175,7 +180,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text="Ryan",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 14)
+        font=("RobotoRoman Light", 14),
+        tag="track_element"
     )
 
     total_duration = playlist.get_total_duration()
@@ -194,7 +200,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text=playlist_information,
         fill="#BBBBBB",
-        font=("RobotoRoman Light", 12)
+        font=("RobotoRoman Light", 12),
+        tag="track_element"
     )
 
     play_image = PhotoImage(
@@ -202,7 +209,8 @@ def populate_tracks(event, playlist, tracks):
     scroll_view_canvas.create_image(
         910.0+82,
         143.99999999999994,
-        image=play_image
+        image=play_image,
+        tag="track_element"
     )
 
     pause_image = PhotoImage(
@@ -210,7 +218,8 @@ def populate_tracks(event, playlist, tracks):
     scroll_view_canvas.create_image(
         910.0+82,
         143.99999999999994,
-        image=pause_image
+        image=pause_image,
+        tag="track_element"
     )
 
     shuffle_image = PhotoImage(
@@ -218,7 +227,8 @@ def populate_tracks(event, playlist, tracks):
     scroll_view_canvas.create_image(
         960.0+82,
         143.99999999999994,
-        image=shuffle_image
+        image=shuffle_image,
+        tag="track_element"
     )
 
     scroll_view_canvas.create_text(
@@ -227,7 +237,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text="#",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 12)
+        font=("RobotoRoman Light", 12),
+        tag="track_element"
     )
 
     scroll_view_canvas.create_text(
@@ -236,7 +247,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text="Title",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 12)
+        font=("RobotoRoman Light", 12),
+        tag="track_element"
     )
 
     scroll_view_canvas.create_text(
@@ -245,7 +257,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text="Artist",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 12)
+        font=("RobotoRoman Light", 12),
+        tag="track_element"
     )
 
     scroll_view_canvas.create_text(
@@ -254,7 +267,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text="Album",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 12)
+        font=("RobotoRoman Light", 12),
+        tag="track_element"
     )
 
     scroll_view_canvas.create_text(
@@ -263,7 +277,8 @@ def populate_tracks(event, playlist, tracks):
         anchor="nw",
         text="Date Added",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 12)
+        font=("RobotoRoman Light", 12),
+        tag="track_element"
     )
 
     duration_image = PhotoImage(
@@ -271,7 +286,8 @@ def populate_tracks(event, playlist, tracks):
     scroll_view_canvas.create_image(
         948.0+82,
         273.99999999999994,
-        image=duration_image
+        image=duration_image,
+        tag="track_element"
     )
 
     scroll_view_canvas.create_rectangle(
@@ -280,75 +296,91 @@ def populate_tracks(event, playlist, tracks):
         996.0+82,
         293.99999999999994,
         fill="#5B5B5B",
-        outline="")
-
-    for row, track in enumerate(tracks):
-        track_frame_image = PhotoImage(
-            file=relative_to_assets("image_30.png"))
-        image_30 = scroll_view_canvas.create_image(
-            621.0+82,
-            324.99999999999994 + (row * 52),
-            image=track_frame_image
+        outline="",
+        tag="track_element"
         )
 
-        scroll_view_canvas.create_text(
+    for row, track in enumerate(tracks):
+        objs = list()
+
+        track_frame_image = PhotoImage(
+            file=relative_to_assets("image_30.png"))
+        objs.append(scroll_view_canvas.create_image(
+            621.0+82,
+            324.99999999999994 + (row * 52),
+            image=track_frame_image,
+            tag="track_element"
+        ))
+
+        objs.append(scroll_view_canvas.create_text(
             270.0+82,
             314.99999999999994 + (row * 52),
             anchor="nw",
             text=str(row+1),
             fill="#FFFFFF",
-            font=("RobotoRoman Medium", 12)
-        )
+            font=("RobotoRoman Medium", 12),
+            tag="track_element"
+        ))
 
         track_title = (track.title[:16] + "..") if len(track.title) > 16 else track.title
-        scroll_view_canvas.create_text(
+        objs.append(scroll_view_canvas.create_text(
             331.0+82,
             314.99999999999994 + (row * 52),
             anchor="nw",
             text=track_title,
             fill="#FFFFFF",
-            font=("RobotoRoman Medium", 12)
-        )
+            font=("RobotoRoman Medium", 12),
+            tag="track_element"
+        ))
 
         track_artist = (track.artist[:14] + "..") if len(track.artist) > 14 else track.artist
-        scroll_view_canvas.create_text(
+        objs.append(scroll_view_canvas.create_text(
             496.0+82,
             314.99999999999994 + (row * 52),
             anchor="nw",
             text=track_artist,
             fill="#FFFFFF",
-            font=("RobotoRoman Medium", 12)
-        )
+            font=("RobotoRoman Medium", 12),
+            tag="track_element"
+        ))
 
         track_album = (track.album[:14] + "..") if len(track.album) > 14 else track.album
-        scroll_view_canvas.create_text(
+        objs.append(scroll_view_canvas.create_text(
             645.0+82,
             314.99999999999994 + (row * 52),
             anchor="nw",
             text=track_album,
             fill="#FFFFFF",
-            font=("RobotoRoman Medium", 12)
-        )
+            font=("RobotoRoman Medium", 12),
+            tag="track_element"
+        ))
 
-        scroll_view_canvas.create_text(
+        objs.append(scroll_view_canvas.create_text(
             791.0+82,
             315.99999999999994 + (row * 52),
             anchor="nw",
             text="2018-12-04",
             fill="#CCCCCC",
-            font=("RobotoRoman Light", 11)
-        )
+            font=("RobotoRoman Light", 11),
+            tag="track_element"
+        ))
 
         track_duration = time.strftime('%#M:%S', time.gmtime(track.duration))
-        scroll_view_canvas.create_text(
+        objs.append(scroll_view_canvas.create_text(
             947.0+82,
             314.99999999999994 + (row * 52),
             anchor="n",
             text=track_duration,
             fill="#CCCCCC",
-            font=("RobotoRoman Light", 11)
-        )
+            font=("RobotoRoman Light", 11),
+            tag="track_element"
+        ))
         scroll_view_canvas.images.append(track_frame_image)
+        for obj in objs:
+            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
+                lambda event, title=track.title, artist=track.artist, url=track.stream.url:
+                play_track(event, title, artist, url)
+                )
 
     scroll_view_canvas.images.append(playlist_image)
     scroll_view_canvas.images.append(play_image)
@@ -359,12 +391,17 @@ def populate_tracks(event, playlist, tracks):
 def split(a, n):
     return (a[x:x+n] for x in range(0, len(a), n))
 
-def populate(frame):
+def populate():
     global scroll_view_canvas
+
+    scroll_view_canvas.delete("track_element")
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.images = list()
+
     pm = PlaylistManager()
+    pm.close_session()
     playlist_rows = split(pm.session.query(Playlist).all(), 3)
+
     for row, playlists in enumerate(playlist_rows):
         for column, playlist in enumerate(playlists):
             objs = list()
@@ -442,7 +479,7 @@ scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
 
 frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
-populate(frame)
+populate()
 
 # -------------------------------------------------
 
@@ -802,7 +839,7 @@ button_6 = Button(
     image=button_image_6,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda f=frame: populate(f),
+    command=lambda: populate(),
     relief="flat"
 )
 button_6.place(

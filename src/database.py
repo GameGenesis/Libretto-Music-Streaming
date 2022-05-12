@@ -158,7 +158,12 @@ def test():
 
     playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "Hollywood's Bleeding", 221, "https://www.youtube.com/watch?v=UceaB4D0jpo")
     playlist_manager.add_to_liked_songs("Circles", "Post Malone", "Hollywood's Bleeding", 167, "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
-    playlist_manager.add_track_to_playlist("Circles", "Post Malone", "Hollywood's Bleeding", 167, "https://www.youtube.com/watch?v=wXhTHyIgQ_U", post_playlist)
+    playlist_manager.add_to_liked_songs("Sunflower", "Post Malone, Swae Lee", "Sunflower", 180, "https://www.youtube.com/watch?v=ApXoWvfEYVU")
+    playlist_manager.add_to_liked_songs("Congratulations", "Post Malone", "Congratulations", 234, "https://www.youtube.com/watch?v=SC4xMk98Pdc")
+    playlist_manager.add_to_liked_songs("Psycho", "Post Malone", "Psycho", 157, "https://www.youtube.com/watch?v=au2n7VVGv_c")
+    playlist_manager.add_to_liked_songs("Better Now", "Post Malone", "Better Now", 167, "https://www.youtube.com/watch?v=UYwF-jdcVjY")
+    playlist_manager.add_to_liked_songs("Wow", "Post Malone", "Wow", 193, "https://www.youtube.com/watch?v=393C3pr2ioY")
+    playlist_manager.add_track_to_playlist("Better Now", "Post Malone", "Better Now", 167, "https://www.youtube.com/watch?v=UYwF-jdcVjY", post_playlist)
 
     playlist_manager.close_session()
 
