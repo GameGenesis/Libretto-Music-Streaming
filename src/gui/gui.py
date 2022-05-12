@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 import sys
 import threading
+import time
 
 from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
 
@@ -139,6 +140,7 @@ def play_track(title, artist, url):
 
 def populate_tracks(event, playlist_title, tracks):
     global scroll_view_canvas
+    scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("playlist_element")
 
     scroll_view_canvas.create_rectangle(
@@ -297,20 +299,22 @@ def populate_tracks(event, playlist_title, tracks):
             font=("RobotoRoman Medium", 12)
         )
 
+        track_artist = (track.artist[:14] + "..") if len(track.artist) > 14 else track.artist
         scroll_view_canvas.create_text(
             496.0+82,
             314.99999999999994 + (row * 52),
             anchor="nw",
-            text=track.artist,
+            text=track_artist,
             fill="#FFFFFF",
             font=("RobotoRoman Medium", 12)
         )
 
+        track_album = (track.album[:14] + "..") if len(track.album) > 14 else track.album
         scroll_view_canvas.create_text(
             645.0+82,
             314.99999999999994 + (row * 52),
             anchor="nw",
-            text=track_title,
+            text=track_album,
             fill="#FFFFFF",
             font=("RobotoRoman Medium", 12)
         )
@@ -324,11 +328,12 @@ def populate_tracks(event, playlist_title, tracks):
             font=("RobotoRoman Light", 11)
         )
 
+        track_duration = time.strftime('%M:%S', time.gmtime(track.duration))
         scroll_view_canvas.create_text(
             947.0+82,
             314.99999999999994 + (row * 52),
             anchor="n",
-            text="3:48",
+            text=track_duration,
             fill="#CCCCCC",
             font=("RobotoRoman Light", 11)
         )
@@ -345,6 +350,7 @@ def split(a, n):
 
 def populate(frame):
     global scroll_view_canvas
+    scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.images = list()
     pm = PlaylistManager()
     playlist_rows = split(pm.session.query(Playlist).all(), 3)
@@ -415,10 +421,6 @@ def on_mousewheel(event):
 scroll_view_canvas = Canvas(window, borderwidth=0, background="#202020", bd = 0, highlightthickness = 0, relief = "ridge")
 
 frame = Frame(scroll_view_canvas, background="#202020", width=806.0, padx=20.0, pady=20.0)
-# vsb = Scrollbar(window, orient="vertical", command=scroll_view_canvas.yview)
-# vsb.lift(frame)
-# vsb.place(x=1007.0, y=33.0, height=607.0)
-# scroll_view_canvas.configure(yscrollcommand=vsb.set)
 
 scroll_view_canvas.bind('<Enter>', bound_to_mousewheel)
 scroll_view_canvas.bind('<Leave>', unbound_to_mousewheel)

@@ -78,6 +78,8 @@ class Track(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     artist = Column(String)
+    album = Column(String)
+    duration = Column(Integer)
     path = Column(String)
     stream_id = Column(Integer, ForeignKey("stream.id"))
     stream = relationship("Stream", backref="track")
@@ -86,10 +88,12 @@ class Track(Base):
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
-    def __init__(self, title: str, artist: str, playlists: list[Playlist], path: str=None, stream_url: str=None,
+    def __init__(self, title: str, artist: str, album: str, duration: int, playlists: list[Playlist], path: str=None, stream_url: str=None,
         liked: bool=False) -> None:
         self.title = title
         self.artist = artist
+        self.album = album
+        self.duration = duration
         self.playlists = playlists
         self.liked = liked
 
@@ -125,10 +129,10 @@ class PlaylistManager:
         self.session.commit()
         return playlist
 
-    def add_track_to_playlist(self, title: str, artist: str, stream_url: str, playlist: Playlist) -> Track:
+    def add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist) -> Track:
         track = self.session.query(Track).filter_by(title=title).first()
         if track == None:
-            track = Track(title=title, artist=artist, playlists=[playlist], stream_url=stream_url)
+            track = Track(title=title, artist=artist, album=album, duration=duration, playlists=[playlist], stream_url=stream_url)
             self.session.add(track)
         else:
             playlists = track.playlists
@@ -138,9 +142,9 @@ class PlaylistManager:
         self.session.commit()
         return track
 
-    def add_to_liked_songs(self, title: str, artist: str, stream_url: str) -> None:
+    def add_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str) -> None:
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
-        self.add_track_to_playlist(title, artist, stream_url, liked_songs_playlist)
+        self.add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist)
 
     def commit_session(self) -> None:
         self.session.commit()
@@ -152,9 +156,9 @@ def test():
     playlist_manager = PlaylistManager()
     post_playlist = playlist_manager.get_or_create_playlist("Post Malone")
 
-    playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "https://www.youtube.com/watch?v=UceaB4D0jpo")
-    playlist_manager.add_to_liked_songs("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
-    playlist_manager.add_track_to_playlist("Circles", "Post Malone", "https://www.youtube.com/watch?v=wXhTHyIgQ_U", post_playlist)
+    playlist_manager.add_to_liked_songs("Rockstar", "Post Malone", "Hollywood's Bleeding", 221, "https://www.youtube.com/watch?v=UceaB4D0jpo")
+    playlist_manager.add_to_liked_songs("Circles", "Post Malone", "Hollywood's Bleeding", 167, "https://www.youtube.com/watch?v=wXhTHyIgQ_U")
+    playlist_manager.add_track_to_playlist("Circles", "Post Malone", "Hollywood's Bleeding", 167, "https://www.youtube.com/watch?v=wXhTHyIgQ_U", post_playlist)
 
     playlist_manager.close_session()
 
