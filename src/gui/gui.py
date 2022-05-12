@@ -138,7 +138,8 @@ def play_track(title, artist, url):
     music_thread.start()
 
 def populate_tracks(event, tracks):
-    global widgets
+    global widgets, scroll_view_canvas
+    scroll_view_canvas.delete("playlist_element")
     for widget in widgets:
         widget.destroy()
 
@@ -158,6 +159,10 @@ def split(a, n):
 
 def populate(frame):
     global widgets, scroll_view_canvas
+    for widgets in frame.winfo_children():
+      widgets.destroy()
+    widgets = []
+    scroll_view_canvas.images = list()
     pm = PlaylistManager()
     playlist_rows = split(pm.session.query(Playlist).all(), 3)
     for row, playlists in enumerate(playlist_rows):
@@ -167,11 +172,12 @@ def populate(frame):
             # Button(frame, text=playlist.title, borderwidth=0, highlightthickness=0,
             #     command=lambda t=playlist.tracks: populate_tracks(t), relief="flat").grid(row=row, column=1)
             frame_image = PhotoImage(
-                file=relative_to_assets("image_27.png"))
+                file=relative_to_assets("image_25.png"))
             objs.append(scroll_view_canvas.create_image(
                 336.0+80 + (column * 208),
                 177.99999999999994 + (row * 260),
-                image=frame_image
+                image=frame_image,
+                tag="playlist_element"
             ))
 
             playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
@@ -181,7 +187,8 @@ def populate(frame):
                 anchor="nw",
                 text=playlist_title,
                 fill="#FFFFFF",
-                font=("RobotoRoman Medium", 11, "bold")
+                font=("RobotoRoman Medium", 11, "bold"),
+                tag="playlist_element"
             ))
 
             objs.append(scroll_view_canvas.create_text(
@@ -190,15 +197,17 @@ def populate(frame):
                 anchor="nw",
                 text="Ryan",
                 fill="#DDDDDD",
-                font=("RobotoRoman Light", 10)
+                font=("RobotoRoman Light", 10),
+                tag="playlist_element"
             ))
 
             playlist_image = PhotoImage(
-                file=relative_to_assets("image_30.png" if playlist.title == "Liked Songs" else "image_28.png"))
+                file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
             objs.append(scroll_view_canvas.create_image(
                 336.0+80 + (column * 208),
                 149.99999999999994 + (row * 260),
-                image=playlist_image
+                image=playlist_image,
+                tag="playlist_element"
             ))
             scroll_view_canvas.images.append(frame_image)
             scroll_view_canvas.images.append(playlist_image)
@@ -239,8 +248,6 @@ scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
 
 frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
-widgets = []
-scroll_view_canvas.images = list()
 populate(frame)
 
 # -------------------------------------------------
@@ -601,7 +608,7 @@ button_6 = Button(
     image=button_image_6,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_6 clicked"),
+    command=lambda f=frame: populate(f),
     relief="flat"
 )
 button_6.place(
