@@ -134,7 +134,7 @@ def play_track(url):
     music_thread.daemon = True 
     music_thread.start()
 
-def populate_tracks(tracks):
+def populate_tracks(event, tracks):
     global widgets
     for widget in widgets:
         widget.destroy()
@@ -144,14 +144,56 @@ def populate_tracks(tracks):
         button.grid(row=row, column=2)
         widgets.append(button)
 
+def split(a, n):
+    return (a[x:x+n] for x in range(0, len(a), n))
+
 def populate(frame):
-    global widgets
+    global widgets, scroll_view_canvas
     pm = PlaylistManager()
-    playlists = pm.session.query(Playlist).all()
-    for row, playlist in enumerate(playlists):
-        Label(frame, text=row, width=3, borderwidth=0, relief="flat").grid(row=row, column=0)
-        Button(frame, text=playlist.title, borderwidth=0, highlightthickness=0,
-            command=lambda t=playlist.tracks: populate_tracks(t), relief="flat").grid(row=row, column=1)
+    playlist_rows = split(pm.session.query(Playlist).all(), 3)
+    for row, playlists in enumerate(playlist_rows):
+        for column, playlist in enumerate(playlists):
+            objs = list()
+            # Label(frame, text=row, width=3, borderwidth=0, relief="flat").grid(row=row, column=0)
+            # Button(frame, text=playlist.title, borderwidth=0, highlightthickness=0,
+            #     command=lambda t=playlist.tracks: populate_tracks(t), relief="flat").grid(row=row, column=1)
+            frame_image = PhotoImage(
+                file=relative_to_assets("image_27.png"))
+            objs.append(scroll_view_canvas.create_image(
+                336.0+80 + (column * 208),
+                177.99999999999994 + (row * 260),
+                image=frame_image
+            ))
+
+            objs.append(scroll_view_canvas.create_text(
+                270.0+80 + (column * 208),
+                230.99999999999994 + (row * 260),
+                anchor="nw",
+                text=playlist.title,
+                fill="#FFFFFF",
+                font=("RobotoRoman Medium", 11, "bold")
+            ))
+
+            objs.append(scroll_view_canvas.create_text(
+                270.0+80 + (column * 208),
+                254.99999999999994 + (row * 260),
+                anchor="nw",
+                text="Ryan",
+                fill="#DDDDDD",
+                font=("RobotoRoman Light", 10)
+            ))
+
+            playlist_image = PhotoImage(
+                file=relative_to_assets("image_30.png" if playlist.title == "Liked Songs" else "image_28.png"))
+            objs.append(scroll_view_canvas.create_image(
+                336.0+80 + (column * 208),
+                149.99999999999994 + (row * 260),
+                image=playlist_image
+            ))
+            scroll_view_canvas.images.append(frame_image)
+            scroll_view_canvas.images.append(playlist_image)
+            for obj in objs:
+                scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, t=playlist.tracks: populate_tracks(event, t))
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
@@ -188,109 +230,8 @@ scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
 frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
 widgets = []
-# populate(frame)
-
-image_image_25 = PhotoImage(
-    file=relative_to_assets("image_25.png"))
-image_25 = scroll_view_canvas.create_image(
-    336.0+80,
-    177.99999999999994,
-    image=image_image_25
-)
-
-image_image_26 = PhotoImage(
-    file=relative_to_assets("image_26.png"))
-image_26 = scroll_view_canvas.create_image(
-    336.0+80,
-    147.99999999999994,
-    image=image_image_26
-)
-
-scroll_view_canvas.create_text(
-    270.0+80,
-    230.99999999999994,
-    anchor="nw",
-    text="Post Malone",
-    fill="#FFFFFF",
-    font=("RobotoRoman Medium", 12, "bold")
-)
-
-scroll_view_canvas.create_text(
-    270.0+80,
-    254.99999999999994,
-    anchor="nw",
-    text="Author",
-    fill="#DDDDDD",
-    font=("RobotoRoman Light", 10)
-)
-
-image_image_27 = PhotoImage(
-    file=relative_to_assets("image_27.png"))
-image_27 = scroll_view_canvas.create_image(
-    544.0+80,
-    177.99999999999994,
-    image=image_image_27
-)
-
-scroll_view_canvas.create_text(
-    478.0+80,
-    230.99999999999994,
-    anchor="nw",
-    text="Favorite Tracks",
-    fill="#FFFFFF",
-    font=("RobotoRoman Medium", 12, "bold")
-)
-
-scroll_view_canvas.create_text(
-    478.0+80,
-    254.99999999999994,
-    anchor="nw",
-    text="Ryan",
-    fill="#DDDDDD",
-    font=("RobotoRoman Light", 10)
-)
-
-image_image_28 = PhotoImage(
-    file=relative_to_assets("image_28.png"))
-image_28 = scroll_view_canvas.create_image(
-    544.0+80,
-    149.99999999999994,
-    image=image_image_28
-)
-
-image_image_29 = PhotoImage(
-    file=relative_to_assets("image_29.png"))
-image_29 = scroll_view_canvas.create_image(
-    752.0+80,
-    177.99999999999994,
-    image=image_image_29
-)
-
-scroll_view_canvas.create_text(
-    686.0+80,
-    230.99999999999994,
-    anchor="nw",
-    text="Favorite Tracks",
-    fill="#FFFFFF",
-    font=("RobotoRoman Medium", 12, "bold")
-)
-
-scroll_view_canvas.create_text(
-    686.0+80,
-    254.99999999999994,
-    anchor="nw",
-    text="Ryan",
-    fill="#DDDDDD",
-    font=("RobotoRoman Light", 10)
-)
-
-image_image_30 = PhotoImage(
-    file=relative_to_assets("image_30.png"))
-image_30 = scroll_view_canvas.create_image(
-    752.0+80,
-    149.99999999999994,
-    image=image_image_30
-)
+scroll_view_canvas.images = list()
+populate(frame)
 
 # -------------------------------------------------
 
@@ -459,21 +400,21 @@ image_12 = canvas.create_image(
 )
 
 canvas.create_text(
-    90.0,
-    680.0,
+    85.0,
+    683.0,
     anchor="nw",
     text="Post Malone",
-    fill="#FFFFFF",
-    font=("RobotoRoman Light", 14 * -1)
+    fill="#DDDDDD",
+    font=("RobotoRoman Light", 10)
 )
 
 canvas.create_text(
-    90.0,
-    660.0,
+    85.0,
+    663.0,
     anchor="nw",
     text="Congratulations",
     fill="#FFFFFF",
-    font=("RobotoRoman Medium", 16 * -1)
+    font=("RobotoRoman Medium", 12, "bold")
 )
 
 image_image_13 = PhotoImage(
