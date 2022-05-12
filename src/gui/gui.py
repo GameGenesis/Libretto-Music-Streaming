@@ -137,22 +137,22 @@ def play_track(title, artist, url):
     music_thread.daemon = True 
     music_thread.start()
 
-def populate_tracks(event, tracks):
+def populate_tracks(event, playlist_title, tracks):
     global scroll_view_canvas
     scroll_view_canvas.delete("playlist_element")
 
     # for row, track in enumerate(tracks):
     scroll_view_canvas.create_rectangle(
         218.0+82,
-        32.99999999999994,
+        33.0,
         1024.0+82,
         240.99999999999994,
         fill="#292929",
         outline="")
 
     playlist_image = PhotoImage(
-        file=relative_to_assets("image_26.png"))
-    image_25 = scroll_view_canvas.create_image(
+        file=relative_to_assets("image_27.png" if playlist_title == "Liked Songs" else "image_26.png"))
+    scroll_view_canvas.create_image(
         326.0+82,
         135.99999999999994,
         image=playlist_image
@@ -160,34 +160,34 @@ def populate_tracks(event, tracks):
 
     scroll_view_canvas.create_text(
         432.0+82,
-        76.99999999999994,
+        85.0,
         anchor="nw",
-        text="Liked Songs",
+        text=playlist_title,
         fill="#FFFFFF",
-        font=("RobotoRoman Medium", 36 * -1)
+        font=("RobotoRoman Medium", 32, "bold")
     )
 
     scroll_view_canvas.create_text(
         433.0+82,
-        115.99999999999994,
+        135.0,
         anchor="nw",
         text="Ryan",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 20 * -1)
+        font=("RobotoRoman Light", 14)
     )
 
     scroll_view_canvas.create_text(
         433.0+82,
-        155.99999999999994,
+        165.0,
         anchor="nw",
         text="5 Songs, 42 min",
         fill="#BBBBBB",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
     play_image = PhotoImage(
         file=relative_to_assets("image_32.png"))
-    image_26 = scroll_view_canvas.create_image(
+    scroll_view_canvas.create_image(
         910.0+82,
         143.99999999999994,
         image=play_image
@@ -195,7 +195,7 @@ def populate_tracks(event, tracks):
 
     pause_image = PhotoImage(
         file=relative_to_assets("image_33.png"))
-    image_27 = scroll_view_canvas.create_image(
+    scroll_view_canvas.create_image(
         910.0+82,
         143.99999999999994,
         image=pause_image
@@ -203,7 +203,7 @@ def populate_tracks(event, tracks):
 
     shuffle_image = PhotoImage(
         file=relative_to_assets("image_34.png"))
-    image_28 = scroll_view_canvas.create_image(
+    scroll_view_canvas.create_image(
         960.0+82,
         143.99999999999994,
         image=shuffle_image
@@ -215,7 +215,7 @@ def populate_tracks(event, tracks):
         anchor="nw",
         text="#",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
     scroll_view_canvas.create_text(
@@ -224,7 +224,7 @@ def populate_tracks(event, tracks):
         anchor="nw",
         text="Title",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
     scroll_view_canvas.create_text(
@@ -233,7 +233,7 @@ def populate_tracks(event, tracks):
         anchor="nw",
         text="Artist",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
     scroll_view_canvas.create_text(
@@ -242,7 +242,7 @@ def populate_tracks(event, tracks):
         anchor="nw",
         text="Album",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
     scroll_view_canvas.create_text(
@@ -251,12 +251,12 @@ def populate_tracks(event, tracks):
         anchor="nw",
         text="Date Added",
         fill="#FFFFFF",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
     duration_image = PhotoImage(
         file=relative_to_assets("image_29.png"))
-    image_29 = scroll_view_canvas.create_image(
+    scroll_view_canvas.create_image(
         948.0+82,
         273.99999999999994,
         image=duration_image
@@ -270,133 +270,73 @@ def populate_tracks(event, tracks):
         fill="#5B5B5B",
         outline="")
 
-    track_frame_image = PhotoImage(
-        file=relative_to_assets("image_30.png"))
-    image_30 = scroll_view_canvas.create_image(
-        621.0+82,
-        324.99999999999994,
-        image=track_frame_image
-    )
+    # track_frame_image = PhotoImage(
+    #     file=relative_to_assets("image_30.png"))
+    # image_30 = scroll_view_canvas.create_image(
+    #     621.0+82,
+    #     324.99999999999994,
+    #     image=track_frame_image
+    # )
 
-    scroll_view_canvas.create_text(
-        331.0+82,
-        314.99999999999994,
-        anchor="nw",
-        text="God's Plan",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
+    # scroll_view_canvas.create_text(
+    #     331.0+82,
+    #     314.99999999999994,
+    #     anchor="nw",
+    #     text="God's Plan",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 16 * -1)
+    # )
 
-    scroll_view_canvas.create_text(
-        270.0+82,
-        314.99999999999994,
-        anchor="nw",
-        text="1",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
+    # scroll_view_canvas.create_text(
+    #     270.0+82,
+    #     314.99999999999994,
+    #     anchor="nw",
+    #     text="1",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 16 * -1)
+    # )
 
-    scroll_view_canvas.create_text(
-        496.0+82,
-        314.99999999999994,
-        anchor="nw",
-        text="Drake",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
+    # scroll_view_canvas.create_text(
+    #     496.0+82,
+    #     314.99999999999994,
+    #     anchor="nw",
+    #     text="Drake",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 16 * -1)
+    # )
 
-    scroll_view_canvas.create_text(
-        645.0+82,
-        314.99999999999994,
-        anchor="nw",
-        text="Scorpion",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
+    # scroll_view_canvas.create_text(
+    #     645.0+82,
+    #     314.99999999999994,
+    #     anchor="nw",
+    #     text="Scorpion",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 16 * -1)
+    # )
 
-    scroll_view_canvas.create_text(
-        791.0+82,
-        315.99999999999994,
-        anchor="nw",
-        text="2018-12-04",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 14 * -1)
-    )
+    # scroll_view_canvas.create_text(
+    #     791.0+82,
+    #     315.99999999999994,
+    #     anchor="nw",
+    #     text="2018-12-04",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Light", 14 * -1)
+    # )
 
-    scroll_view_canvas.create_text(
-        931.0+82,
-        314.99999999999994,
-        anchor="nw",
-        text="3:48",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 14 * -1)
-    )
-
-    image_31 = scroll_view_canvas.create_image(
-        621.0+82,
-        377.99999999999994,
-        image=track_frame_image
-    )
-
-    scroll_view_canvas.create_text(
-        331.0+82,
-        367.99999999999994,
-        anchor="nw",
-        text="Circles",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
-
-    scroll_view_canvas.create_text(
-        270.0+82,
-        367.99999999999994,
-        anchor="nw",
-        text="2",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
-
-    scroll_view_canvas.create_text(
-        496.0+82,
-        367.99999999999994,
-        anchor="nw",
-        text="Post Malone",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
-
-    scroll_view_canvas.create_text(
-        645.0+82,
-        367.99999999999994,
-        anchor="nw",
-        text="Hollywood's B..",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
-
-    scroll_view_canvas.create_text(
-        791.0+82,
-        368.99999999999994,
-        anchor="nw",
-        text="2018-12-09",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 14 * -1)
-    )
-
-    scroll_view_canvas.create_text(
-        931.0+82,
-        367.99999999999994,
-        anchor="nw",
-        text="2:31",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 14 * -1)
-    )
+    # scroll_view_canvas.create_text(
+    #     931.0+82,
+    #     314.99999999999994,
+    #     anchor="nw",
+    #     text="3:48",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Light", 14 * -1)
+    # )
     scroll_view_canvas.images.append(playlist_image)
     scroll_view_canvas.images.append(play_image)
     scroll_view_canvas.images.append(pause_image)
     scroll_view_canvas.images.append(shuffle_image)
     scroll_view_canvas.images.append(duration_image)
-    scroll_view_canvas.images.append(track_frame_image)
+    # scroll_view_canvas.images.append(track_frame_image)
 
 def split(a, n):
     return (a[x:x+n] for x in range(0, len(a), n))
@@ -450,7 +390,8 @@ def populate(frame):
             scroll_view_canvas.images.append(frame_image)
             scroll_view_canvas.images.append(playlist_image)
             for obj in objs:
-                scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, t=playlist.tracks: populate_tracks(event, t))
+                scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
+                    lambda event, title=playlist_title, tracks=playlist.tracks: populate_tracks(event, title, tracks))
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
