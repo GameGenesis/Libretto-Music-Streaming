@@ -168,13 +168,10 @@ def populate(frame):
     for row, playlists in enumerate(playlist_rows):
         for column, playlist in enumerate(playlists):
             objs = list()
-            # Label(frame, text=row, width=3, borderwidth=0, relief="flat").grid(row=row, column=0)
-            # Button(frame, text=playlist.title, borderwidth=0, highlightthickness=0,
-            #     command=lambda t=playlist.tracks: populate_tracks(t), relief="flat").grid(row=row, column=1)
             frame_image = PhotoImage(
                 file=relative_to_assets("image_25.png"))
             objs.append(scroll_view_canvas.create_image(
-                336.0+80 + (column * 208),
+                416.0 + (column * 208),
                 177.99999999999994 + (row * 260),
                 image=frame_image,
                 tag="playlist_element"
@@ -182,7 +179,7 @@ def populate(frame):
 
             playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
             objs.append(scroll_view_canvas.create_text(
-                270.0+80 + (column * 208),
+                350.0 + (column * 208),
                 230.99999999999994 + (row * 260),
                 anchor="nw",
                 text=playlist_title,
@@ -192,7 +189,7 @@ def populate(frame):
             ))
 
             objs.append(scroll_view_canvas.create_text(
-                270.0+80 + (column * 208),
+                350.0 + (column * 208),
                 254.99999999999994 + (row * 260),
                 anchor="nw",
                 text="Ryan",
@@ -204,7 +201,7 @@ def populate(frame):
             playlist_image = PhotoImage(
                 file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
             objs.append(scroll_view_canvas.create_image(
-                336.0+80 + (column * 208),
+                416.0 + (column * 208),
                 149.99999999999994 + (row * 260),
                 image=playlist_image,
                 tag="playlist_element"
@@ -242,7 +239,6 @@ frame = Frame(scroll_view_canvas, background="#202020", width=806.0, padx=20.0, 
 scroll_view_canvas.bind('<Enter>', bound_to_mousewheel)
 scroll_view_canvas.bind('<Leave>', unbound_to_mousewheel)
 
-scroll_view_canvas.configure(yscrollcommand=vsb.set)
 
 scroll_view_canvas.place(x=218.0, y=33.0, width=806.0, height=607.0)
 scroll_view_canvas.create_window((300,33), window=frame, anchor="nw")
