@@ -128,6 +128,7 @@ def play_track(title, artist, url):
     if music_thread:
         music_thread.join()
 
+    title = (title[:14] + "..") if len(title) > 14 else title
     canvas.itemconfig(track_title_text, text=title)
     canvas.itemconfig(track_artist_text, text=artist)
     stream = Stream(url)
@@ -173,11 +174,12 @@ def populate(frame):
                 image=frame_image
             ))
 
+            playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
             objs.append(scroll_view_canvas.create_text(
                 270.0+80 + (column * 208),
                 230.99999999999994 + (row * 260),
                 anchor="nw",
-                text=playlist.title,
+                text=playlist_title,
                 fill="#FFFFFF",
                 font=("RobotoRoman Medium", 11, "bold")
             ))
