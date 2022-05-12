@@ -141,7 +141,6 @@ def populate_tracks(event, playlist_title, tracks):
     global scroll_view_canvas
     scroll_view_canvas.delete("playlist_element")
 
-    # for row, track in enumerate(tracks):
     scroll_view_canvas.create_rectangle(
         218.0+82,
         33.0,
@@ -270,73 +269,76 @@ def populate_tracks(event, playlist_title, tracks):
         fill="#5B5B5B",
         outline="")
 
-    # track_frame_image = PhotoImage(
-    #     file=relative_to_assets("image_30.png"))
-    # image_30 = scroll_view_canvas.create_image(
-    #     621.0+82,
-    #     324.99999999999994,
-    #     image=track_frame_image
-    # )
+    for row, track in enumerate(tracks):
+        track_frame_image = PhotoImage(
+            file=relative_to_assets("image_30.png"))
+        image_30 = scroll_view_canvas.create_image(
+            621.0+82,
+            324.99999999999994 + (row * 52),
+            image=track_frame_image
+        )
 
-    # scroll_view_canvas.create_text(
-    #     331.0+82,
-    #     314.99999999999994,
-    #     anchor="nw",
-    #     text="God's Plan",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Medium", 16 * -1)
-    # )
+        scroll_view_canvas.create_text(
+            270.0+82,
+            314.99999999999994 + (row * 52),
+            anchor="nw",
+            text=str(row+1),
+            fill="#FFFFFF",
+            font=("RobotoRoman Medium", 12)
+        )
 
-    # scroll_view_canvas.create_text(
-    #     270.0+82,
-    #     314.99999999999994,
-    #     anchor="nw",
-    #     text="1",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Medium", 16 * -1)
-    # )
+        track_title = (track.title[:16] + "..") if len(track.title) > 16 else track.title
+        scroll_view_canvas.create_text(
+            331.0+82,
+            314.99999999999994 + (row * 52),
+            anchor="nw",
+            text=track_title,
+            fill="#FFFFFF",
+            font=("RobotoRoman Medium", 12)
+        )
 
-    # scroll_view_canvas.create_text(
-    #     496.0+82,
-    #     314.99999999999994,
-    #     anchor="nw",
-    #     text="Drake",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Medium", 16 * -1)
-    # )
+        scroll_view_canvas.create_text(
+            496.0+82,
+            314.99999999999994 + (row * 52),
+            anchor="nw",
+            text=track.artist,
+            fill="#FFFFFF",
+            font=("RobotoRoman Medium", 12)
+        )
 
-    # scroll_view_canvas.create_text(
-    #     645.0+82,
-    #     314.99999999999994,
-    #     anchor="nw",
-    #     text="Scorpion",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Medium", 16 * -1)
-    # )
+        scroll_view_canvas.create_text(
+            645.0+82,
+            314.99999999999994 + (row * 52),
+            anchor="nw",
+            text=track_title,
+            fill="#FFFFFF",
+            font=("RobotoRoman Medium", 12)
+        )
 
-    # scroll_view_canvas.create_text(
-    #     791.0+82,
-    #     315.99999999999994,
-    #     anchor="nw",
-    #     text="2018-12-04",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Light", 14 * -1)
-    # )
+        scroll_view_canvas.create_text(
+            791.0+82,
+            315.99999999999994 + (row * 52),
+            anchor="nw",
+            text="2018-12-04",
+            fill="#CCCCCC",
+            font=("RobotoRoman Light", 11)
+        )
 
-    # scroll_view_canvas.create_text(
-    #     931.0+82,
-    #     314.99999999999994,
-    #     anchor="nw",
-    #     text="3:48",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Light", 14 * -1)
-    # )
+        scroll_view_canvas.create_text(
+            947.0+82,
+            314.99999999999994 + (row * 52),
+            anchor="n",
+            text="3:48",
+            fill="#CCCCCC",
+            font=("RobotoRoman Light", 11)
+        )
+        scroll_view_canvas.images.append(track_frame_image)
+
     scroll_view_canvas.images.append(playlist_image)
     scroll_view_canvas.images.append(play_image)
     scroll_view_canvas.images.append(pause_image)
     scroll_view_canvas.images.append(shuffle_image)
     scroll_view_canvas.images.append(duration_image)
-    # scroll_view_canvas.images.append(track_frame_image)
 
 def split(a, n):
     return (a[x:x+n] for x in range(0, len(a), n))
