@@ -37,6 +37,7 @@ class Stream:
             Otherwise, extracts the track title from the website url or original source
         """
         self.streams = []
+        self.player = None
         if not streams_override:
             self.url = url
             # Get streams from url and if available, the pafy youtube stream
@@ -355,10 +356,14 @@ class Stream:
         # Return the added stream index
         return index
 
-    def play(self) -> None:
+    def stop(self) -> None:
+        if self.player:
+            self.player.stop()
+
+    def play(self, continuous_play: bool=True) -> None:
         self.play_default_stream()
 
-    def play_default_stream(self) -> None:
+    def play_default_stream(self, continuous_play: bool=True) -> None:
         """Play the default stream using the VLC media player"""
         # Return if there is no default stream
         if not self.default_stream:
@@ -392,6 +397,9 @@ class Stream:
 
         # Record the previously playing track
         previously_playing = None
+
+        if not continuous_play:
+            return
 
         # While the stream is still playing
         # Alternatively, use "self.player.get_state() != vlc.State.Ended" without the prior wait while
