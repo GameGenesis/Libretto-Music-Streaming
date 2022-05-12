@@ -234,9 +234,10 @@ def on_mousewheel(event):
 scroll_view_canvas = Canvas(window, borderwidth=0, background="#202020", bd = 0, highlightthickness = 0, relief = "ridge")
 
 frame = Frame(scroll_view_canvas, background="#202020", width=806.0, padx=20.0, pady=20.0)
-vsb = Scrollbar(window, orient="vertical", command=scroll_view_canvas.yview)
-vsb.lift(frame)
-vsb.place(x=1007.0, y=33.0, height=607.0)
+# vsb = Scrollbar(window, orient="vertical", command=scroll_view_canvas.yview)
+# vsb.lift(frame)
+# vsb.place(x=1007.0, y=33.0, height=607.0)
+# scroll_view_canvas.configure(yscrollcommand=vsb.set)
 
 scroll_view_canvas.bind('<Enter>', bound_to_mousewheel)
 scroll_view_canvas.bind('<Leave>', unbound_to_mousewheel)
@@ -293,7 +294,7 @@ title_bar_frame = canvas.create_rectangle(
     0.0,
     1024.0,
     33.0,
-    fill="#202020",
+    fill="#303030",
     outline=""
 )
 
