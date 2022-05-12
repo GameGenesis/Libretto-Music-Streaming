@@ -16,6 +16,7 @@ import inspect
 import os
 from pathlib import Path
 import sys
+import threading
 
 from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
 
@@ -24,6 +25,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir) 
 
 from database import Playlist, PlaylistManager
+from stream import Stream
 
 HIGH_RES = False
 
@@ -116,24 +118,40 @@ canvas.create_rectangle(
 
 # ------------------- Test Code -------------------
 
-def populate_tracks(song):
+music_thread = None
+stream = None
+
+def play_track(url):
+    global music_thread, stream
+    if stream:
+        stream.stop()
+    if music_thread:
+        music_thread.join()
+
+    stream = Stream(url)
+    music_thread = threading.Thread(target=lambda: stream.play(False))
+    #make test_loop terminate when the user exits the window
+    music_thread.daemon = True 
+    music_thread.start()
+
+def populate_tracks(tracks):
     global widgets
     for widget in widgets:
         widget.destroy()
 
-    for row, track in enumerate(song.tracks):
-        label = Label(frame, text=track.title, borderwidth="1", relief="solid")
-        label.grid(row=row, column=2)
-        widgets.append(label)
+    for row, track in enumerate(tracks):
+        button = Button(frame, text=track.title, borderwidth=0, relief="flat", command=lambda t=track.stream.url: play_track(t))
+        button.grid(row=row, column=2)
+        widgets.append(button)
 
 def populate(frame):
     global widgets
     pm = PlaylistManager()
-    songs = pm.session.query(Playlist).all()
-    for row, song in enumerate(songs):
-        Label(frame, text=row, width=3, borderwidth="1", relief="solid").grid(row=row, column=0)
-        Button(frame, text=song.title, borderwidth=0, highlightthickness=0,
-            command=lambda s=song: populate_tracks(s), relief="flat").grid(row=row, column=1)
+    playlists = pm.session.query(Playlist).all()
+    for row, playlist in enumerate(playlists):
+        Label(frame, text=row, width=3, borderwidth=0, relief="flat").grid(row=row, column=0)
+        Button(frame, text=playlist.title, borderwidth=0, highlightthickness=0,
+            command=lambda t=playlist.tracks: populate_tracks(t), relief="flat").grid(row=row, column=1)
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
@@ -148,6 +166,7 @@ def unbound_to_mousewheel(event):
     scroll_view_canvas.unbind_all("<MouseWheel>")
 
 def on_mousewheel(event):
+    # This code was modified using this source: https://stackoverflow.com/a/37861801
     global scroll_view_canvas
     scroll_view_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
@@ -206,7 +225,7 @@ def stop_move(event):
 def do_move(event):
     global x, y
 
-    if x is not None and y is not None:
+    if x and y:
         window.geometry(f'+{event.x_root - x}+{event.y_root - y}')
 
 title_bar_frame = canvas.create_rectangle(
