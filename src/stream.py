@@ -50,10 +50,20 @@ class Stream:
                 # Get stream title and remove white spaces and special/escape characters
                 self.title = soup.title.text.replace("|", "").split()
                 self.title = " ".join(self.title)
+                self.album = self.title
+                self.artist = None
+                self.duration = None
             else:
                 yt = YouTube(self.url)
-                self.title = yt.title
-                self.artist = yt.author
+                self.title = yt.metadata[0].get("Song")
+                if not self.title:
+                    self.title = yt.title
+                self.artist = yt.metadata[0].get("Artist")
+                if not self.artist:
+                    self.title = yt.author
+                self.album = yt.metadata[0].get("Album")
+                if not self.album:
+                    self.album = self.title
                 self.duration = yt.length
         else:
             # Assign streams if streams are valid
@@ -534,7 +544,7 @@ class Stream:
     def add_to_playlist(self, playlist_name: str) -> None:
         playlist_manager = PlaylistManager()
         playlist = playlist_manager.get_or_create_playlist(playlist_name)
-        track = playlist_manager.add_track_to_playlist(self.title, self.artist, self.url, playlist)
+        track = playlist_manager.add_track_to_playlist(self.title, self.artist, self.album, self.duration, self.url, playlist)
 
         if playlist.downloaded:
             path = self.download_stream()
