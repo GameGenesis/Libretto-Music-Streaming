@@ -51,17 +51,17 @@ class Stream:
                 self.title = soup.title.text.replace("|", "").split()
                 self.title = " ".join(self.title)
                 self.album = self.title
-                self.artist = None
-                self.duration = None
+                self.artist = "Unknown"
+                self.duration = self.get_stream_duration(self.default_stream)
             else:
                 yt = YouTube(self.url)
-                self.title = yt.metadata[0].get("Song")
+                self.title = yt.metadata[0].get("Song") if yt.metadata[0] else None
                 if not self.title:
                     self.title = yt.title
-                self.artist = yt.metadata[0].get("Artist")
+                self.artist = yt.metadata[0].get("Artist") if yt.metadata[0] else None
                 if not self.artist:
                     self.title = yt.author
-                self.album = yt.metadata[0].get("Album")
+                self.album = yt.metadata[0].get("Album") if yt.metadata[0] else None
                 if not self.album:
                     self.album = self.title
                 self.duration = yt.length
@@ -232,6 +232,34 @@ class Stream:
         return streams, youtube_streams
 
     @staticmethod
+    def get_stream_duration(stream_url: str):
+        instance = vlc.Instance()
+        player = instance.media_player_new()
+        player.audio_set_mute(True)
+
+        is_playlist = Stream.is_stream_playlist(stream_url)
+        if is_playlist:
+            player = instance.media_list_player_new()
+            media = instance.media_list_new([stream_url])
+            player.set_media_list(media)
+        else:
+            media = instance.media_new(stream_url)
+            player.set_media(media)
+
+        player.play()
+
+        # Wait until the vlc player starts playing
+        condition, current_time = True, 0.0
+        while condition:
+            condition, current_time = Stream.wait_while(not player.is_playing(), current_time)
+
+        if not is_playlist:
+            duration = player.get_length() // 1000
+
+        player.stop()
+        return duration
+
+    @staticmethod
     def get_youtube_audio_streams(url: str) -> tuple[list[str], list[Any]]:
         """
         Get streams and stream urls ordered by bitrate in descending order (highest bitrate first).
@@ -254,7 +282,7 @@ class Stream:
         return streams, youtube_streams
 
     @staticmethod # Move to another class/file
-    def wait_while(condition: bool, current_time: float, time_out: float=5, increment_steps: int=100) -> tuple[bool, float]:
+    def wait_while(condition: bool, current_time: float, time_out: float=5.0, increment_steps: int=100) -> tuple[bool, float]:
         """
         Wait while a condition is true until the function times out.
         You need to use this method as a conditional in a while loop
@@ -371,7 +399,7 @@ class Stream:
             self.player.stop()
 
     def play(self, continuous_play: bool=True) -> None:
-        self.play_default_stream()
+        self.play_default_stream(continuous_play)
 
     def play_default_stream(self, continuous_play: bool=True) -> None:
         """Play the default stream using the VLC media player"""
