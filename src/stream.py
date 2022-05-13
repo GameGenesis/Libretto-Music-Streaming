@@ -55,13 +55,14 @@ class Stream:
                 self.duration = self.get_stream_duration(self.default_stream)
             else:
                 yt = YouTube(self.url)
-                self.title = yt.metadata[0].get("Song") if yt.metadata[0] else None
+                metadata = yt.metadata[0] if type(yt.metadata) is list else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
+                self.title = metadata.get("Song") if metadata else None
                 if not self.title:
                     self.title = yt.title
-                self.artist = yt.metadata[0].get("Artist") if yt.metadata[0] else None
+                self.artist = metadata.get("Artist") if metadata else None
                 if not self.artist:
-                    self.title = yt.author
-                self.album = yt.metadata[0].get("Album") if yt.metadata[0] else None
+                    self.artist = yt.author
+                self.album = metadata.get("Album") if metadata else None
                 if not self.album:
                     self.album = self.title
                 self.duration = yt.length
