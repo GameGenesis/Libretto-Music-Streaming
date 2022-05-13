@@ -212,6 +212,7 @@ class Stream:
         # Decoding the page source
         raw_file = response.read().decode("utf-8")
 
+        supported_extensions = {".wma", ".xspf", ".pls", ".m3u8", ".m3u", ".hls", ".mp3", ".aac", ".ogg", ".m4a", ".wav"}
         regex_terms = {"stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"}
         # Return the stream urls that match the regular expressions
         for term in regex_terms:
@@ -219,16 +220,18 @@ class Stream:
                 return streams, youtube_streams
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
 
+            # Remove all results without the supported extensions (Due to these regular expressions being very generalized)
+            streams[:] = [stream for stream in streams if Stream.is_supported_stream(stream, supported_extensions)]
+
         # Search terms for Apple Podcasts, Google Podcasts, etc.
         specialized_regex_terms = {r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""}
         for term in specialized_regex_terms:
             if streams:
                 return streams, youtube_streams
             streams = re.findall(term, raw_file)
-            # Remove all results without the "mp3" extension (Due to these regular expressions being very generalized)
-            for stream in streams:
-                if ".mp3" not in stream:
-                    streams.remove(stream)
+
+            # Remove all results without the supported extensions (Due to these regular expressions being very generalized)
+            streams[:] = [stream for stream in streams if Stream.is_supported_stream(stream, supported_extensions)]
         return streams, youtube_streams
 
     @staticmethod
@@ -597,17 +600,9 @@ class AudioQuality(Enum):
     LOW = -1
 
 def main():
-    youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-    youtube.add_to_liked_songs()
-    youtube.add_to_playlist("Downloaded Songs")
-
-    playlist_manager = PlaylistManager()
-    playlist_manager.close_session()
-    downloaded_songs = playlist_manager.get_or_create_playlist("Downloaded Songs")
-
-    for track in downloaded_songs.tracks:
-        print(track.title)
-        Stream(track.stream.url).play_default_stream()
+    # youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
+    # youtube.add_to_liked_songs()
+    # youtube.add_to_playlist("Downloaded Songs")
 
     google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
     google_podcast.download_stream()
