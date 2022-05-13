@@ -139,7 +139,7 @@ def play_track(event, title, artist, url):
     canvas.itemconfig(track_artist_text, text=artist)
     stream = Stream(url)
     music_thread = threading.Thread(target=lambda: stream.play(False))
-    #make test_loop terminate when the user exits the window
+    # Make the thread terminate when the user exits the window
     music_thread.daemon = True
     music_thread.start()
 

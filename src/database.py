@@ -155,7 +155,10 @@ class PlaylistManager:
 def test():
     import stream
 
-    stream_urls = [
+    stream.Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q").add_to_liked_songs()
+    stream.Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/").add_to_liked_songs()
+
+    post_malone_stream_urls = [
     "https://www.youtube.com/watch?v=UceaB4D0jpo",
     "https://www.youtube.com/watch?v=wXhTHyIgQ_U",
     "https://www.youtube.com/watch?v=ApXoWvfEYVU",
@@ -165,8 +168,17 @@ def test():
     "https://www.youtube.com/watch?v=393C3pr2ioY"
     ]
 
-    for stream_url in stream_urls:
+    bazzi_stream_urls = [
+    "https://www.youtube.com/watch?v=Gc71AmT_b2k",
+    "https://www.youtube.com/watch?v=Xhh3_-JRnDc",
+    "https://www.youtube.com/watch?v=Uk1hv6h7O1Y"
+    ]
+
+    for stream_url in post_malone_stream_urls:
         stream.Stream(stream_url).add_to_playlist("This is Post Malone")
+
+    for stream_url in bazzi_stream_urls:
+        stream.Stream(stream_url).add_to_playlist("This is Bazzi")
 
     playlist_manager = PlaylistManager()
     playlist_manager.close_session()
