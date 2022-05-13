@@ -2,7 +2,7 @@
 Most of the basic GUI code was generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer,
 and was later modified to fit the specific needs of the application
 
-Most of the icons used are Google's Material Icons: https://developers.google.com/fonts/docs/material_icons, inserted into
+The icons used are Google's Material Icons: https://developers.google.com/fonts/docs/material_icons, inserted into
 Figma using the Material Design Icons Plugin
 
 Most of the title bar code was derived from these Stack Overflow threads and later modified:
@@ -122,6 +122,11 @@ canvas.create_rectangle(
 music_thread = None
 stream = None
 
+def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
+    truncated_len = max_length-len(continuation_str)
+    truncated_str = f"{string[:truncated_len]}{continuation_str}"
+    return truncated_str if len(string) > max_length else string
+
 def play_track(event, title, artist, url):
     global music_thread, stream, canvas, track_title_text, track_artist_text
     if stream:
@@ -129,7 +134,7 @@ def play_track(event, title, artist, url):
     if music_thread:
         music_thread.join()
 
-    title = (title[:14] + "..") if len(title) > 14 else title
+    title = truncate_string(title, 16)
     canvas.itemconfig(track_title_text, text=title)
     canvas.itemconfig(track_artist_text, text=artist)
     stream = Stream(url)
@@ -163,7 +168,7 @@ def populate_tracks(event, playlist, tracks):
         tag="track_element"
     )
 
-    playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
+    playlist_title = truncate_string(playlist.title, 20)
     scroll_view_canvas.create_text(
         432.0+82,
         85.0,
@@ -322,7 +327,7 @@ def populate_tracks(event, playlist, tracks):
             tag="track_element"
         ))
 
-        track_title = (track.title[:16] + "..") if len(track.title) > 16 else track.title
+        track_title = truncate_string(track.title, 18)
         objs.append(scroll_view_canvas.create_text(
             331.0+82,
             314.99999999999994 + (row * 52),
@@ -333,7 +338,7 @@ def populate_tracks(event, playlist, tracks):
             tag="track_element"
         ))
 
-        track_artist = (track.artist[:14] + "..") if len(track.artist) > 14 else track.artist
+        track_artist = truncate_string(track.artist, 16)
         objs.append(scroll_view_canvas.create_text(
             496.0+82,
             314.99999999999994 + (row * 52),
@@ -344,7 +349,7 @@ def populate_tracks(event, playlist, tracks):
             tag="track_element"
         ))
 
-        track_album = (track.album[:14] + "..") if len(track.album) > 14 else track.album
+        track_album = truncate_string(track.album, 16)
         objs.append(scroll_view_canvas.create_text(
             645.0+82,
             314.99999999999994 + (row * 52),
@@ -414,7 +419,7 @@ def populate():
                 tag="playlist_element"
             ))
 
-            playlist_title = (playlist.title[:18] + "..") if len(playlist.title) > 18 else playlist.title
+            playlist_title = truncate_string(playlist.title, 20)
             objs.append(scroll_view_canvas.create_text(
                 352.0 + (column * 208),
                 230.99999999999994 + (row * 260),
