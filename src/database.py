@@ -118,9 +118,12 @@ class PlaylistManager:
         Session.configure(bind=engine)
         self.session = Session()
 
+    def playlist_exists(self, title: str) -> bool:
+        return self.session.query(Playlist).filter_by(title=title).first() is not None
+
     def get_or_create_playlist(self, title: str="New Playlist") -> Playlist:
         playlist = self.session.query(Playlist).filter_by(title=title).first()
-        if playlist != None:
+        if playlist:
             return playlist
 
         playlist = Playlist(title=title, date_created=datetime.now())
@@ -159,26 +162,37 @@ def test():
     stream.Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/").add_to_liked_songs()
 
     post_malone_stream_urls = [
-    "https://www.youtube.com/watch?v=UceaB4D0jpo",
-    "https://www.youtube.com/watch?v=wXhTHyIgQ_U",
-    "https://www.youtube.com/watch?v=ApXoWvfEYVU",
-    "https://www.youtube.com/watch?v=SC4xMk98Pdc",
-    "https://www.youtube.com/watch?v=au2n7VVGv_c",
-    "https://www.youtube.com/watch?v=UYwF-jdcVjY",
-    "https://www.youtube.com/watch?v=393C3pr2ioY"
-    ]
+        "https://www.youtube.com/watch?v=UceaB4D0jpo",
+        "https://www.youtube.com/watch?v=wXhTHyIgQ_U",
+        "https://www.youtube.com/watch?v=ApXoWvfEYVU",
+        "https://www.youtube.com/watch?v=SC4xMk98Pdc",
+        "https://www.youtube.com/watch?v=au2n7VVGv_c",
+        "https://www.youtube.com/watch?v=UYwF-jdcVjY",
+        "https://www.youtube.com/watch?v=393C3pr2ioY"
+        ]
 
     bazzi_stream_urls = [
-    "https://www.youtube.com/watch?v=Gc71AmT_b2k",
-    "https://www.youtube.com/watch?v=Xhh3_-JRnDc",
-    "https://www.youtube.com/watch?v=Uk1hv6h7O1Y"
-    ]
+        "https://www.youtube.com/watch?v=Gc71AmT_b2k",
+        "https://www.youtube.com/watch?v=Xhh3_-JRnDc",
+        "https://www.youtube.com/watch?v=Uk1hv6h7O1Y"
+        ]
+
+    lea_makhoul_urls = [
+        "https://www.youtube.com/watch?v=GT4IveXeAVg",
+        "https://www.youtube.com/watch?v=cUN1HpavTu0",
+        "https://www.youtube.com/watch?v=XJeOtXxygIs",
+        "https://www.youtube.com/watch?v=TUD5cIzokMs",
+        "https://www.youtube.com/watch?v=6ECsnJY290o"
+        ]
 
     for stream_url in post_malone_stream_urls:
         stream.Stream(stream_url).add_to_playlist("This is Post Malone")
 
     for stream_url in bazzi_stream_urls:
         stream.Stream(stream_url).add_to_playlist("This is Bazzi")
+
+    for stream_url in lea_makhoul_urls:
+        stream.Stream(stream_url).add_to_playlist("This is Lea Makhoul")
 
     playlist_manager = PlaylistManager()
     playlist_manager.close_session()
