@@ -395,6 +395,31 @@ def populate(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track
 
     onFrameConfigure(scroll_view_canvas)
 
+def create_new_playlist():
+    global scroll_view_canvas, canvas, track_title_text, track_artist_text
+    scroll_view_canvas.delete("track_element")
+    scroll_view_canvas.delete("playlist_element")
+
+    playlist_manager = PlaylistManager()
+    playlist_created = False
+    index = 0
+    while not playlist_created:
+        playlist_name = f"New Playlist ({index})"
+        if not playlist_manager.playlist_exists(playlist_name):
+            new_playlist = playlist_manager.get_or_create_playlist(playlist_name)
+            playlist_created = True
+        index += 1
+    
+    populate_tracks(scroll_view_canvas, canvas, new_playlist, track_title_text, track_artist_text)
+    playlist_manager.close_session()
+
+def view_liked_songs():
+    global scroll_view_canvas, canvas, track_title_text, track_artist_text
+    playlist_manager = PlaylistManager()
+    liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
+    populate_tracks(scroll_view_canvas, canvas, liked_songs_playlist, track_title_text, track_artist_text)
+    playlist_manager.close_session()
+
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
     canvas.configure(scrollregion=canvas.bbox("all"))
@@ -739,7 +764,7 @@ button_1 = Button(
     image=button_image_1,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_1 clicked"),
+    command=view_liked_songs,
     relief="flat"
 )
 button_1.place(
@@ -748,24 +773,6 @@ button_1.place(
     width=218.0,
     height=43.0
 )
-
-def create_new_playlist():
-    global scroll_view_canvas, canvas, track_title_text, track_artist_text
-    scroll_view_canvas.delete("track_element")
-    scroll_view_canvas.delete("playlist_element")
-
-    playlist_manager = PlaylistManager()
-    playlist_created = False
-    index = 0
-    while not playlist_created:
-        playlist_name = f"New Playlist ({index})"
-        if not playlist_manager.playlist_exists(playlist_name):
-            new_playlist = playlist_manager.get_or_create_playlist(playlist_name)
-            playlist_created = True
-        index += 1
-    
-    populate_tracks(scroll_view_canvas, canvas, new_playlist, track_title_text, track_artist_text)
-    playlist_manager.close_session()
 
 button_image_2 = PhotoImage(
     file=relative_to_assets("button_2.png"))
