@@ -749,13 +749,31 @@ button_1.place(
     height=43.0
 )
 
+def create_new_playlist():
+    global scroll_view_canvas, canvas, track_title_text, track_artist_text
+    scroll_view_canvas.delete("track_element")
+    scroll_view_canvas.delete("playlist_element")
+
+    playlist_manager = PlaylistManager()
+    playlist_created = False
+    index = 0
+    while not playlist_created:
+        playlist_name = f"New Playlist ({index})"
+        if not playlist_manager.playlist_exists(playlist_name):
+            new_playlist = playlist_manager.get_or_create_playlist(playlist_name)
+            playlist_created = True
+        index += 1
+    
+    populate_tracks(scroll_view_canvas, canvas, new_playlist, track_title_text, track_artist_text)
+    playlist_manager.close_session()
+
 button_image_2 = PhotoImage(
     file=relative_to_assets("button_2.png"))
 button_2 = Button(
     image=button_image_2,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_2 clicked"),
+    command=create_new_playlist,
     relief="flat"
 )
 button_2.place(
