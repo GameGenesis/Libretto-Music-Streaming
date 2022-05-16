@@ -17,7 +17,6 @@ def truncate_string(string: str, max_length: int, continuation_str: str="..") ->
 
 def play_track(event: Event, canvas: Canvas, track_title_text: int, title: str, track_artist_text: int, artist: str, url: str):
     global music_thread, stream
-    print(type(event))
     if stream:
         stream.stop()
     if music_thread:

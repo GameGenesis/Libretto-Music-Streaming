@@ -2,14 +2,14 @@ import os
 import re
 import urllib.request
 import time
-from pathlib import Path
-from enum import Enum
-from typing import Any, Optional
-
-import vlc
 import requests
 from bs4 import BeautifulSoup
 
+from enum import Enum
+from typing import Any, Optional
+
+
+import vlc
 from pytube import YouTube
 from moviepy.editor import AudioFileClip
 import mutagen
