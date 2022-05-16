@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 import sys
 
-from tkinter import Event, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -327,7 +327,7 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
         for obj in objs:
             scroll_canvas.tag_bind(obj, "<ButtonPress-1>",
                 lambda event, title=track.title, artist=track.artist, url=track.stream.url:
-                player.play_track(event, canvas, track_title_text, title, track_artist_text, artist, url))
+                player.play_track(canvas, track_title_text, title, track_artist_text, artist, url))
 
     scroll_canvas.images.append(playlist_image)
     scroll_canvas.images.append(play_image)
@@ -338,6 +338,7 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
 
 def populate(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track_artist_text: int):
     scroll_canvas.delete("track_element")
+    scroll_canvas.delete("playlist_element")
     scroll_canvas.yview_moveto(0)
     scroll_canvas.images = list()
 
@@ -397,9 +398,6 @@ def populate(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track
 
 def create_new_playlist():
     global scroll_view_canvas, canvas, track_title_text, track_artist_text
-    scroll_view_canvas.delete("track_element")
-    scroll_view_canvas.delete("playlist_element")
-
     playlist_manager = PlaylistManager()
     playlist_created = False
     index = 0

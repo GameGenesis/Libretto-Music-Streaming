@@ -132,6 +132,15 @@ class PlaylistManager:
         self.session.commit()
         return playlist
 
+    def delete_playlist(self, title: str):
+        playlist = self.session.query(Playlist).filter_by(title=title).first()
+
+        if not playlist:
+            return
+
+        playlist.delete()
+        self.session.commit()
+
     def add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist) -> Track:
         track = self.session.query(Track).filter_by(title=title).first()
         if track == None:
