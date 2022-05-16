@@ -95,7 +95,7 @@ style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
-def populate_tracks(event: Event, scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, tracks: list[Track], track_title_text: int, track_artist_text: int):
+def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, track_title_text: int, track_artist_text: int):
     scroll_canvas.yview_moveto(0)
     scroll_canvas.delete("track_element")
     scroll_canvas.delete("playlist_element")
@@ -248,7 +248,7 @@ def populate_tracks(event: Event, scroll_canvas: Canvas, canvas: Canvas, playlis
         tag="track_element"
         )
 
-    for row, track in enumerate(tracks):
+    for row, track in enumerate(playlist.tracks):
         objs = list()
 
         track_frame_image = PhotoImage(
@@ -334,6 +334,7 @@ def populate_tracks(event: Event, scroll_canvas: Canvas, canvas: Canvas, playlis
     scroll_canvas.images.append(pause_image)
     scroll_canvas.images.append(shuffle_image)
     scroll_canvas.images.append(duration_image)
+    onFrameConfigure(scroll_view_canvas)
 
 def populate(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track_artist_text: int):
     scroll_canvas.delete("track_element")
@@ -389,8 +390,10 @@ def populate(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track
             scroll_canvas.images.append(playlist_image)
             for obj in objs:
                 scroll_canvas.tag_bind(obj, "<ButtonPress-1>",
-                    lambda event, scroll_canvas=scroll_canvas, canvas=canvas, playlist=playlist, tracks=playlist.tracks:
-                        populate_tracks(event, scroll_canvas, canvas, playlist, tracks, track_title_text, track_artist_text))
+                    lambda event, scroll_canvas=scroll_canvas, canvas=canvas, playlist=playlist, track_title_text=track_title_text, track_artist_text=track_artist_text:
+                        populate_tracks(scroll_canvas, canvas, playlist, track_title_text, track_artist_text))
+
+    onFrameConfigure(scroll_view_canvas)
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""

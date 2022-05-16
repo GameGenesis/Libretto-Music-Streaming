@@ -2,7 +2,7 @@ import threading
 import time
 from typing import Any
 
-from tkinter import Canvas, Event
+from tkinter import Canvas
 
 from stream import Stream
 from database import Playlist, Track
@@ -15,7 +15,7 @@ def truncate_string(string: str, max_length: int, continuation_str: str="..") ->
     truncated_str = f"{string[:truncated_len]}{continuation_str}"
     return truncated_str if len(string) > max_length else string
 
-def play_track(event: Event, canvas: Canvas, track_title_text: int, title: str, track_artist_text: int, artist: str, url: str):
+def play_track(canvas: Canvas, track_title_text: int, title: str, track_artist_text: int, artist: str, url: str):
     global music_thread, stream
     if stream:
         stream.stop()
