@@ -136,6 +136,15 @@ class PlaylistManager:
     def playlist_exists(self, title: str) -> bool:
         return self.get_playlist(title) is not None
 
+    def rename_playlist(self, current_title: str, new_title: str):
+        playlist = self.get_playlist(current_title)
+        if not playlist:
+            return
+
+        playlist.title = new_title
+        self.session.merge(playlist)
+        self.session.commit()
+
     def delete_playlist(self, title: str):
         playlist = self.get_playlist(title)
 
