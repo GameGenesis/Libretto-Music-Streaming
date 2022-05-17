@@ -336,7 +336,7 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
     scroll_canvas.images.append(duration_image)
     onFrameConfigure(scroll_view_canvas)
 
-def populate(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track_artist_text: int):
+def populate_playlists(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track_artist_text: int):
     scroll_canvas.delete("track_element")
     scroll_canvas.delete("playlist_element")
     scroll_canvas.yview_moveto(0)
@@ -700,37 +700,37 @@ image_16 = canvas.create_image(
     image=image_image_16
 )
 
-image_image_17 = PhotoImage(
+def mute():
+    global volume_indicator, high_volume_image, mute_volume_image
+    if not player.stream or not player.stream.player:
+        return
+
+    if player.stream.player.audio_get_mute():
+        player.stream.player.audio_set_mute(False)
+        canvas.itemconfig(volume_indicator, image=high_volume_image)
+    else:
+        player.stream.player.audio_set_mute(True)
+        canvas.itemconfig(volume_indicator, image=mute_volume_image)
+
+low_volume_image = PhotoImage(
     file=relative_to_assets("image_17.png"))
-image_17 = canvas.create_image(
-    856.0,
-    677.0,
-    image=image_image_17
-)
 
-image_image_18 = PhotoImage(
+medium_volume_image = PhotoImage(
     file=relative_to_assets("image_18.png"))
-image_18 = canvas.create_image(
-    858.0,
-    677.0,
-    image=image_image_18
-)
 
-image_image_19 = PhotoImage(
+high_volume_image = PhotoImage(
     file=relative_to_assets("image_19.png"))
-image_19 = canvas.create_image(
+
+mute_volume_image = PhotoImage(
+    file=relative_to_assets("image_20.png"))
+
+volume_indicator = canvas.create_image(
     861.0,
     677.0,
-    image=image_image_19
+    image=high_volume_image
 )
 
-image_image_20 = PhotoImage(
-    file=relative_to_assets("image_20.png"))
-image_20 = canvas.create_image(
-    861.0,
-    677.0,
-    image=image_image_20
-)
+canvas.tag_bind(volume_indicator, "<ButtonPress-1>", lambda event: mute())
 
 image_image_21 = PhotoImage(
     file=relative_to_assets("image_21.png"))
@@ -842,7 +842,7 @@ button_6 = Button(
     image=button_image_6,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda s=scroll_view_canvas, c=canvas, t=track_title_text, a=track_artist_text: populate(s, c, t, a),
+    command=lambda s=scroll_view_canvas, c=canvas, t=track_title_text, a=track_artist_text: populate_playlists(s, c, t, a),
     relief="flat"
 )
 button_6.place(
@@ -932,5 +932,5 @@ button_10.place(
     height=33.0,
 )
 
-populate(scroll_view_canvas, canvas, track_title_text, track_artist_text)
+populate_playlists(scroll_view_canvas, canvas, track_title_text, track_artist_text)
 window.mainloop()
