@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 import sys
 
-from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage
+from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -95,6 +95,27 @@ style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
+def create_overlay_window() -> tuple[Toplevel, Canvas]:
+    window_overlay = Toplevel(window)
+    window_overlay.overrideredirect(True)
+    window_overlay.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
+    window_overlay.wm_attributes("-topmost", True)
+    window_overlay.wm_attributes("-alpha", 0.65)
+    window_overlay.configure(background="#101010")
+
+    canvas_overlay = Canvas(window_overlay, width=1024, height=720, highlightthickness=0)
+    rectangle_overlay = canvas_overlay.create_rectangle(0, 0, 1024, 720, fill="#101010")
+    canvas_overlay.tag_bind(rectangle_overlay, "<ButtonPress-1>", lambda event: window_overlay.destroy())
+    canvas_overlay.pack()
+
+    window.bind("<Unmap>", lambda event: window_overlay.destroy())
+
+    return window_overlay, canvas_overlay
+
+def rename_window():
+    window_overlay, canvas_overlay = create_overlay_window()
+    print("Rename")
+
 def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, track_title_text: int, track_artist_text: int):
     scroll_canvas.yview_moveto(0)
     scroll_canvas.delete("track_element")
@@ -119,16 +140,17 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
         tag="track_element"
     )
 
-    playlist_title = player.truncate_string(playlist.title, 20)
-    scroll_canvas.create_text(
+    playlist_title_name = player.truncate_string(playlist.title, 20)
+    playlist_title = scroll_canvas.create_text(
         432.0+82,
         85.0,
         anchor="nw",
-        text=playlist_title,
+        text=playlist_title_name,
         fill="#FFFFFF",
         font=("RobotoRoman Medium", 32, "bold"),
         tag="track_element"
     )
+    scroll_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event: rename_window())
 
     scroll_canvas.create_text(
         433.0+82,
@@ -407,7 +429,7 @@ def create_new_playlist():
             new_playlist = playlist_manager.get_or_create_playlist(playlist_name)
             playlist_created = True
         index += 1
-    
+
     populate_tracks(scroll_view_canvas, canvas, new_playlist, track_title_text, track_artist_text)
     playlist_manager.close_session()
 
