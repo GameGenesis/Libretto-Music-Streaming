@@ -118,11 +118,12 @@ class PlaylistManager:
         Session.configure(bind=engine)
         self.session = Session()
 
-    def playlist_exists(self, title: str) -> bool:
-        return self.session.query(Playlist).filter_by(title=title).first() is not None
+    def get_playlist(self, title) -> Playlist:
+        playlist = self.session.query(Playlist).filter_by(title=title).first()
+        return playlist
 
     def get_or_create_playlist(self, title: str="New Playlist") -> Playlist:
-        playlist = self.session.query(Playlist).filter_by(title=title).first()
+        playlist = self.get_playlist(title)
         if playlist:
             return playlist
 
@@ -132,8 +133,11 @@ class PlaylistManager:
         self.session.commit()
         return playlist
 
+    def playlist_exists(self, title: str) -> bool:
+        return self.get_playlist(title) is not None
+
     def delete_playlist(self, title: str):
-        playlist = self.session.query(Playlist).filter_by(title=title).first()
+        playlist = self.get_playlist(title)
 
         if not playlist:
             return
