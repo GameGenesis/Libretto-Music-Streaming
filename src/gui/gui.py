@@ -112,9 +112,118 @@ def create_overlay_window() -> tuple[Toplevel, Canvas]:
 
     return window_overlay, canvas_overlay
 
-def rename_window():
+def create_edit_window() -> tuple[Toplevel, Canvas]:
     window_overlay, canvas_overlay = create_overlay_window()
-    print("Rename")
+    edit_window = Toplevel(window_overlay)
+    edit_window.overrideredirect(True)
+    edit_window.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
+
+    edit_window.config(background="grey")
+    edit_window.attributes("-transparentcolor", "grey")
+
+    edit_window.wm_attributes("-topmost", True)
+    edit_window.update()
+    edit_window.wm_attributes("-topmost", False)
+
+    edit_canvas = Canvas(edit_window, width=1024, height=720, highlightthickness=0, bg="grey")
+    edit_canvas.pack()
+
+    return edit_window, edit_canvas
+
+def rename_window():
+    edit_window, edit_canvas = create_edit_window()
+    edit_canvas.images = list()
+
+    playlist_details_box_image = PhotoImage(
+    file=relative_to_assets("image_35.png"))
+    edit_canvas.create_image(
+        512.0,
+        335.99999999999994,
+        image=playlist_details_box_image
+    )
+
+    title_entry_box_image = PhotoImage(
+        file=relative_to_assets("image_36.png"))
+    edit_canvas.create_image(
+        598.0,
+        270.99999999999994,
+        image=title_entry_box_image
+    )
+
+    edit_canvas.create_text(
+        480.0,
+        261.99999999999994,
+        anchor="nw",
+        text="Add a name",
+        fill="#CCCCCC",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    edit_canvas.create_text(
+        480.0,
+        261.99999999999994,
+        anchor="nw",
+        text="Liked Songs",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    description_entry_box_image = PhotoImage(
+        file=relative_to_assets("image_37.png"))
+    edit_canvas.create_image(
+        598.0,
+        356.99999999999994,
+        image=description_entry_box_image
+    )
+
+    edit_canvas.create_text(
+        480.0,
+        314.99999999999994,
+        anchor="nw",
+        text="Add an optional description",
+        fill="#CCCCCC",
+        font=("RobotoRoman Light", 16 * -1)
+    )
+
+    edit_canvas.create_text(
+        480.0,
+        314.99999999999994,
+        anchor="nw",
+        text="My Favorite Songs",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16 * -1)
+    )
+
+    playlist_image = PhotoImage(
+        file=relative_to_assets("image_27.png"))
+    edit_canvas.create_image(
+        378.0,
+        331.99999999999994,
+        image=playlist_image
+    )
+
+    save_button_image = PhotoImage(
+        file=relative_to_assets("image_38.png"))
+    edit_canvas.create_image(
+        674.0,
+        448.99999999999994,
+        image=save_button_image
+    )
+
+    close_button_image = PhotoImage(
+        file=relative_to_assets("image_39.png"))
+    edit_canvas.create_image(
+        720.0,
+        215.99999999999994,
+        image=close_button_image
+    )
+
+    edit_canvas.images.append(playlist_details_box_image)
+    edit_canvas.images.append(title_entry_box_image)
+    edit_canvas.images.append(description_entry_box_image)
+    edit_canvas.images.append(playlist_image)
+    edit_canvas.images.append(save_button_image)
+    edit_canvas.images.append(close_button_image)
 
 def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, track_title_text: int, track_artist_text: int):
     scroll_canvas.yview_moveto(0)
