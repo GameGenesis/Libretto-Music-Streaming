@@ -163,22 +163,43 @@ class PlaylistManager:
         playlist.delete()
         self.session.commit()
 
-    def add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist) -> Track:
-        track = self.session.query(Track).filter_by(title=title).first()
+    def add_track_to_playlist(self, track: Track, playlist: Playlist):
+        playlists = track.playlists
+        if playlist in playlists:
+            return
+        playlists.append(playlist)
+        track.playlists = playlists
+        self.session.commit()
+
+    def create_and_add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist) -> Track:
+        track = self.get_track(title=title)
         if track == None:
             track = Track(title=title, artist=artist, album=album, duration=duration, playlists=[playlist], stream_url=stream_url)
             self.session.add(track)
+            self.session.commit()
         else:
-            playlists = track.playlists
-            if playlist not in playlists:
-                playlists.append(playlist)
-                track.playlists = playlists
-        self.session.commit()
+            self.add_track_to_playlist(track, playlist)
         return track
 
-    def add_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str) -> None:
+    def add_track_to_liked_songs(self, track: Track):
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
-        self.add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist)
+        self.add_track_to_playlist(liked_songs_playlist)
+
+    def create_and_add_track_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str) -> None:
+        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
+        self.create_and_add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist)
+
+    def remove_track_from_playlist(self, track: Track, playlist: Playlist) -> None:  
+        playlists = track.playlists
+        if playlist in playlists:
+            playlists.remove(playlist)
+            track.playlists = playlists
+            self.session.commit()
+
+    def remove_track_from_liked_songs(self, track: Track) -> None:
+        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
+
+        self.remove_track_from_playlist(track, liked_songs_playlist)
 
     def track_is_liked(self, track: Track) -> bool:
         return self.get_or_create_playlist("Liked Songs") in track.playlists
