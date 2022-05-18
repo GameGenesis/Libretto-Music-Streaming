@@ -115,9 +115,6 @@ class Stream(Base):
 class PlaylistManager:
     def __init__(self) -> None:
         Base.metadata.create_all(engine)
-        Session = sessionmaker()
-        Session.configure(bind=engine)
-        self.session = Session()
 
     def get_track(self, title: Optional[str]=None, id: Optional[int]=None) -> Track:
         track = None
@@ -204,11 +201,18 @@ class PlaylistManager:
     def track_is_liked(self, track: Track) -> bool:
         return self.get_or_create_playlist("Liked Songs") in track.playlists
 
+    def open_session(self) -> None:
+        Session = sessionmaker()
+        Session.configure(bind=engine)
+        self.session = Session()
+
     def commit_session(self) -> None:
         self.session.commit()
 
     def close_session(self) -> None:
         self.session.close()
+
+playlist_manager = PlaylistManager()
 
 def test():
     import stream
