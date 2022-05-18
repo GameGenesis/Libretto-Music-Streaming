@@ -96,10 +96,10 @@ style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 def create_overlay_window() -> tuple[Toplevel, Canvas]:
+    global window
     window_overlay = Toplevel(window)
     window_overlay.overrideredirect(True)
     window_overlay.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
-    window_overlay.wm_attributes("-topmost", True)
     window_overlay.wm_attributes("-alpha", 0.65)
     window_overlay.configure(background="#101010")
 
@@ -108,7 +108,7 @@ def create_overlay_window() -> tuple[Toplevel, Canvas]:
     canvas_overlay.tag_bind(rectangle_overlay, "<ButtonPress-1>", lambda event: window_overlay.destroy())
     canvas_overlay.pack()
 
-    window.bind("<Unmap>", lambda event: window_overlay.destroy())
+    window.bind("<Unmap>", lambda event: window_overlay.destroy(), window_overlay.update())
 
     return window_overlay, canvas_overlay
 
