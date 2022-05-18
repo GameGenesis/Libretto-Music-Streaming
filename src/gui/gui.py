@@ -17,13 +17,13 @@ import os
 from pathlib import Path
 import sys
 
-from tkinter import Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
+from tkinter import END, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
-from database import Playlist, PlaylistManager, Track
+from database import Playlist, playlist_manager
 import player
 
 HIGH_RES = False
@@ -64,6 +64,10 @@ def get_handle(root) -> int:
     root.update_idletasks()
     return GetWindowLongPtrW(root.winfo_id(), GWLP_HWNDPARENT)
 
+def close_window():
+    playlist_manager.close_session()
+    window.destroy()
+
 fullscreen = False
 
 def toggle_fullscreen(event=None):
@@ -94,6 +98,13 @@ hwnd = get_handle(window)
 style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
+
+def save_updated_playlist_name(overlay_window, current_title, new_title_entry):
+    new_title = new_title_entry.get()
+    print(current_title, new_title)
+    playlist_manager.rename_playlist(current_title, new_title)
+    overlay_window.destroy()
+    overlay_window.update()
 
 def create_overlay_window() -> tuple[Toplevel, Canvas]:
     global window
@@ -133,6 +144,20 @@ def create_edit_window() -> tuple[Toplevel, Toplevel, Canvas]:
 def rename_window(playlist):
     overlay_window, edit_window, edit_canvas = create_edit_window()
     edit_canvas.images = list()
+
+    title_entry = Entry(
+        edit_canvas,
+        width = 27,
+        bg = "#4B4B4B",
+        fg = "#FFFFFF",
+        bd = 0,
+        highlightthickness = 0,
+        relief = "ridge",
+        font = ("RobotoRoman Medium", 12, "bold"),
+        insertbackground = "#FFFFFF"
+    )
+    title_entry.insert(END, playlist.title)
+    edit_canvas.create_window(600,271,window=title_entry)
 
     playlist_details_box_image = PhotoImage(
     file=relative_to_assets("image_35.png"))
@@ -218,8 +243,8 @@ def rename_window(playlist):
         image=close_button_image
     )
 
-    edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event: overlay_window.destroy(), overlay_window.update())
-    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy(), overlay_window.update())
+    edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, c=playlist.title, e=title_entry: save_updated_playlist_name(w, c, e))
+    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
 
     edit_canvas.images.append(playlist_details_box_image)
     edit_canvas.images.append(title_entry_box_image)
@@ -477,9 +502,7 @@ def populate_playlists(scroll_canvas: Canvas, canvas: Canvas):
     scroll_canvas.yview_moveto(0)
     scroll_canvas.images = list()
 
-    pm = PlaylistManager()
-    pm.close_session()
-    playlist_rows = player.split_list(pm.session.query(Playlist).all(), 3)
+    playlist_rows = player.split_list(playlist_manager.session.query(Playlist).all(), 3)
 
     for row, playlists in enumerate(playlist_rows):
         for column, playlist in enumerate(playlists):
@@ -533,7 +556,7 @@ def populate_playlists(scroll_canvas: Canvas, canvas: Canvas):
 
 def create_new_playlist():
     global scroll_view_canvas, canvas
-    playlist_manager = PlaylistManager()
+
     playlist_created = False
     index = 0
     while not playlist_created:
@@ -544,14 +567,11 @@ def create_new_playlist():
         index += 1
 
     populate_tracks(scroll_view_canvas, canvas, new_playlist)
-    playlist_manager.close_session()
 
 def view_liked_songs():
     global scroll_view_canvas, canvas
-    playlist_manager = PlaylistManager()
     liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
     populate_tracks(scroll_view_canvas, canvas, liked_songs_playlist)
-    playlist_manager.close_session()
 
 def onFrameConfigure(canvas):
     """Reset the scroll region to encompass the inner frame"""
@@ -663,7 +683,7 @@ canvas.tag_bind(title_bar_frame, "<ButtonRelease-1>", stop_move)
 canvas.tag_bind(title_bar_frame, "<B1-Motion>", do_move)
 canvas.tag_bind(title_bar_frame, '<Double-1>', toggle_fullscreen)
 
-
+playlist_manager.open_session()
 populate_playlists(scroll_view_canvas, canvas)
 
 """
@@ -1007,7 +1027,7 @@ button_7 = Button(
     image=button_image_7,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: window.destroy(),
+    command=close_window,
     relief="flat"
 )
 button_7.place(
