@@ -5,7 +5,7 @@ from typing import Any
 from tkinter import Canvas, PhotoImage
 
 from stream import Stream
-from database import Playlist, PlaylistManager, Track
+from database import Playlist, Track, playlist_manager
 
 music_thread = None
 stream = None
@@ -15,15 +15,15 @@ def truncate_string(string: str, max_length: int, continuation_str: str="..") ->
     truncated_str = f"{string[:truncated_len]}{continuation_str}"
     return truncated_str if len(string) > max_length else string
 
-def toggle_track_like(track: Track, playlist_manager: PlaylistManager, canvas: Canvas,
+def toggle_track_like(track: Track, canvas: Canvas,
     heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage):
     liked_track = playlist_manager.track_is_liked(track)
     if liked_track:
         playlist_manager.remove_track_from_liked_songs(track)
     else:
         playlist_manager.add_track_to_liked_songs(track)
-    liked_track = not liked_track
 
+    liked_track = not liked_track
     canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
 
 def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
@@ -34,8 +34,6 @@ def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artis
     if music_thread:
         music_thread.join()
 
-    playlist_manager = PlaylistManager()
-    playlist_manager.close_session()
     track = playlist_manager.get_track(id=track_id)
 
     title = truncate_string(track.title, 16)
@@ -46,8 +44,9 @@ def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artis
 
     liked_track = playlist_manager.track_is_liked(track)
     canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
-    canvas.tag_bind(heart_button, "<ButtonPress-1>", lambda event, track=track, playlist_manager=playlist_manager, canvas=canvas:
-        toggle_track_like(track, playlist_manager, canvas, heart_button, heart_empty_image, heart_full_image))
+    canvas.tag_bind(heart_button, "<ButtonPress-1>", lambda event, track=track, canvas=canvas:
+        toggle_track_like(track, canvas, heart_button, heart_empty_image, heart_full_image))
+
 
     stream = Stream(track.stream.url)
     music_thread = threading.Thread(target=lambda: stream.play(False))
