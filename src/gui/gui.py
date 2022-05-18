@@ -103,13 +103,16 @@ def close_toplevel_window(window):
     window.destroy()
     window.update()
 
-def save_updated_playlist_name(overlay_window, playlist, new_title_entry):
+def save_playlist_details(overlay_window, playlist, new_title_entry):
     current_title = playlist.title
     new_title = new_title_entry.get()
 
     close_toplevel_window(overlay_window)
 
     if current_title == new_title:
+        return
+    if playlist_manager.playlist_exists(new_title):
+        print("Playlist name already exists!")
         return
 
     playlist_manager.rename_playlist(current_title, new_title)
@@ -150,7 +153,7 @@ def create_edit_window() -> tuple[Toplevel, Toplevel, Canvas]:
 
     return overlay_window, edit_window, edit_canvas
 
-def rename_window(playlist):
+def create_rename_window(playlist):
     overlay_window, edit_window, edit_canvas = create_edit_window()
     edit_canvas.images = list()
 
@@ -166,6 +169,8 @@ def rename_window(playlist):
         insertbackground = "#FFFFFF"
     )
     title_entry.insert(END, playlist.title)
+    title_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_playlist_details(w, p, e))
+
     edit_canvas.create_window(600,271,window=title_entry)
 
     playlist_details_box_image = PhotoImage(
@@ -176,12 +181,12 @@ def rename_window(playlist):
         image=playlist_details_box_image
     )
 
-    title_entry_box_image = PhotoImage(
+    title_entry_image = PhotoImage(
         file=relative_to_assets("image_36.png"))
     edit_canvas.create_image(
         598.0,
         270.99999999999994,
-        image=title_entry_box_image
+        image=title_entry_image
     )
 
     edit_canvas.create_text(
@@ -193,12 +198,12 @@ def rename_window(playlist):
         font=("RobotoRoman Light", 12)
     )
 
-    description_entry_box_image = PhotoImage(
+    description_entry_image = PhotoImage(
         file=relative_to_assets("image_37.png"))
     edit_canvas.create_image(
         598.0,
         356.99999999999994,
-        image=description_entry_box_image
+        image=description_entry_image
     )
 
     edit_canvas.create_text(
@@ -243,12 +248,12 @@ def rename_window(playlist):
         image=close_button_image
     )
 
-    edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_updated_playlist_name(w, p, e))
+    edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_playlist_details(w, p, e))
     edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
 
     edit_canvas.images.append(playlist_details_box_image)
-    edit_canvas.images.append(title_entry_box_image)
-    edit_canvas.images.append(description_entry_box_image)
+    edit_canvas.images.append(title_entry_image)
+    edit_canvas.images.append(description_entry_image)
     edit_canvas.images.append(playlist_image)
     edit_canvas.images.append(save_button_image)
     edit_canvas.images.append(close_button_image)
@@ -290,7 +295,7 @@ def populate_tracks(playlist: Playlist):
     )
 
     if playlist.title != "Liked Songs":
-        scroll_view_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event, playlist=playlist: rename_window(playlist))
+        scroll_view_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event, playlist=playlist: create_rename_window(playlist))
 
     scroll_view_canvas.create_text(
         433.0+82,
