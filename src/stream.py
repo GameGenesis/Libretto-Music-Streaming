@@ -576,7 +576,7 @@ class Stream:
     def add_to_playlist(self, playlist_name: str) -> None:
         playlist_manager = PlaylistManager()
         playlist = playlist_manager.get_or_create_playlist(playlist_name)
-        track = playlist_manager.add_track_to_playlist(self.title, self.artist, self.album, self.duration, self.url, playlist)
+        track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, self.url, playlist)
 
         if playlist.downloaded:
             path = self.download_stream()

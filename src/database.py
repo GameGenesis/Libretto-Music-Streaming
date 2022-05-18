@@ -183,7 +183,7 @@ class PlaylistManager:
 
     def add_track_to_liked_songs(self, track: Track):
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
-        self.add_track_to_playlist(liked_songs_playlist)
+        self.add_track_to_playlist(track, liked_songs_playlist)
 
     def create_and_add_track_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str) -> None:
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
