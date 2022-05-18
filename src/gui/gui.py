@@ -97,41 +97,41 @@ SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 def create_overlay_window() -> tuple[Toplevel, Canvas]:
     global window
-    window_overlay = Toplevel(window)
-    window_overlay.overrideredirect(True)
-    window_overlay.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
-    window_overlay.wm_attributes("-alpha", 0.65)
-    window_overlay.configure(background="#101010")
+    overlay_window = Toplevel(window)
+    overlay_window.overrideredirect(True)
+    overlay_window.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
+    overlay_window.wm_attributes("-alpha", 0.65)
+    overlay_window.configure(background="#101010")
 
-    canvas_overlay = Canvas(window_overlay, width=1024, height=720, highlightthickness=0)
-    rectangle_overlay = canvas_overlay.create_rectangle(0, 0, 1024, 720, fill="#101010")
-    canvas_overlay.tag_bind(rectangle_overlay, "<ButtonPress-1>", lambda event: window_overlay.destroy())
-    canvas_overlay.pack()
+    overlay_canvas = Canvas(overlay_window, width=1024, height=720, highlightthickness=0)
+    overlay_rectangle = overlay_canvas.create_rectangle(0, 0, 1024, 720, fill="#101010")
+    overlay_canvas.tag_bind(overlay_rectangle, "<ButtonPress-1>", lambda event: overlay_window.destroy(), overlay_window.update())
+    overlay_canvas.pack()
 
-    window.bind("<Unmap>", lambda event: window_overlay.destroy(), window_overlay.update())
+    window.bind("<Unmap>", lambda event: overlay_window.destroy(), overlay_window.update())
 
-    return window_overlay, canvas_overlay
+    return overlay_window, overlay_canvas
 
-def create_edit_window() -> tuple[Toplevel, Canvas]:
-    window_overlay, canvas_overlay = create_overlay_window()
-    edit_window = Toplevel(window_overlay)
+def create_edit_window() -> tuple[Toplevel, Toplevel, Canvas]:
+    overlay_window, overlay_canvas = create_overlay_window()
+    edit_window = Toplevel(overlay_window)
     edit_window.overrideredirect(True)
     edit_window.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
 
-    edit_window.config(background="grey")
-    edit_window.attributes("-transparentcolor", "grey")
+    edit_window.config(background="red")
+    edit_window.attributes("-transparentcolor", "red")
 
     edit_window.wm_attributes("-topmost", True)
     edit_window.update()
     edit_window.wm_attributes("-topmost", False)
 
-    edit_canvas = Canvas(edit_window, width=1024, height=720, highlightthickness=0, bg="grey")
+    edit_canvas = Canvas(edit_window, width=1024, height=720, highlightthickness=0, bg="red")
     edit_canvas.pack()
 
-    return edit_window, edit_canvas
+    return overlay_window, edit_window, edit_canvas
 
-def rename_window():
-    edit_window, edit_canvas = create_edit_window()
+def rename_window(playlist):
+    overlay_window, edit_window, edit_canvas = create_edit_window()
     edit_canvas.images = list()
 
     playlist_details_box_image = PhotoImage(
@@ -195,7 +195,7 @@ def rename_window():
     )
 
     playlist_image = PhotoImage(
-        file=relative_to_assets("image_27.png"))
+        file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
     edit_canvas.create_image(
         378.0,
         331.99999999999994,
@@ -204,7 +204,7 @@ def rename_window():
 
     save_button_image = PhotoImage(
         file=relative_to_assets("image_38.png"))
-    edit_canvas.create_image(
+    save_button = edit_canvas.create_image(
         674.0,
         448.99999999999994,
         image=save_button_image
@@ -212,11 +212,14 @@ def rename_window():
 
     close_button_image = PhotoImage(
         file=relative_to_assets("image_39.png"))
-    edit_canvas.create_image(
+    close_button = edit_canvas.create_image(
         720.0,
         215.99999999999994,
         image=close_button_image
     )
+
+    edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event: overlay_window.destroy(), overlay_window.update())
+    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy(), overlay_window.update())
 
     edit_canvas.images.append(playlist_details_box_image)
     edit_canvas.images.append(title_entry_box_image)
@@ -241,7 +244,7 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
         )
 
     playlist_image = PhotoImage(
-        file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
+        file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
     scroll_canvas.create_image(
         326.0+82,
         135.99999999999994,
@@ -259,7 +262,7 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
         font=("RobotoRoman Medium", 32, "bold"),
         tag="track_element"
     )
-    scroll_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event: rename_window())
+    scroll_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event, playlist=playlist: rename_window(playlist))
 
     scroll_canvas.create_text(
         433.0+82,
