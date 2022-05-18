@@ -258,6 +258,11 @@ def create_rename_window(playlist):
     edit_canvas.images.append(save_button_image)
     edit_canvas.images.append(close_button_image)
 
+def toggle_edit_details_popup(playlist_title: int, hidden: bool=False):
+    global scroll_view_canvas
+    state = "hidden" if hidden else "normal"
+    scroll_view_canvas.itemconfigure(playlist_title, state=state)
+
 def populate_tracks(playlist: Playlist):
     global scroll_view_canvas, canvas, track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image
     scroll_view_canvas.yview_moveto(0)
@@ -294,7 +299,20 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    title_text_bounds = scroll_view_canvas.bbox(playlist_title)
+
+    edit_details_image = PhotoImage(
+    file=relative_to_assets("image_42.png"))
+    edit_details_popup = scroll_view_canvas.create_image(
+        title_text_bounds[2] + 25.0,
+        113.0,
+        image=edit_details_image,
+        state = "hidden"
+    )
+
     if playlist.title != "Liked Songs":
+        scroll_view_canvas.tag_bind(playlist_title, "<Enter>", lambda event: toggle_edit_details_popup(edit_details_popup, False))
+        scroll_view_canvas.tag_bind(playlist_title, "<Leave>", lambda event: toggle_edit_details_popup(edit_details_popup, True))
         scroll_view_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event, playlist=playlist: create_rename_window(playlist))
 
     scroll_view_canvas.create_text(
@@ -497,6 +515,7 @@ def populate_tracks(playlist: Playlist):
                 player.play_track(canvas, track_id, track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image))
 
     scroll_view_canvas.images.append(playlist_image)
+    scroll_view_canvas.images.append(edit_details_image)
     scroll_view_canvas.images.append(play_image)
     scroll_view_canvas.images.append(pause_image)
     scroll_view_canvas.images.append(shuffle_image)
