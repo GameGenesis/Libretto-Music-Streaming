@@ -156,17 +156,17 @@ def rename_window(playlist):
         anchor="nw",
         text="Add a name",
         fill="#CCCCCC",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
-    edit_canvas.create_text(
-        480.0,
-        261.99999999999994,
-        anchor="nw",
-        text="Liked Songs",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
+    # edit_canvas.create_text(
+    #     480.0,
+    #     261.99999999999994,
+    #     anchor="nw",
+    #     text="Liked Songs",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 12)
+    # )
 
     description_entry_box_image = PhotoImage(
         file=relative_to_assets("image_37.png"))
@@ -182,17 +182,17 @@ def rename_window(playlist):
         anchor="nw",
         text="Add an optional description",
         fill="#CCCCCC",
-        font=("RobotoRoman Light", 16 * -1)
+        font=("RobotoRoman Light", 12)
     )
 
-    edit_canvas.create_text(
-        480.0,
-        314.99999999999994,
-        anchor="nw",
-        text="My Favorite Songs",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16 * -1)
-    )
+    # edit_canvas.create_text(
+    #     480.0,
+    #     314.99999999999994,
+    #     anchor="nw",
+    #     text="My Favorite Songs",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 12)
+    # )
 
     playlist_image = PhotoImage(
         file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
@@ -228,7 +228,8 @@ def rename_window(playlist):
     edit_canvas.images.append(save_button_image)
     edit_canvas.images.append(close_button_image)
 
-def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, track_title_text: int, track_artist_text: int):
+def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist):
+    global track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image
     scroll_canvas.yview_moveto(0)
     scroll_canvas.delete("track_element")
     scroll_canvas.delete("playlist_element")
@@ -460,8 +461,8 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
         scroll_canvas.images.append(track_frame_image)
         for obj in objs:
             scroll_canvas.tag_bind(obj, "<ButtonPress-1>",
-                lambda event, title=track.title, artist=track.artist, url=track.stream.url:
-                player.play_track(canvas, track_title_text, title, track_artist_text, artist, url))
+                lambda event, track_id=track.id:
+                player.play_track(canvas, track_id, track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image))
 
     scroll_canvas.images.append(playlist_image)
     scroll_canvas.images.append(play_image)
@@ -470,7 +471,7 @@ def populate_tracks(scroll_canvas: Canvas, canvas: Canvas, playlist: Playlist, t
     scroll_canvas.images.append(duration_image)
     onFrameConfigure(scroll_view_canvas)
 
-def populate_playlists(scroll_canvas: Canvas, canvas: Canvas, track_title_text: int, track_artist_text: int):
+def populate_playlists(scroll_canvas: Canvas, canvas: Canvas):
     scroll_canvas.delete("track_element")
     scroll_canvas.delete("playlist_element")
     scroll_canvas.yview_moveto(0)
@@ -525,13 +526,13 @@ def populate_playlists(scroll_canvas: Canvas, canvas: Canvas, track_title_text: 
             scroll_canvas.images.append(playlist_image)
             for obj in objs:
                 scroll_canvas.tag_bind(obj, "<ButtonPress-1>",
-                    lambda event, scroll_canvas=scroll_canvas, canvas=canvas, playlist=playlist, track_title_text=track_title_text, track_artist_text=track_artist_text:
-                        populate_tracks(scroll_canvas, canvas, playlist, track_title_text, track_artist_text))
+                    lambda event, scroll_canvas=scroll_canvas, canvas=canvas, playlist=playlist:
+                        populate_tracks(scroll_canvas, canvas, playlist))
 
     onFrameConfigure(scroll_view_canvas)
 
 def create_new_playlist():
-    global scroll_view_canvas, canvas, track_title_text, track_artist_text
+    global scroll_view_canvas, canvas
     playlist_manager = PlaylistManager()
     playlist_created = False
     index = 0
@@ -542,14 +543,14 @@ def create_new_playlist():
             playlist_created = True
         index += 1
 
-    populate_tracks(scroll_view_canvas, canvas, new_playlist, track_title_text, track_artist_text)
+    populate_tracks(scroll_view_canvas, canvas, new_playlist)
     playlist_manager.close_session()
 
 def view_liked_songs():
-    global scroll_view_canvas, canvas, track_title_text, track_artist_text
+    global scroll_view_canvas, canvas
     playlist_manager = PlaylistManager()
     liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
-    populate_tracks(scroll_view_canvas, canvas, liked_songs_playlist, track_title_text, track_artist_text)
+    populate_tracks(scroll_view_canvas, canvas, liked_songs_playlist)
     playlist_manager.close_session()
 
 def onFrameConfigure(canvas):
@@ -662,6 +663,8 @@ canvas.tag_bind(title_bar_frame, "<ButtonRelease-1>", stop_move)
 canvas.tag_bind(title_bar_frame, "<B1-Motion>", do_move)
 canvas.tag_bind(title_bar_frame, '<Double-1>', toggle_fullscreen)
 
+
+populate_playlists(scroll_view_canvas, canvas)
 
 """
 ---------------------------------------------------------------------------------------------------------
@@ -802,20 +805,16 @@ track_title_text = canvas.create_text(
     font=("RobotoRoman Medium", 12, "bold")
 )
 
-image_image_13 = PhotoImage(
+heart_empty_image = PhotoImage(
     file=relative_to_assets("image_13.png"))
-image_13 = canvas.create_image(
-    235.0,
-    684.0,
-    image=image_image_13
-)
 
-image_image_14 = PhotoImage(
+heart_full_image = PhotoImage(
     file=relative_to_assets("image_14.png"))
-image_14 = canvas.create_image(
+
+heart_button = canvas.create_image(
     235.0,
     684.0,
-    image=image_image_14
+    image=heart_empty_image
 )
 
 image_image_15 = PhotoImage(
@@ -976,7 +975,7 @@ button_6 = Button(
     image=button_image_6,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda s=scroll_view_canvas, c=canvas, t=track_title_text, a=track_artist_text: populate_playlists(s, c, t, a),
+    command=lambda s=scroll_view_canvas, c=canvas: populate_playlists(s, c),
     relief="flat"
 )
 button_6.place(
@@ -1065,6 +1064,4 @@ button_10.place(
     width=52.0,
     height=33.0,
 )
-
-populate_playlists(scroll_view_canvas, canvas, track_title_text, track_artist_text)
 window.mainloop()

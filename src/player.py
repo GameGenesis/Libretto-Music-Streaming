@@ -2,10 +2,10 @@ import threading
 import time
 from typing import Any
 
-from tkinter import Canvas
+from tkinter import Canvas, PhotoImage
 
 from stream import Stream
-from database import Playlist, Track
+from database import Playlist, PlaylistManager, Track
 
 music_thread = None
 stream = None
@@ -15,17 +15,28 @@ def truncate_string(string: str, max_length: int, continuation_str: str="..") ->
     truncated_str = f"{string[:truncated_len]}{continuation_str}"
     return truncated_str if len(string) > max_length else string
 
-def play_track(canvas: Canvas, track_title_text: int, title: str, track_artist_text: int, artist: str, url: str):
+def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
+    heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage):
     global music_thread, stream
     if stream:
         stream.stop()
     if music_thread:
         music_thread.join()
 
-    title = truncate_string(title, 16)
+    playlist_manager = PlaylistManager()
+    playlist_manager.close_session()
+    track = playlist_manager.get_track(id=track_id)
+
+    title = truncate_string(track.title, 16)
+    artist = truncate_string(track.artist, 16)
+
     canvas.itemconfig(track_title_text, text=title)
     canvas.itemconfig(track_artist_text, text=artist)
-    stream = Stream(url)
+
+    liked_track = playlist_manager.track_is_liked(track)
+    canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
+
+    stream = Stream(track.stream.url)
     music_thread = threading.Thread(target=lambda: stream.play(False))
     # Make the thread terminate when the user exits the window
     music_thread.daemon = True
