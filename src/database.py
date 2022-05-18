@@ -151,13 +151,11 @@ class PlaylistManager:
         self.session.merge(playlist)
         self.session.commit()
 
-    def delete_playlist(self, title: str):
-        playlist = self.get_playlist(title)
-
+    def delete_playlist(self, playlist: Playlist):
         if not playlist:
             return
 
-        playlist.delete()
+        self.session.delete(playlist)
         self.session.commit()
 
     def add_track_to_playlist(self, track: Track, playlist: Playlist):

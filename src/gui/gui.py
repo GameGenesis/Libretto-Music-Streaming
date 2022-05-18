@@ -99,9 +99,10 @@ style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
-def close_toplevel_window(window):
-    window.destroy()
-    window.update()
+def delete_playlist(overlay_window, playlist):
+    playlist_manager.delete_playlist(playlist)
+    close_toplevel_window(overlay_window)
+    populate_playlists()
 
 def save_playlist_details(overlay_window, playlist, new_title_entry):
     current_title = playlist.title
@@ -117,6 +118,10 @@ def save_playlist_details(overlay_window, playlist, new_title_entry):
 
     playlist_manager.rename_playlist(current_title, new_title)
     populate_tracks(playlist)
+
+def close_toplevel_window(window):
+    window.destroy()
+    window.update()
 
 def create_overlay_window() -> tuple[Toplevel, Canvas]:
     global window
@@ -240,6 +245,14 @@ def create_rename_window(playlist):
         image=save_button_image
     )
 
+    delete_button_image = PhotoImage(
+    file=relative_to_assets("image_45.png"))
+    delete_button = edit_canvas.create_image(
+        557.0,
+        448.99999999999994,
+        image=delete_button_image
+    )
+
     close_button_image = PhotoImage(
         file=relative_to_assets("image_39.png"))
     close_button = edit_canvas.create_image(
@@ -248,6 +261,7 @@ def create_rename_window(playlist):
         image=close_button_image
     )
 
+    edit_canvas.tag_bind(delete_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist: delete_playlist(w, p))
     edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_playlist_details(w, p, e))
     edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
 
@@ -256,6 +270,7 @@ def create_rename_window(playlist):
     edit_canvas.images.append(description_entry_image)
     edit_canvas.images.append(playlist_image)
     edit_canvas.images.append(save_button_image)
+    edit_canvas.images.append(delete_button_image)
     edit_canvas.images.append(close_button_image)
 
 def toggle_edit_details_popup(playlist_title: int, hidden: bool=False):
