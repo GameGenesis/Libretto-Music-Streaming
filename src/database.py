@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import time
+from typing import Optional
 
 import sqlalchemy as db
 from sqlalchemy import Column, Integer, String, ForeignKey, Table, DateTime, Boolean
@@ -118,6 +119,14 @@ class PlaylistManager:
         Session.configure(bind=engine)
         self.session = Session()
 
+    def get_track(self, title: Optional[str]=None, id: Optional[int]=None) -> Track:
+        track = None
+        if title:
+            track = self.session.query(Track).filter_by(title=title).first()
+        elif id:
+            track = self.session.query(Track).filter_by(id=id).first()
+        return track
+
     def get_playlist(self, title) -> Playlist:
         playlist = self.session.query(Playlist).filter_by(title=title).first()
         return playlist
@@ -170,6 +179,9 @@ class PlaylistManager:
     def add_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str) -> None:
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist)
+
+    def track_is_liked(self, track: Track) -> bool:
+        return self.get_or_create_playlist("Liked Songs") in track.playlists
 
     def commit_session(self) -> None:
         self.session.commit()
