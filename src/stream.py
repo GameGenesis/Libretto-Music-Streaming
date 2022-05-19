@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 from enum import Enum
 from typing import Any, Optional
 
-
 import vlc
 from pytube import YouTube
 from moviepy.editor import AudioFileClip
@@ -15,74 +14,7 @@ import mutagen
 
 from database import PlaylistManager
 
-class Stream:
-    """
-    Supports radio streaming, podcast streaming, and YouTube audio streams.
-    Also supports downloading streams
-    """
-
-    def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None) -> None:
-        """
-        Parameters
-        ----------
-        url : str
-            The website url to extract streams from
-        streams_override : list[str], optional
-            The urls of streams that are passed in manually
-        album : str
-            The playlist artist
-        title_override : str, optional
-            Overrides the track title.
-            Otherwise, extracts the track title from the website url or original source
-        """
-        self.streams = []
-        self.player = None
-        if not streams_override:
-            self.url = url
-            # Get streams from url and if available, the pafy youtube stream
-            self.streams, self.youtube_streams = Stream.get_streams(url)
-            self.set_default_stream()
-
-            if not self.youtube_streams:
-                # Get website title
-                soup = BeautifulSoup(requests.get(url, verify=False).text, features="html.parser")
-                # Get stream title and remove white spaces and special/escape characters
-                self.title = soup.title.text.replace("|", "").split()
-                self.title = " ".join(self.title)
-                self.album = self.title
-                self.artist = "Unknown"
-                self.duration = self.get_stream_duration(self.default_stream)
-            else:
-                yt = YouTube(self.url)
-                metadata = yt.metadata[0] if type(yt.metadata) is list else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
-                self.title = metadata.get("Song") if metadata else None
-                if not self.title:
-                    self.title = yt.title
-                self.artist = metadata.get("Artist") if metadata else None
-                if not self.artist:
-                    self.artist = yt.author
-                self.album = metadata.get("Album") if metadata else None
-                if not self.album:
-                    self.album = self.title
-                self.duration = yt.length
-        else:
-            # Assign streams if streams are valid
-            if Stream.check_stream_validity(streams_override[0])[0]:
-                self.streams = streams_override
-            self.set_default_stream()
-
-            try:
-                # Try getting a website url from the default stream
-                url = requests.get(self.default_stream, stream=True, verify=False).headers.get("icy-url")
-                # Get website title
-                soup = BeautifulSoup(requests.get(url, verify=False).text, features="html.parser")
-                # Get stream title and remove white spaces and special/escape characters
-                self.title = " ".join(soup.title.text.split())
-            except Exception as e:
-                print(f"Error: {e}")
-                if not title_override:
-                    self.title = "New Radio Station"
-
+class StreamUtility:
     @staticmethod
     def is_stream_playlist(stream_url: str) -> bool:
         """
@@ -144,7 +76,7 @@ class Stream:
             player = instance.media_player_new()
             player.audio_set_mute(True)
 
-            is_playlist = Stream.is_stream_playlist(stream_url)
+            is_playlist = StreamUtility.is_stream_playlist(stream_url)
             if is_playlist:
                 player = instance.media_list_player_new()
                 media = instance.media_list_new([stream_url])
@@ -159,7 +91,7 @@ class Stream:
             # Wait until the vlc player starts playing
             condition, current_time = True, 0.0
             while condition:
-                condition, current_time = Stream.wait_while(not player.is_playing(), current_time)
+                condition, current_time = StreamUtility.wait_while(not player.is_playing(), current_time)
 
             # Get the player state
             state = player.get_state()
@@ -199,7 +131,7 @@ class Stream:
         youtube_streams = None
         youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
         if re.search(youtube_regex, url):
-            streams, youtube_streams = Stream.get_youtube_audio_streams(url)
+            streams, youtube_streams = StreamUtility.get_youtube_audio_streams(url)
             return streams, youtube_streams
 
         # Try opening the url
@@ -223,7 +155,7 @@ class Stream:
             streams = re.findall(f"{term}\":\"(.*?)\"", raw_file)
 
             # Remove all results without the supported extensions (Due to these regular expressions being very generalized)
-            streams[:] = [stream for stream in streams if Stream.is_supported_stream(stream, supported_extensions)]
+            streams[:] = [stream for stream in streams if StreamUtility.is_supported_stream(stream, supported_extensions)]
 
         # Search terms for Apple Podcasts, Google Podcasts, etc.
         specialized_regex_terms = {r"assetUrl\\\":\\\"(.*?)\"" , r"jsdata=\"Kwyn5e;(.*?);", r"url\":\"(.*?)\"", r"src=\"(.*?)\"", r"href=\"(.*?)\""}
@@ -233,7 +165,7 @@ class Stream:
             streams = re.findall(term, raw_file)
 
             # Remove all results without the supported extensions (Due to these regular expressions being very generalized)
-            streams[:] = [stream for stream in streams if Stream.is_supported_stream(stream, supported_extensions)]
+            streams[:] = [stream for stream in streams if StreamUtility.is_supported_stream(stream, supported_extensions)]
         return streams, youtube_streams
 
     @staticmethod
@@ -242,7 +174,7 @@ class Stream:
         player = instance.media_player_new()
         player.audio_set_mute(True)
 
-        is_playlist = Stream.is_stream_playlist(stream_url)
+        is_playlist = StreamUtility.is_stream_playlist(stream_url)
         if is_playlist:
             player = instance.media_list_player_new()
             media = instance.media_list_new([stream_url])
@@ -256,7 +188,7 @@ class Stream:
         # Wait until the vlc player starts playing
         condition, current_time = True, 0.0
         while condition:
-            condition, current_time = Stream.wait_while(not player.is_playing(), current_time)
+            condition, current_time = StreamUtility.wait_while(not player.is_playing(), current_time)
 
         if not is_playlist:
             duration = player.get_length() // 1000
@@ -322,6 +254,75 @@ class Stream:
             return True, current_time
         return False, current_time
 
+
+class StreamData:
+    """
+    Supports radio streaming, podcast streaming, and YouTube audio streams.
+    Also supports downloading streams
+    """
+
+    def __init__(self, url: str, streams_override: list[str]=None, title_override:str=None) -> None:
+        """
+        Parameters
+        ----------
+        url : str
+            The website url to extract streams from
+        streams_override : list[str], optional
+            The urls of streams that are passed in manually
+        album : str
+            The playlist artist
+        title_override : str, optional
+            Overrides the track title.
+            Otherwise, extracts the track title from the website url or original source
+        """
+        self.streams = []
+        self.player = None
+        if not streams_override:
+            self.url = url
+            # Get streams from url and if available, the pafy youtube stream
+            self.streams, self.youtube_streams = StreamUtility.get_streams(url)
+            self.set_default_stream()
+
+            if not self.youtube_streams:
+                # Get website title
+                soup = BeautifulSoup(requests.get(url, verify=False).text, features="html.parser")
+                # Get stream title and remove white spaces and special/escape characters
+                self.title = soup.title.text.replace("|", "").split()
+                self.title = " ".join(self.title)
+                self.album = self.title
+                self.artist = "Unknown"
+                self.duration = StreamUtility.get_stream_duration(self.default_stream)
+            else:
+                yt = YouTube(self.url)
+                metadata = yt.metadata[0] if type(yt.metadata) is list else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
+                self.title = metadata.get("Song") if metadata else None
+                if not self.title:
+                    self.title = yt.title
+                self.artist = metadata.get("Artist") if metadata else None
+                if not self.artist:
+                    self.artist = yt.author
+                self.album = metadata.get("Album") if metadata else None
+                if not self.album:
+                    self.album = self.title
+                self.duration = yt.length
+        else:
+            # Assign streams if streams are valid
+            if StreamUtility.check_stream_validity(streams_override[0])[0]:
+                self.streams = streams_override
+            self.set_default_stream()
+
+            try:
+                # Try getting a website url from the default stream
+                url = requests.get(self.default_stream, stream=True, verify=False).headers.get("icy-url")
+                # Get website title
+                soup = BeautifulSoup(requests.get(url, verify=False).text, features="html.parser")
+                # Get stream title and remove white spaces and special/escape characters
+                self.title = " ".join(soup.title.text.split())
+            except Exception as e:
+                print(f"Error: {e}")
+                if not title_override:
+                    self.title = "New Radio Station"
+
     def get_youtube_stream_bitrates(self) -> Optional[list[str]]:
         """
         Returns a list of the average bitrate of the streams in the same order (if there are supported YouTube streams)
@@ -353,7 +354,7 @@ class Stream:
         if stream_index < len(self.streams):
             self.default_stream = self.streams[stream_index]
             # Determine if the default stream is a playlist
-            self.is_playlist = Stream.is_stream_playlist(self.default_stream)
+            self.is_playlist = StreamUtility.is_stream_playlist(self.default_stream)
         else:
             self.default_stream = None
             raise IndexError
@@ -381,7 +382,7 @@ class Stream:
         index = -1
 
         # Get the stream validity before trying to add the stream
-        valid_stream = self.check_stream_validity(stream_url)[0]
+        valid_stream = StreamUtility.check_stream_validity(stream_url)[0]
         if not valid_stream:
             print("Could not add stream!")
             return index
@@ -398,79 +399,6 @@ class Stream:
 
         # Return the added stream index
         return index
-
-    def stop(self) -> None:
-        if self.player:
-            self.player.stop()
-
-    def play(self, continuous_play: bool=True) -> None:
-        self.play_default_stream(continuous_play)
-
-    def play_default_stream(self, continuous_play: bool=True) -> None:
-        """Play the default stream using the VLC media player"""
-        # Return if there is no default stream
-        if not self.default_stream:
-            print("Can't play radio stream; there is no default stream!")
-            return
-
-        # Create a vlc instance and player
-        self.vlc_instace = vlc.Instance()
-        self.player = self.vlc_instace.media_player_new()
-        self.player.audio_set_mute(False)
-
-        if self.is_playlist:
-            # Set the default stream playlist as the playable media list
-            self.player = self.vlc_instace.media_list_player_new()
-            self.media = self.vlc_instace.media_list_new([self.default_stream])
-            self.player.set_media_list(self.media)
-        else:
-            # Set the default stream as the playable media
-            self.media = self.vlc_instace.media_new(self.default_stream)
-            self.player.set_media(self.media)
-
-        self.player.play()
-        # Wait until the vlc player starts playing
-        condition, current_time = True, 0.0
-        while condition:
-            condition, current_time = Stream.wait_while(not self.player.is_playing(), current_time)
-
-        # Get the current track duration
-        if not self.is_playlist:
-            self.duration = self.player.get_length() // 1000
-
-        # Record the previously playing track
-        previously_playing = None
-
-        if not continuous_play:
-            return
-
-        # While the stream is still playing
-        # Alternatively, use "self.player.get_state() != vlc.State.Ended" without the prior wait while
-        while self.player.is_playing():
-            time.sleep(1)
-
-            # Debug information
-            if not self.is_playlist:
-                print(f"Percent: {round(self.player.get_position() * 100, 2)}%") #set_position
-                self.current_time = self.player.get_time() // 1000 # self.player.set_time()
-                print(f"Current time: {time.strftime('%M:%S', time.gmtime(self.current_time))} of {time.strftime('%M:%S', time.gmtime(self.duration))}")
-
-            # Playlist streams do not support media data
-            if self.is_playlist:
-                continue
-
-            now_playing = self.media.get_meta(12)
-            if now_playing == previously_playing:
-                continue
-
-            # Display the now playing track and record the previously playing track
-            print("Now playing", now_playing)
-            previously_playing = now_playing
-
-            # Display the currently playing track genre
-            genre = self.media.get_meta(2)
-            if genre:
-                print("Genre:", genre)
 
     def download_stream(self, file_name: str="", download_only_default: bool=False) -> Optional[str]:
         """
@@ -546,7 +474,7 @@ class Stream:
         # Supported stream types to download
         supported_extensions = {".mp3", ".aac", ".ogg", ".m4a", ".wav", ".mpeg"}
         # If the default stream does not match one of the supported stream extensions
-        if not Stream.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_streams:
+        if not StreamUtility.is_supported_stream(self.default_stream, supported_extensions) and not self.youtube_streams:
             if download_only_default:
                 print("Can't download radio stream; there are no supported streams!")
                 return None
@@ -554,7 +482,7 @@ class Stream:
             for stream in self.streams:
                 if stream == self.default_stream:
                     continue
-                if Stream.is_supported_stream(stream, supported_extensions):
+                if StreamUtility.is_supported_stream(stream, supported_extensions):
                     stream_to_download = stream
                     break
             else:
@@ -578,7 +506,7 @@ class Stream:
         playlist_manager = PlaylistManager()
         playlist_manager.open_session()
         playlist = playlist_manager.get_or_create_playlist(playlist_name)
-        track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, self.url, playlist)
+        track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, self.default_stream, playlist)
 
         if playlist.downloaded:
             path = self.download_stream()
@@ -592,6 +520,84 @@ class Stream:
         self.add_to_playlist("Liked Songs")
 
 
+class Stream():
+    def __init__(self, stream: str) -> None:
+        self.stream = stream
+        self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
+
+        # Create a vlc instance and player
+        self.vlc_instace = vlc.Instance()
+        self.player = self.vlc_instace.media_player_new()
+
+    def play(self, continuous_play: bool=False) -> None:
+        """Play a stream using the VLC media player"""
+
+        # Return if there is no stream
+        # if not self.stream:
+        #     print("Can't play radio stream; there is no stream!")
+        #     return
+
+        # self.player.audio_set_mute(False)
+
+        if self.is_playlist:
+            # Set the default stream playlist as the playable media list
+            self.player = self.vlc_instace.media_list_player_new()
+            self.media = self.vlc_instace.media_list_new([self.stream])
+            self.player.set_media_list(self.media)
+        else:
+            # Set the default stream as the playable media
+            self.media = self.vlc_instace.media_new(self.stream)
+            self.player.set_media(self.media)
+
+        self.player.play()
+        # Wait until the vlc player starts playing
+        condition, current_time = True, 0.0
+        while condition:
+            condition, current_time = StreamUtility.wait_while(not self.player.is_playing(), current_time)
+
+        # Get the current track duration
+        if not self.is_playlist:
+            self.duration = self.player.get_length() // 1000
+
+        # Record the previously playing track
+        previously_playing = None
+
+        if not continuous_play:
+            return
+
+        # While the stream is still playing
+        # Alternatively, use "self.player.get_state() != vlc.State.Ended" without the prior wait while
+        while self.player.is_playing():
+            time.sleep(1)
+
+            # Debug information
+            if not self.is_playlist:
+                print(f"Percent: {round(self.player.get_position() * 100, 2)}%") #set_position
+                self.current_time = self.player.get_time() // 1000 # self.player.set_time()
+                print(f"Current time: {time.strftime('%M:%S', time.gmtime(self.current_time))} of {time.strftime('%M:%S', time.gmtime(self.duration))}")
+
+            # Playlist streams do not support media data
+            if self.is_playlist:
+                continue
+
+            now_playing = self.media.get_meta(12)
+            if now_playing == previously_playing:
+                continue
+
+            # Display the now playing track and record the previously playing track
+            print("Now playing", now_playing)
+            previously_playing = now_playing
+
+            # Display the currently playing track genre
+            genre = self.media.get_meta(2)
+            if genre:
+                print("Genre:", genre)
+
+    def stop(self) -> None:
+        if self.player:
+            self.player.stop()
+
+
 class AudioQuality(Enum):
     """
     Audio quality (bitrate) does not have a noticeable effect on the download times or sizes.
@@ -603,51 +609,49 @@ class AudioQuality(Enum):
     LOW = -1
 
 def main():
-    # youtube = Stream("https://www.youtube.com/watch?v=wEGOxgfdRVc")
-    # youtube.add_to_liked_songs()
-    # youtube.add_to_playlist("Downloaded Songs")
+    youtube = StreamData("https://www.youtube.com/watch?v=wEGOxgfdRVc")
+    Stream(youtube.default_stream).play(True)
 
-    google_podcast = Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
+    google_podcast = StreamData("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q")
     google_podcast.download_stream()
-    google_podcast.play_default_stream()
+    Stream(google_podcast.default_stream).play(True)
 
-    apple_podcast = Stream("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
+    apple_podcast = StreamData("https://podcasts.apple.com/us/podcast/american-radical/id1596796171")
     apple_podcast.download_stream()
-    apple_podcast.play_default_stream()
+    Stream(apple_podcast.default_stream).play(True)
 
-    iheart_podcast = Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
-    iheart_podcast.play_default_stream()
+    iheart_podcast = StreamData("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/")
+    Stream(iheart_podcast.default_stream).play(True)
 
-    cbc_news_podcast = Stream("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
-    cbc_news_podcast.play_default_stream()
+    cbc_news_podcast = StreamData("https://www.cbc.ca/listen/cbc-podcasts/1057-welcome-to-paradise")
+    Stream(cbc_news_podcast.default_stream).play(True)
 
-    cnn_news_radio = Stream("https://www.cnn.com/audio")
-    cnn_news_radio.download_stream()
-    cnn_news_radio.play_default_stream()
+    cnn_news_radio = StreamData("https://www.cnn.com/audio")
+    Stream(cnn_news_radio.default_stream).play(True)
 
-    abc_news_radio = Stream("https://www.abc.net.au/news/newsradio/")
-    abc_news_radio.play_default_stream()
+    abc_news_radio = StreamData("https://www.abc.net.au/news/newsradio/")
+    Stream(abc_news_radio.default_stream).play(True)
 
-    dance_wave_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
-    dance_wave_radio.play_default_stream()
+    dance_wave_radio = StreamData("", ["http://yp.shoutcast.com/sbin/tunein-station.xspf?id=1631097"])
+    Stream(dance_wave_radio.default_stream).play(True)
 
-    antenne_bayerne_radio = Stream("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
-    antenne_bayerne_radio.play_default_stream()
+    antenne_bayerne_radio = StreamData("", ["http://yp.shoutcast.com/sbin/tunein-station.m3u?id=99497996"])
+    Stream(antenne_bayerne_radio.default_stream).play(True)
 
-    virgin_radio = Stream("https://www.iheart.com/live/999-virgin-radio-7481/")
-    virgin_radio.play_default_stream()
+    virgin_radio = StreamData("https://www.iheart.com/live/999-virgin-radio-7481/")
+    Stream(virgin_radio.default_stream).play(True)
 
-    iheart_radio = Stream("https://www.iheart.com/live/iheartradio-top-20-7556/")
-    iheart_radio.play_default_stream()
+    iheart_radio = StreamData("https://www.iheart.com/live/iheartradio-top-20-7556/")
+    Stream(iheart_radio.default_stream).play(True)
 
-    mnm_radio = Stream("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
-    mnm_radio.play_default_stream()
+    mnm_radio = StreamData("", ["http://icecast.vrtcdn.be/mnm-high.mp3"])
+    Stream(mnm_radio.default_stream).play(True)
 
-    jbfm_radio = Stream("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
-    jbfm_radio.play_default_stream()
+    jbfm_radio = StreamData("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
+    Stream(jbfm_radio.default_stream).play(True)
 
-    virgin_radio_broken = Stream("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
-    virgin_radio_broken.play_default_stream()
+    virgin_radio_broken = StreamData("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
+    Stream(virgin_radio_broken.default_stream).play(True)
 
     # NYTimes Podcasts are now inaccessible
     # nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")

@@ -232,8 +232,8 @@ playlist_manager = PlaylistManager()
 def test():
     import stream
 
-    stream.Stream("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q").add_to_liked_songs()
-    stream.Stream("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/").add_to_liked_songs()
+    stream.StreamData("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q").add_to_liked_songs()
+    stream.StreamData("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/").add_to_liked_songs()
 
     post_malone_stream_urls = [
         "https://www.youtube.com/watch?v=UceaB4D0jpo",
@@ -260,15 +260,15 @@ def test():
         ]
 
     for stream_url in post_malone_stream_urls:
-        stream.Stream(stream_url).add_to_playlist("This is Post Malone")
+        stream.StreamData(stream_url).add_to_playlist("This is Post Malone")
 
     for stream_url in bazzi_stream_urls:
-        stream.Stream(stream_url).add_to_playlist("This is Bazzi")
+        stream.StreamData(stream_url).add_to_playlist("This is Bazzi")
 
     for stream_url in lea_makhoul_urls:
-        stream.Stream(stream_url).add_to_playlist("This is Lea Makhoul")
+        stream.StreamData(stream_url).add_to_playlist("This is Lea Makhoul")
 
-    stream.Stream("https://www.youtube.com/watch?v=JTFDm41lJkQ").add_to_playlist("This is Maro")
+    stream.StreamData("https://www.youtube.com/watch?v=JTFDm41lJkQ").add_to_playlist("This is Maro")
 
     playlist_manager = PlaylistManager()
     playlist_manager.close_session()

@@ -49,7 +49,7 @@ def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artis
 
 
     stream = Stream(track.stream.url)
-    music_thread = threading.Thread(target=lambda: stream.play(False))
+    music_thread = threading.Thread(target=lambda: stream.play())
     # Make the thread terminate when the user exits the window
     music_thread.daemon = True
     music_thread.start()
