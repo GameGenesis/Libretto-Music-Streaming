@@ -605,6 +605,22 @@ class Stream():
         if self.player:
             self.player.play()
 
+    def skip_forwards(self, seconds: float) -> None:
+        if not self.player:
+            return
+
+        current_time = self.player.get_time()
+        time_increment = int(seconds * 1000.0)
+        self.player.set_time(current_time + time_increment)
+
+    def skip_backwards(self, seconds: float) -> None:
+        if not self.player:
+            return
+
+        current_time = self.player.get_time()
+        time_increment = int(seconds * 1000.0)
+        self.player.set_time(current_time - time_increment)
+
 class AudioQuality(Enum):
     """
     Audio quality (bitrate) does not have a noticeable effect on the download times or sizes.

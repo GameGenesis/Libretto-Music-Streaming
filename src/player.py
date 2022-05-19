@@ -27,6 +27,18 @@ def toggle_track_like(track: Track, canvas: Canvas,
     liked_track = not liked_track
     canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
 
+def skip_backwards():
+    if not stream:
+        return
+
+    stream.skip_backwards(10.0)
+
+def skip_forwards():
+    if not stream:
+        return
+
+    stream.skip_forwards(10.0)
+
 def configure_play_state(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
     global stream, playing
     if playing:

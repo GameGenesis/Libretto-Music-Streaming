@@ -810,21 +810,25 @@ image_4 = canvas.create_image(
     image=image_image_4
 )
 
-image_image_5 = PhotoImage(
+skip_backwards_button_image = PhotoImage(
     file=relative_to_assets("image_5.png"))
-image_5 = canvas.create_image(
+skip_backwards_button = canvas.create_image(
     416.0,
     670.0,
-    image=image_image_5
+    image=skip_backwards_button_image
 )
 
-image_image_6 = PhotoImage(
+canvas.tag_bind(skip_backwards_button, "<ButtonPress-1>", lambda event: player.skip_backwards())
+
+skip_forwards_button_image = PhotoImage(
     file=relative_to_assets("image_6.png"))
-image_6 = canvas.create_image(
+skip_forwards_button = canvas.create_image(
     602.0,
     670.0,
-    image=image_image_6
+    image=skip_forwards_button_image
 )
+
+canvas.tag_bind(skip_forwards_button, "<ButtonPress-1>", lambda event: player.skip_forwards())
 
 image_image_7 = PhotoImage(
     file=relative_to_assets("image_7.png"))
