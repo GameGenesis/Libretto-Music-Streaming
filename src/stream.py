@@ -1,6 +1,5 @@
 import os
 import re
-import urllib.request
 import time
 import requests
 from bs4 import BeautifulSoup
@@ -46,7 +45,7 @@ class Stream:
 
             if not self.youtube_streams:
                 # Get website title
-                soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
+                soup = BeautifulSoup(requests.get(url, verify=False).text, features="html.parser")
                 # Get stream title and remove white spaces and special/escape characters
                 self.title = soup.title.text.replace("|", "").split()
                 self.title = " ".join(self.title)
@@ -74,9 +73,9 @@ class Stream:
 
             try:
                 # Try getting a website url from the default stream
-                url = requests.get(self.default_stream, stream=True).headers.get("icy-url")
+                url = requests.get(self.default_stream, stream=True, verify=False).headers.get("icy-url")
                 # Get website title
-                soup = BeautifulSoup(urllib.request.urlopen(url), features="html.parser")
+                soup = BeautifulSoup(requests.get(url, verify=False).text, features="html.parser")
                 # Get stream title and remove white spaces and special/escape characters
                 self.title = " ".join(soup.title.text.split())
             except Exception as e:
@@ -128,15 +127,16 @@ class Stream:
         """
         try:
             # Try opening the stream url
-            urllib.request.urlopen(stream_url)
-        except urllib.error.HTTPError as e:
+            response = requests.get(stream_url, verify=False)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
             # Return the HTTP status code error that was sent with the response (e.g. 404, 501, ...)
-            print(f"HTTP Error: {e.code}")
-        except urllib.error.URLError as e:
+            print(f"HTTP Error: {e}")
+        except requests.exceptions.RequestException as e:
             # Not an HTTP-specific error (e.g. connection refused)
-            print(f"URL Error: {e.reason}")
+            print(f"URL Error: {e}")
         except Exception as e:
-            # Not an HTTP-specific or URL error (e.g. unknow url type)
+            # Not an HTTP-specific or RequestException error (e.g. unknow url type)
             print(f"Error: {e}")
         else:
             # Start a vlc instance and try playing the stream
@@ -203,15 +203,16 @@ class Stream:
             return streams, youtube_streams
 
         # Try opening the url
-        request = urllib.request.Request(url)
+        response = requests.get(url, verify=False)
         try:
-            response = urllib.request.urlopen(request)
+            response.raise_for_status()
         except Exception as e:
             print(f"Could not open the specified URL. Error: {e}")
             return streams, youtube_streams
 
         # Decoding the page source
-        raw_file = response.read().decode("utf-8")
+        response.encoding = response.apparent_encoding
+        raw_file = response.text
 
         supported_extensions = {".wma", ".xspf", ".pls", ".m3u8", ".m3u", ".hls", ".mp3", ".aac", ".ogg", ".m4a", ".wav"}
         regex_terms = {"stream", "file", "@id", "fileURL", "streamURL", "mediaURL", "associatedMedia"}
@@ -565,7 +566,7 @@ class Stream:
             stream_to_download = self.default_stream
 
         # Downloading the stream
-        stream_request = requests.get(stream_to_download, stream=True)
+        stream_request = requests.get(stream_to_download, stream=True, verify=False)
 
         with open(file_path, "wb") as f:
             # Write each chunk of the stream content to the created file
