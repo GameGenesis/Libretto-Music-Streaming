@@ -27,13 +27,14 @@ class Playlist(Base):
     __tablename__ = "playlist"
     id = Column(Integer, primary_key=True)
     title = Column(String)
+    description = Column(String)
     date_created = Column(DateTime)
     downloaded = Column(Boolean)
     tracks = relationship(
         "Track", secondary=playlist_track, back_populates="playlists"
     )
 
-    def __init__(self, title: str, date_created: datetime, downloaded: bool=False) -> None:
+    def __init__(self, title: str, date_created: datetime, downloaded: bool=False, description: Optional[str]=None) -> None:
         """
         Parameters
         ----------
@@ -51,6 +52,10 @@ class Playlist(Base):
         self.title = title
         self.date_created = date_created
         self.downloaded = downloaded
+
+        if not description:
+            description = ""
+        self.description = description
 
     def get_length(self) -> int:
         """
@@ -144,12 +149,19 @@ class PlaylistManager:
     def playlist_exists(self, title: str) -> bool:
         return self.get_playlist(title) is not None
 
-    def rename_playlist(self, current_title: str, new_title: str):
-        playlist = self.get_playlist(current_title)
+    def rename_playlist(self, playlist: Playlist, new_title: str):
         if not playlist:
             return
 
         playlist.title = new_title
+        self.session.merge(playlist)
+        self.session.commit()
+
+    def edit_playlist_description(self, playlist: Playlist, new_description: str):
+        if not playlist:
+            return
+
+        playlist.description = new_description
         self.session.merge(playlist)
         self.session.commit()
 
