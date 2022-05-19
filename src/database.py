@@ -115,6 +115,8 @@ class Stream(Base):
 class PlaylistManager:
     def __init__(self) -> None:
         Base.metadata.create_all(engine)
+        self.session = None
+        self.open_session()
 
     def get_track(self, title: Optional[str]=None, id: Optional[int]=None) -> Track:
         track = None
@@ -200,6 +202,9 @@ class PlaylistManager:
         return self.get_or_create_playlist("Liked Songs") in track.playlists
 
     def open_session(self) -> None:
+        if self.session and self.session.is_active:
+            return
+
         Session = sessionmaker()
         Session.configure(bind=engine)
         self.session = Session()
@@ -250,6 +255,8 @@ def test():
 
     for stream_url in lea_makhoul_urls:
         stream.Stream(stream_url).add_to_playlist("This is Lea Makhoul")
+
+    stream.Stream("https://www.youtube.com/watch?v=JTFDm41lJkQ").add_to_playlist("This is Maro")
 
     playlist_manager = PlaylistManager()
     playlist_manager.close_session()
