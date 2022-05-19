@@ -17,7 +17,7 @@ import os
 from pathlib import Path
 import sys
 
-from tkinter import END, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
+from tkinter import END, WORD, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -125,13 +125,10 @@ def save_playlist_details(overlay_window, playlist, title_entry, description_ent
 
     close_toplevel_window(overlay_window)
 
-    if (current_title == new_title and current_description == new_description) or not new_title:
-        return
-    if current_title != new_title and playlist_manager.playlist_exists(new_title):
-        print("Playlist name already exists!")
+    if current_title == new_title and current_description == new_description:
         return
 
-    if current_title != new_title:
+    if new_title and current_title != new_title and not playlist_manager.playlist_exists(new_title):
         playlist_manager.rename_playlist(playlist, new_title)
     if current_description != new_description:
         playlist_manager.edit_playlist_description(playlist, new_description)
@@ -228,7 +225,8 @@ def create_rename_window(playlist):
         highlightthickness = 0,
         relief = "ridge",
         font = ("RobotoRoman Medium", 12),
-        insertbackground = "#FFFFFF"
+        insertbackground = "#FFFFFF",
+        wrap = WORD
     )
     description_entry.insert("1.0", playlist.description)
 
