@@ -1,7 +1,4 @@
 """
-Most of the basic GUI code was generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer,
-and was later modified to fit the specific needs of the application
-
 The icons used are Google's Material Icons: https://developers.google.com/fonts/docs/material_icons, inserted into
 Figma using the Material Design Icons Plugin
 
@@ -81,6 +78,19 @@ def toggle_fullscreen(event=None):
 
 def minimize_window():
     window.iconify()
+
+def toggle_mute():
+    global volume_indicator, high_volume_image, mute_volume_image
+    if not player.stream or not player.stream.player:
+        return
+
+    if player.stream.player.audio_get_mute():
+        player.stream.player.audio_set_mute(False)
+        canvas.itemconfig(volume_indicator, image=high_volume_image)
+    else:
+        player.stream.player.audio_set_mute(True)
+        canvas.itemconfig(volume_indicator, image=mute_volume_image)
+
 
 window = Tk("Music Player")
 
@@ -369,28 +379,32 @@ def populate_tracks(playlist: Playlist):
 
     play_image = PhotoImage(
         file=relative_to_assets("image_32.png"))
-    scroll_view_canvas.create_image(
-        910.0+82,
-        143.99999999999994,
-        image=play_image,
-        tag="track_element"
-    )
-
     pause_image = PhotoImage(
         file=relative_to_assets("image_33.png"))
     scroll_view_canvas.create_image(
-        910.0+82,
-        143.99999999999994,
-        image=pause_image,
+        885.0+82,
+        170.0,
+        image=play_image,
         tag="track_element"
     )
 
     shuffle_image = PhotoImage(
         file=relative_to_assets("image_34.png"))
     scroll_view_canvas.create_image(
-        960.0+82,
-        143.99999999999994,
+        935.0+82,
+        170.0,
         image=shuffle_image,
+        tag="track_element"
+    )
+
+    download_image = PhotoImage(
+        file=relative_to_assets("image_43.png"))
+    downloaded_image = PhotoImage(
+        file=relative_to_assets("image_44.png"))
+    scroll_view_canvas.create_image(
+        975.0+82,
+        170.0,
+        image=download_image,
         tag="track_element"
     )
 
@@ -545,7 +559,8 @@ def populate_tracks(playlist: Playlist):
         for obj in objs:
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
                 lambda event, track_id=track.id:
-                player.play_track(canvas, track_id, track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image))
+                player.play_new_track(canvas, track_id, track_title_text, track_artist_text,
+                    heart_button, heart_empty_image, heart_full_image, play_button, play_button_image, pause_button_image))
 
     scroll_view_canvas.create_rectangle(
         300.0,
@@ -562,6 +577,8 @@ def populate_tracks(playlist: Playlist):
     scroll_view_canvas.images.append(play_image)
     scroll_view_canvas.images.append(pause_image)
     scroll_view_canvas.images.append(shuffle_image)
+    scroll_view_canvas.images.append(download_image)
+    scroll_view_canvas.images.append(downloaded_image)
     scroll_view_canvas.images.append(duration_image)
     onFrameConfigure(scroll_view_canvas)
 
@@ -755,28 +772,27 @@ canvas.tag_bind(title_bar_frame, '<Double-1>', toggle_fullscreen)
 playlist_manager.open_session()
 populate_playlists()
 
+
 """
 ---------------------------------------------------------------------------------------------------------
-The code below has been generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer
+Most of the basic GUI code below was generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer,
+and was later modified to fit the specific needs of the application
 ---------------------------------------------------------------------------------------------------------
 """
 
 
-image_image_1 = PhotoImage(
+play_button_image = PhotoImage(
     file=relative_to_assets("image_1.png"))
-image_1 = canvas.create_image(
+pause_button_image = PhotoImage(
+    file=relative_to_assets("image_2.png"))
+play_button = canvas.create_image(
     511.0,
     669.0,
-    image=image_image_1
+    image=play_button_image
 )
 
-image_image_2 = PhotoImage(
-    file=relative_to_assets("image_2.png"))
-image_2 = canvas.create_image(
-    511.0,
-    669.0,
-    image=image_image_2
-)
+canvas.tag_bind(play_button, "<ButtonPress-1>", lambda event:
+    player.play_pause_track(canvas, play_button, play_button_image, pause_button_image))
 
 image_image_3 = PhotoImage(
     file=relative_to_assets("image_3.png"))
@@ -922,18 +938,6 @@ image_16 = canvas.create_image(
     image=image_image_16
 )
 
-def mute():
-    global volume_indicator, high_volume_image, mute_volume_image
-    if not player.stream or not player.stream.player:
-        return
-
-    if player.stream.player.audio_get_mute():
-        player.stream.player.audio_set_mute(False)
-        canvas.itemconfig(volume_indicator, image=high_volume_image)
-    else:
-        player.stream.player.audio_set_mute(True)
-        canvas.itemconfig(volume_indicator, image=mute_volume_image)
-
 low_volume_image = PhotoImage(
     file=relative_to_assets("image_17.png"))
 
@@ -952,7 +956,7 @@ volume_indicator = canvas.create_image(
     image=high_volume_image
 )
 
-canvas.tag_bind(volume_indicator, "<ButtonPress-1>", lambda event: mute())
+canvas.tag_bind(volume_indicator, "<ButtonPress-1>", lambda event: toggle_mute())
 
 image_image_21 = PhotoImage(
     file=relative_to_assets("image_21.png"))

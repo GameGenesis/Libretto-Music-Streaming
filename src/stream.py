@@ -597,6 +597,13 @@ class Stream():
         if self.player:
             self.player.stop()
 
+    def pause(self) -> None:
+        if self.player:
+            self.player.pause()
+
+    def unpause(self) -> None:
+        if self.player:
+            self.player.play()
 
 class AudioQuality(Enum):
     """
@@ -608,7 +615,7 @@ class AudioQuality(Enum):
     MEDIUM = 2
     LOW = -1
 
-def main():
+def test():
     youtube = StreamData("https://www.youtube.com/watch?v=wEGOxgfdRVc")
     Stream(youtube.default_stream).play(True)
 
@@ -650,15 +657,12 @@ def main():
     jbfm_radio = StreamData("", ["http://playerservices.streamtheworld.com/api/livestream-redirect/JBFMAAC1.aac"])
     Stream(jbfm_radio.default_stream).play(True)
 
-    virgin_radio_broken = StreamData("", ["https://www.iheart.com/live/999-virgin-radio-7481/"])
-    Stream(virgin_radio_broken.default_stream).play(True)
-
     # NYTimes Podcasts are now inaccessible
-    # nytimes_podcast = Stream("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
-
+    # nytimes_podcast = StreamData("https://www.nytimes.com/2022/03/14/podcasts/the-daily/ukraine-russia-family-misinformation.html")
+    # Stream(nytimes_podcast.default_stream).play(True)
 
 if __name__ == "__main__":
-    main()
+    test()
 
 """
 Helpful Resources

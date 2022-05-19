@@ -7,6 +7,7 @@ from tkinter import Canvas, PhotoImage
 from stream import Stream
 from database import Playlist, Track, playlist_manager
 
+playing = False
 music_thread = None
 stream = None
 
@@ -26,9 +27,27 @@ def toggle_track_like(track: Track, canvas: Canvas,
     liked_track = not liked_track
     canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
 
-def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
-    heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage):
-    global music_thread, stream
+def configure_play_state(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
+    global stream, playing
+    if playing:
+        stream.unpause()
+        canvas.itemconfig(play_button, image=pause_button_image)
+    else:
+        stream.pause()
+        canvas.itemconfig(play_button, image=play_button_image)
+
+def play_pause_track(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
+    global stream, playing
+    if not stream:
+        return
+
+    playing = not playing
+    configure_play_state(canvas, play_button, play_button_image, pause_button_image)
+
+def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
+    heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
+    play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
+    global music_thread, stream, playing
     if stream:
         stream.stop()
     if music_thread:
@@ -47,12 +66,14 @@ def play_track(canvas: Canvas, track_id: int, track_title_text: int, track_artis
     canvas.tag_bind(heart_button, "<ButtonPress-1>", lambda event, track=track, canvas=canvas:
         toggle_track_like(track, canvas, heart_button, heart_empty_image, heart_full_image))
 
-
     stream = Stream(track.stream.url)
     music_thread = threading.Thread(target=lambda: stream.play())
     # Make the thread terminate when the user exits the window
     music_thread.daemon = True
     music_thread.start()
+
+    playing = True
+    configure_play_state(canvas, play_button, play_button_image, pause_button_image)
 
 def get_playlist_info(playlist: Playlist):
     total_duration = playlist.get_total_duration()
