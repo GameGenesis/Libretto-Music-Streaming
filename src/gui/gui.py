@@ -99,6 +99,19 @@ style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
+def check_textbox_content(edit_canvas, canvas_window, text_entry):
+    description_state = "normal"
+    if type(text_entry) == Text:
+        description_state = "hidden" if not text_entry.get("1.0", END).strip() else "normal"
+    elif type(text_entry) == Entry:
+        description_state = "hidden" if not text_entry.get() else "normal"
+
+    edit_canvas.itemconfigure(canvas_window, state=description_state)
+
+def edit_textbox(edit_canvas, canvas_window, text_entry):
+    edit_canvas.itemconfigure(canvas_window, state="normal")
+    text_entry.focus()
+
 def delete_playlist(overlay_window, playlist):
     playlist_manager.delete_playlist(playlist)
     close_toplevel_window(overlay_window)
@@ -110,7 +123,7 @@ def save_playlist_details(overlay_window, playlist, new_title_entry):
 
     close_toplevel_window(overlay_window)
 
-    if current_title == new_title:
+    if current_title == new_title or not new_title:
         return
     if playlist_manager.playlist_exists(new_title):
         print("Playlist name already exists!")
@@ -164,7 +177,7 @@ def create_rename_window(playlist):
 
     title_entry = Entry(
         edit_canvas,
-        width = 27,
+        width = 26,
         bg = "#4B4B4B",
         fg = "#FFFFFF",
         bd = 0,
@@ -176,11 +189,29 @@ def create_rename_window(playlist):
     title_entry.insert(END, playlist.title)
     title_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_playlist_details(w, p, e))
 
-    edit_canvas.create_window(600,271,window=title_entry)
+    title_entry_window = edit_canvas.create_window(597, 271, window=title_entry)
+
+    description_entry = Text(
+        edit_canvas,
+        width = 26,
+        height = 5,
+        bg = "#4B4B4B",
+        fg = "#FFFFFF",
+        bd = 0,
+        highlightthickness = 0,
+        relief = "ridge",
+        font = ("RobotoRoman Medium", 12),
+        insertbackground = "#FFFFFF"
+    )
+    # description_text.insert("1.0", "Text set by button")
+    description_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_playlist_details(w, p, e))
+
+    description_entry_window = edit_canvas.create_window(597, 356, window=description_entry)
+    check_textbox_content(edit_canvas, description_entry_window, description_entry)
 
     playlist_details_box_image = PhotoImage(
     file=relative_to_assets("image_35.png"))
-    edit_canvas.create_image(
+    playlist_details_box = edit_canvas.create_image(
         512.0,
         335.99999999999994,
         image=playlist_details_box_image
@@ -188,46 +219,19 @@ def create_rename_window(playlist):
 
     title_entry_image = PhotoImage(
         file=relative_to_assets("image_36.png"))
-    edit_canvas.create_image(
+    title_textbox = edit_canvas.create_image(
         598.0,
         270.99999999999994,
         image=title_entry_image
     )
 
-    edit_canvas.create_text(
-        480.0,
-        261.99999999999994,
-        anchor="nw",
-        text="Add a name",
-        fill="#CCCCCC",
-        font=("RobotoRoman Light", 12)
-    )
-
     description_entry_image = PhotoImage(
         file=relative_to_assets("image_37.png"))
-    edit_canvas.create_image(
+    description_textbox = edit_canvas.create_image(
         598.0,
         356.99999999999994,
         image=description_entry_image
     )
-
-    edit_canvas.create_text(
-        480.0,
-        314.99999999999994,
-        anchor="nw",
-        text="Add an optional description",
-        fill="#CCCCCC",
-        font=("RobotoRoman Light", 12)
-    )
-
-    # edit_canvas.create_text(
-    #     480.0,
-    #     314.99999999999994,
-    #     anchor="nw",
-    #     text="My Favorite Songs",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Medium", 12)
-    # )
 
     playlist_image = PhotoImage(
         file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
@@ -261,6 +265,13 @@ def create_rename_window(playlist):
         image=close_button_image
     )
 
+    edit_canvas.tag_bind(description_textbox, "<ButtonPress-1>", lambda event, c=edit_canvas, w=description_entry_window, e=description_entry: edit_textbox(c, w, e))
+    edit_canvas.tag_bind(title_textbox, "<ButtonPress-1>", lambda event, c=edit_canvas, w=title_entry_window, e=title_entry: edit_textbox(c, w, e))
+    edit_canvas.tag_bind(playlist_details_box, "<ButtonPress-1>", lambda event: edit_canvas.focus_set())
+
+    description_entry.bind("<FocusOut>", lambda event, c=edit_canvas, w=description_entry_window, e=description_entry: check_textbox_content(c, w, e))
+    title_entry.bind("<FocusOut>", lambda event, c=edit_canvas, w=title_entry_window, e=title_entry: check_textbox_content(c, w, e))
+
     edit_canvas.tag_bind(delete_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist: delete_playlist(w, p))
     edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, e=title_entry: save_playlist_details(w, p, e))
     edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
@@ -285,14 +296,14 @@ def populate_tracks(playlist: Playlist):
     scroll_view_canvas.delete("playlist_element")
 
     scroll_view_canvas.create_rectangle(
-        218.0+82,
+        300.0,
         33.0,
-        1024.0+82,
-        240.99999999999994,
+        1106.0,
+        241.0,
         fill="#292929",
         outline="",
         tag="track_element"
-        )
+    )
 
     playlist_image = PhotoImage(
         file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
@@ -448,7 +459,10 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
         )
 
+    final_row = 0
+
     for row, track in enumerate(playlist.tracks):
+        final_row = row + 1
         objs = list()
 
         track_frame_image = PhotoImage(
@@ -528,6 +542,16 @@ def populate_tracks(playlist: Playlist):
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
                 lambda event, track_id=track.id:
                 player.play_track(canvas, track_id, track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image))
+
+    scroll_view_canvas.create_rectangle(
+        300.0,
+        330.0 + (final_row * 52.0),
+        1106.0,
+        340.0 + (final_row * 52.0),
+        fill="#202020",
+        outline="",
+        tag="track_element"
+    )
 
     scroll_view_canvas.images.append(playlist_image)
     scroll_view_canvas.images.append(edit_details_image)
@@ -715,7 +739,7 @@ title_bar_frame = canvas.create_rectangle(
     0.0,
     1024.0,
     33.0,
-    fill="#303030",
+    fill="#313131",
     outline=""
 )
 
