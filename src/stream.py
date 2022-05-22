@@ -279,7 +279,7 @@ class StreamData:
         self.player = None
         if not streams_override:
             self.url = url
-            # Get streams from url and if available, the pafy youtube stream
+            # Get streams from url and if available, the youtube streams
             self.streams, self.youtube_streams = StreamUtility.get_streams(url)
             self.set_default_stream()
 
