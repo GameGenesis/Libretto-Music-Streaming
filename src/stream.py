@@ -111,6 +111,26 @@ class StreamUtility:
         return any(extension in stream_url for extension in supported_extensions)
 
     @staticmethod
+    def is_youtube_url(url: str) -> bool:
+        """
+        Returns whether or not a url is a YouTube video link.
+
+        Parameters
+        ----------
+        url : str
+            The url to check
+
+        Returns
+        -------
+        bool
+            whether or not the url is a YouTube video link
+        """
+
+        # Source for YouTube URL regex: https://stackoverflow.com/a/37704433
+        youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
+        return re.search(youtube_regex, url)
+
+    @staticmethod
     def get_streams(url: str) -> tuple[list[str], Optional[Any]]:
         """
         Returns a list of stream urls (and optionally, a list of YouTube audio streams) from a URL.
@@ -129,8 +149,7 @@ class StreamUtility:
         """
         streams = []
         youtube_streams = None
-        youtube_regex = "^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$"
-        if re.search(youtube_regex, url):
+        if StreamUtility.is_youtube_url(url):
             streams, youtube_streams = StreamUtility.get_youtube_audio_streams(url)
             return streams, youtube_streams
 
@@ -704,7 +723,6 @@ if __name__ == "__main__":
 
 """
 Helpful Resources
-https://stackoverflow.com/questions/19377262/regex-for-youtube-url
 https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.MediaListPlayer-class.html
 Python vlc: https://www.olivieraubert.net/vlc/python-ctypes/, https://github.com/oaubert/python-vlc
 """
