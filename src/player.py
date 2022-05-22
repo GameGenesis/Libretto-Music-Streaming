@@ -40,13 +40,15 @@ def skip_forwards():
 
     stream.skip_forwards(10.0)
 
-def toggle_loop():
+def toggle_loop(canvas: Canvas, loop_button: int, no_loop_button_image: PhotoImage, loop_button_image: PhotoImage):
     global looping
     if not stream:
         return
 
     looping = not looping
     stream.set_loop(looping)
+
+    canvas.itemconfig(loop_button, image=loop_button_image if looping else no_loop_button_image)
 
 def configure_play_state(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
     global stream, playing

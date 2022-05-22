@@ -848,7 +848,7 @@ loop_button = canvas.create_image(
     image=no_loop_button_image
 )
 
-canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop())
+canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop(canvas, loop_button, no_loop_button_image, loop_button_image))
 
 image_image_10 = PhotoImage(
     file=relative_to_assets("image_10.png"))

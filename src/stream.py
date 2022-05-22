@@ -294,7 +294,7 @@ class StreamData:
                 self.duration = StreamUtility.get_stream_duration(self.default_stream)
             else:
                 yt = YouTube(self.url)
-                metadata = yt.metadata[0] if type(yt.metadata) is list else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
+                metadata = yt.metadata[0] if type(yt.metadata) is list and yt.metadata else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
                 self.title = metadata.get("Song") if metadata else None
                 if not self.title:
                     self.title = yt.title
@@ -637,7 +637,7 @@ class Stream():
         if not self.player:
             return
 
-        current_time = self.player.get_time() // 1000.0
+        current_time = self.player.get_time() / 1000.0
         self.player.stop()
         self.player = self.vlc_instace.media_player_new()
         self.play(start_time=current_time)
