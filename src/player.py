@@ -7,6 +7,7 @@ from tkinter import Canvas, PhotoImage
 from stream import Stream
 from database import Playlist, Track, playlist_manager
 
+looping = False
 playing = False
 music_thread = None
 stream = None
@@ -38,6 +39,14 @@ def skip_forwards():
         return
 
     stream.skip_forwards(10.0)
+
+def toggle_loop():
+    global looping
+    if not stream:
+        return
+
+    looping = not looping
+    stream.set_loop(looping)
 
 def configure_play_state(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
     global stream, playing

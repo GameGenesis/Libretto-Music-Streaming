@@ -524,18 +524,14 @@ class Stream():
     def __init__(self, stream: str) -> None:
         self.stream = stream
         self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
+        self.looping = False
 
         # Create a vlc instance and player
         self.vlc_instace = vlc.Instance()
         self.player = self.vlc_instace.media_player_new()
 
-    def play(self, continuous_play: bool=False) -> None:
+    def play(self, continuous_play: bool=False, start_time: float=0.0) -> None:
         """Play a stream using the VLC media player"""
-
-        # Return if there is no stream
-        # if not self.stream:
-        #     print("Can't play radio stream; there is no stream!")
-        #     return
 
         # self.player.audio_set_mute(False)
 
@@ -555,9 +551,13 @@ class Stream():
         while condition:
             condition, current_time = StreamUtility.wait_while(not self.player.is_playing(), current_time)
 
+        # Set the start time in ms
+        if start_time > 0.0:
+            self.player.set_time(int(start_time * 1000.0))
+
         # Get the current track duration
         if not self.is_playlist:
-            self.duration = self.player.get_length() // 1000
+            self.duration = self.player.get_length() // 1000.0
 
         # Record the previously playing track
         previously_playing = None
@@ -573,7 +573,7 @@ class Stream():
             # Debug information
             if not self.is_playlist:
                 print(f"Percent: {round(self.player.get_position() * 100, 2)}%") #set_position
-                self.current_time = self.player.get_time() // 1000 # self.player.set_time()
+                self.current_time = self.player.get_time() // 1000.0 # self.player.set_time()
                 print(f"Current time: {time.strftime('%M:%S', time.gmtime(self.current_time))} of {time.strftime('%M:%S', time.gmtime(self.duration))}")
 
             # Playlist streams do not support media data
@@ -620,6 +620,28 @@ class Stream():
         current_time = self.player.get_time()
         time_increment = int(seconds * 1000.0)
         self.player.set_time(current_time - time_increment)
+
+    def set_rate(self, rate: float=1.0) -> None:
+        if not self.player:
+            return
+
+        self.player.set_rate(rate)
+
+    def set_loop(self, looping: bool=True):
+        if looping == self.looping:
+            return
+
+        self.looping = looping
+        self.vlc_instace = vlc.Instance("--input-repeat=999999" if self.looping else "")
+
+        if not self.player:
+            return
+
+        current_time = self.player.get_time() // 1000.0
+        self.player.stop()
+        self.player = self.vlc_instace.media_player_new()
+        self.play(start_time=current_time)
+
 
 class AudioQuality(Enum):
     """

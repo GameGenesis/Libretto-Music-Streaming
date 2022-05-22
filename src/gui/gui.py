@@ -838,21 +838,17 @@ image_7 = canvas.create_image(
     image=image_image_7
 )
 
-image_image_8 = PhotoImage(
+no_loop_button_image = PhotoImage(
     file=relative_to_assets("image_8.png"))
-image_8 = canvas.create_image(
+loop_button_image = PhotoImage(
+    file=relative_to_assets("image_9.png"))
+loop_button = canvas.create_image(
     644.0,
     671.0,
-    image=image_image_8
+    image=no_loop_button_image
 )
 
-image_image_9 = PhotoImage(
-    file=relative_to_assets("image_9.png"))
-image_9 = canvas.create_image(
-    644.0,
-    671.0,
-    image=image_image_9
-)
+canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop())
 
 image_image_10 = PhotoImage(
     file=relative_to_assets("image_10.png"))
