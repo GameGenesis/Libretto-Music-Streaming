@@ -22,6 +22,7 @@ sys.path.insert(0, parentdir)
 
 from database import Playlist, playlist_manager
 import player
+import utils
 
 
 HIGH_RES = False
@@ -855,21 +856,7 @@ loop_button = canvas.create_image(
 
 canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop(canvas, loop_button, no_loop_button_image, loop_button_image))
 
-image_image_10 = PhotoImage(
-    file=relative_to_assets("image_10.png"))
-image_10 = canvas.create_image(
-    512.0,
-    702.0,
-    image=image_image_10
-)
-
-image_image_11 = PhotoImage(
-    file=relative_to_assets("image_11.png"))
-image_11 = canvas.create_image(
-    445.0,
-    702.0,
-    image=image_image_11
-)
+track_slider = utils.Slider(canvas, 317.0, 699.0, 707.0, 704.0)
 
 elapsed_time_text = canvas.create_text(
     310.0,
