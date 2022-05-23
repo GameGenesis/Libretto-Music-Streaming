@@ -23,6 +23,7 @@ sys.path.insert(0, parentdir)
 from database import Playlist, playlist_manager
 import player
 
+
 HIGH_RES = False
 
 OUTPUT_PATH = Path(__file__).parent
@@ -549,7 +550,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
-        track_duration = player.get_track_duration(track)
+        track_duration = player.get_formatted_time(track.duration)
         objs.append(scroll_view_canvas.create_text(
             947.0+82,
             314.99999999999994 + (row * 52),
@@ -1161,4 +1162,6 @@ button_10.place(
     width=52.0,
     height=33.0,
 )
+
+player.init(canvas, elapsed_time_text)
 window.mainloop()

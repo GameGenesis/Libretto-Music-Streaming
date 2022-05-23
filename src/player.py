@@ -7,10 +7,19 @@ from tkinter import Canvas, PhotoImage
 from stream import Stream
 from database import Playlist, Track, playlist_manager
 
+gui_canvas = None
+gui_elapsed_time_text = None
+
 looping = False
 playing = False
 music_thread = None
 stream = None
+
+def init(canvas: Canvas, elapsed_time_text: int):
+    global gui_canvas, gui_elapsed_time_text
+
+    gui_canvas = canvas
+    gui_elapsed_time_text = elapsed_time_text
 
 def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
     truncated_len = max_length-len(continuation_str)
@@ -67,6 +76,11 @@ def play_pause_track(canvas: Canvas, play_button: int, play_button_image: PhotoI
     playing = not playing
     configure_play_state(canvas, play_button, play_button_image, pause_button_image)
 
+def update_elapsed_time(current_time, current_position):
+    global gui_canvas, gui_elapsed_time_text
+
+    gui_canvas.itemconfig(gui_elapsed_time_text, text=get_formatted_time(int(current_time)))
+
 def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
     heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
     play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
@@ -90,10 +104,10 @@ def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_a
     canvas.tag_bind(heart_button, "<ButtonPress-1>", lambda event, track=track, canvas=canvas:
         toggle_track_like(track, canvas, heart_button, heart_empty_image, heart_full_image))
 
-    track_duration = get_track_duration(track)
+    track_duration = get_formatted_time(track.duration)
     canvas.itemconfig(total_time_text, text=track_duration)
 
-    stream = Stream(track.stream.url, lambda x, y: print(x, y))
+    stream = Stream(track.stream.url, update_elapsed_time)
     music_thread = threading.Thread(target=lambda: stream.play())
     # Make the thread terminate when the user exits the window
     music_thread.daemon = True
@@ -120,6 +134,5 @@ def split_list(list: list[Any], size: int):
     """
     return (list[index:index+size] for index in range(0, len(list), size))
 
-def get_track_duration(track: Track):
-    track_duration = time.strftime('%#M:%S', time.gmtime(track.duration))
-    return track_duration
+def get_formatted_time(seconds: int):
+    return time.strftime('%#M:%S', time.gmtime(seconds))
