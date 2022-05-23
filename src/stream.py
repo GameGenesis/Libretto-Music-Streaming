@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 import vlc
 from pytube import YouTube
@@ -538,10 +538,11 @@ class StreamData:
     def add_to_liked_songs(self) -> None:
         self.add_to_playlist("Liked Songs")
 
-
 class Stream():
     def __init__(self, stream: str) -> None:
+    def __init__(self, url: str, time_elapsed_callback: Optional[Callable]=None) -> None:
         self.stream = stream
+        self.time_elapsed_callback = time_elapsed_callback
         self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
         self.looping = False
 
@@ -563,6 +564,9 @@ class Stream():
             # Set the default stream as the playable media
             self.media = self.vlc_instace.media_new(self.stream)
             self.player.set_media(self.media)
+
+        self.vlc_event_manager = self.player.event_manager()
+        self.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerTimeChanged, self.media_time_elapsed)
 
         self.player.play()
         # Wait until the vlc player starts playing
@@ -591,8 +595,8 @@ class Stream():
 
             # Debug information
             if not self.is_playlist:
-                print(f"Percent: {round(self.player.get_position() * 100, 2)}%") #set_position
-                self.current_time = self.player.get_time() // 1000.0 # self.player.set_time()
+                print(f"Percent: {round(self.player.get_position() * 100, 2)}%")
+                self.current_time = self.player.get_time() / 1000.0
                 print(f"Current time: {time.strftime('%M:%S', time.gmtime(self.current_time))} of {time.strftime('%M:%S', time.gmtime(self.duration))}")
 
             # Playlist streams do not support media data
@@ -611,6 +615,13 @@ class Stream():
             genre = self.media.get_meta(2)
             if genre:
                 print("Genre:", genre)
+
+    def media_time_elapsed(self, event):
+        current_time = self.player.get_time() / 1000.0
+        current_position = self.player.get_position()
+
+        if self.time_elapsed_callback:
+            self.time_elapsed_callback(current_time, current_position)
 
     def stop(self) -> None:
         if self.player:

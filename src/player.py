@@ -69,7 +69,8 @@ def play_pause_track(canvas: Canvas, play_button: int, play_button_image: PhotoI
 
 def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
     heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
-    play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
+    play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
+    total_time_text: int):
     global music_thread, stream, playing
     if stream:
         stream.stop()
@@ -89,7 +90,10 @@ def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_a
     canvas.tag_bind(heart_button, "<ButtonPress-1>", lambda event, track=track, canvas=canvas:
         toggle_track_like(track, canvas, heart_button, heart_empty_image, heart_full_image))
 
-    stream = Stream(track.stream.url)
+    track_duration = get_track_duration(track)
+    canvas.itemconfig(total_time_text, text=track_duration)
+
+    stream = Stream(track.stream.url, lambda x, y: print(x, y))
     music_thread = threading.Thread(target=lambda: stream.play())
     # Make the thread terminate when the user exits the window
     music_thread.daemon = True

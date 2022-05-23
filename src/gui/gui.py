@@ -304,7 +304,11 @@ def toggle_edit_details_popup(playlist_title: int, hidden: bool=False):
     scroll_view_canvas.itemconfigure(playlist_title, state=state)
 
 def populate_tracks(playlist: Playlist):
-    global scroll_view_canvas, canvas, track_title_text, track_artist_text, heart_button, heart_empty_image, heart_full_image
+    global scroll_view_canvas, canvas, track_title_text, track_artist_text
+    global heart_button, heart_empty_image, heart_full_image
+    global play_button, pause_button_image, play_button_image
+    global total_time_text
+
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
@@ -560,7 +564,7 @@ def populate_tracks(playlist: Playlist):
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
                 lambda event, track_id=track.id:
                 player.play_new_track(canvas, track_id, track_title_text, track_artist_text,
-                    heart_button, heart_empty_image, heart_full_image, play_button, play_button_image, pause_button_image))
+                    heart_button, heart_empty_image, heart_full_image, play_button, play_button_image, pause_button_image, total_time_text))
 
     scroll_view_canvas.create_rectangle(
         300.0,
@@ -866,7 +870,7 @@ image_11 = canvas.create_image(
     image=image_image_11
 )
 
-canvas.create_text(
+elapsed_time_text = canvas.create_text(
     310.0,
     694.0,
     anchor="ne",
@@ -875,7 +879,7 @@ canvas.create_text(
     font=("RobotoRoman Light", 12 * -1)
 )
 
-canvas.create_text(
+total_time_text = canvas.create_text(
     715.0,
     694.0,
     anchor="nw",
