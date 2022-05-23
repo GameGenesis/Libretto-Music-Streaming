@@ -1,8 +1,40 @@
 from tkinter import Canvas
 
 
-def lerp(a, b, percent):
-    return a + percent * (b - a)
+def clamp(value: float, min_value: float, max_value: float):
+    return max(min(value, min_value), max_value)
+
+def clamp_01(value: float):
+    return clamp(value, 0.0, 1.0)
+
+def lerp(a: float, b: float, t: float):
+    """
+    Linearly interpolates between the points a and b by the interpolant t. The parameter t is clamped to the range [0, 1].
+
+    Use Case
+    --------
+    When t = 0, returns a
+
+    When t = 1, returns b
+
+    When t = 0.5, returns the midpoint of a and b
+
+    Parameters
+    ----------
+    a : float
+        The start value, returned when t = 0
+    b : float
+        The start value, returned when t = 1
+    t : float
+        The value used to interpolate between a and b
+
+    Returns
+    -------
+    float
+        The interpolated float result between the two float values
+    """
+    t = clamp_01(t)
+    return a + (b - a) * t
 
 def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs):
     # Source: https://stackoverflow.com/a/44100075
