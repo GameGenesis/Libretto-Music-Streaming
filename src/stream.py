@@ -539,9 +539,8 @@ class StreamData:
         self.add_to_playlist("Liked Songs")
 
 class Stream():
-    def __init__(self, stream: str) -> None:
     def __init__(self, url: str, time_elapsed_callback: Optional[Callable]=None) -> None:
-        self.stream = stream
+        self.stream = url
         self.time_elapsed_callback = time_elapsed_callback
         self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
         self.looping = False

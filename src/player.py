@@ -9,17 +9,20 @@ from database import Playlist, Track, playlist_manager
 
 gui_canvas = None
 gui_elapsed_time_text = None
+gui_track_slider = None
+past_time = 0
 
 looping = False
 playing = False
 music_thread = None
 stream = None
 
-def init(canvas: Canvas, elapsed_time_text: int):
-    global gui_canvas, gui_elapsed_time_text
+def init(canvas: Canvas, elapsed_time_text: int, track_slider):
+    global gui_canvas, gui_elapsed_time_text, gui_track_slider
 
     gui_canvas = canvas
     gui_elapsed_time_text = elapsed_time_text
+    gui_track_slider = track_slider
 
 def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
     truncated_len = max_length-len(continuation_str)
@@ -77,9 +80,15 @@ def play_pause_track(canvas: Canvas, play_button: int, play_button_image: PhotoI
     configure_play_state(canvas, play_button, play_button_image, pause_button_image)
 
 def update_elapsed_time(current_time, current_position):
-    global gui_canvas, gui_elapsed_time_text
+    global gui_canvas, gui_elapsed_time_text, past_time
 
     gui_canvas.itemconfig(gui_elapsed_time_text, text=get_formatted_time(int(current_time)))
+
+    if int(current_time) != past_time:
+        print(int(current_time))
+        gui_track_slider.set_position(current_position)
+    
+    past_time = int(current_time)
 
 def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
     heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,

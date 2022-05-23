@@ -1150,5 +1150,5 @@ button_10.place(
     height=33.0,
 )
 
-player.init(canvas, elapsed_time_text)
+player.init(canvas, elapsed_time_text, track_slider)
 window.mainloop()
