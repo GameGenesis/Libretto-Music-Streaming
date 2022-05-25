@@ -862,18 +862,18 @@ elapsed_time_text = canvas.create_text(
     310.0,
     694.0,
     anchor="ne",
-    text="1:48",
+    text="0:00",
     fill="#FFFFFF",
-    font=("RobotoRoman Light", 12 * -1)
+    font=("RobotoRoman Light", 9)
 )
 
 total_time_text = canvas.create_text(
     715.0,
     694.0,
     anchor="nw",
-    text="2:36",
+    text="0:00",
     fill="#FFFFFF",
-    font=("RobotoRoman Light", 12 * -1)
+    font=("RobotoRoman Light", 9)
 )
 
 image_image_12 = PhotoImage(

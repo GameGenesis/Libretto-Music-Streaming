@@ -85,7 +85,6 @@ def update_elapsed_time(current_time, current_position):
     gui_canvas.itemconfig(gui_elapsed_time_text, text=get_formatted_time(int(current_time)))
 
     if int(current_time) != past_time:
-        print(int(current_time))
         gui_track_slider.set_position(current_position)
     
     past_time = int(current_time)

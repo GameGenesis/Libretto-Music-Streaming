@@ -1,3 +1,5 @@
+# Helpful resources: https://stackoverflow.com/questions/12223335/sqlalchemy-creating-vs-reusing-a-session
+
 from datetime import datetime
 import os
 import time

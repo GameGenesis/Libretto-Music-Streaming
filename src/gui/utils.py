@@ -2,7 +2,7 @@ from tkinter import Canvas
 
 
 def clamp(value: float, min_value: float, max_value: float):
-    return max(min(value, min_value), max_value)
+    return max(min(value, max_value), min_value)
 
 def clamp_01(value: float):
     return clamp(value, 0.0, 1.0)
