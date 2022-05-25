@@ -313,7 +313,20 @@ class StreamData:
                 self.duration = StreamUtility.get_stream_duration(self.default_stream)
             else:
                 yt = YouTube(self.url)
-                metadata = yt.metadata[0] if type(yt.metadata) is list and yt.metadata else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
+
+                # Get YouTube song metadata if it exists
+                if yt.metadata:
+                    if type(yt.metadata) is list:
+                        metadata = yt.metadata[0]
+                    elif type(yt.metadata.metadata) is list and yt.metadata.metadata:
+                        metadata = yt.metadata.metadata[0]
+                    elif yt.metadata.metadata:
+                        metadata = yt.metadata.metadata
+                    else:
+                        metadata = None
+                else:
+                    metadata = None
+
                 self.title = metadata.get("Song") if metadata else None
                 if not self.title:
                     self.title = yt.title
