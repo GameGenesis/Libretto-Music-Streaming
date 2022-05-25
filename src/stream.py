@@ -107,7 +107,21 @@ class StreamUtility:
 
     @staticmethod
     def is_supported_stream(stream_url: str, supported_extensions: list[str]) -> bool:
-        """Checks if the stream url contains any of the specified extensions"""
+        """
+        Checks if the stream url contains any of the specified extensions
+
+        Parameters
+        ----------
+        stream_url : str
+            The url of the stream
+        supported_extensions: list[str]
+            A list of supported extensions (e.g. ".mp3")
+
+        Returns
+        -------
+        bool
+            if the stream url contains any of the supported extensions
+        """
         return any(extension in stream_url for extension in supported_extensions)
 
     @staticmethod
@@ -188,7 +202,20 @@ class StreamUtility:
         return streams, youtube_streams
 
     @staticmethod
-    def get_stream_duration(stream_url: str):
+    def get_stream_duration(stream_url: str) -> int:
+        """
+        Returns the duration of the stream in seconds
+
+        Parameters
+        ----------
+        stream_url : str
+            The url of the stream
+
+        Returns
+        -------
+        int
+            the duration of the stream in seconds
+        """
         instance = vlc.Instance()
         player = instance.media_player_new()
         player.audio_set_mute(True)
@@ -535,6 +562,19 @@ class StreamData:
             return file_path
 
     def add_to_playlist(self, playlist_name: str) -> None:
+        """
+        Creates a new database Track object and populates it with information from the StreamData obejct such as title, artist, duration, etc.
+        Then, adds this Track object to the playlist specified (Creates a new playlist with the name if it doesn't exist)
+
+        Parameters
+        ----------
+        playlist_name : str
+            The name of the playlist to add the track to
+
+        Returns
+        -------
+        None
+        """
         playlist_manager = PlaylistManager()
         playlist_manager.open_session()
         playlist = playlist_manager.get_or_create_playlist(playlist_name)
@@ -549,6 +589,14 @@ class StreamData:
         playlist_manager.close_session()
 
     def add_to_liked_songs(self) -> None:
+        """
+        Creates a new database Track object and populates it with information from the StreamData obejct such as title, artist, duration, etc.
+        Then, adds this Track object to the "Liked Songs" Playlist
+
+        Returns
+        -------
+        None
+        """
         self.add_to_playlist("Liked Songs")
 
 class Stream():
