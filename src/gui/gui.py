@@ -111,6 +111,198 @@ style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
+# App content
+
+def populate_search_results():
+    pass
+
+def search_tab():
+    global scroll_view_canvas, canvas
+    global heart_empty_image
+
+    scroll_view_canvas.yview_moveto(0)
+    scroll_view_canvas.delete("track_element")
+    scroll_view_canvas.delete("playlist_element")
+    scroll_view_canvas.delete("search_tab_element")
+    scroll_view_canvas.delete("search_result_element")
+
+    scroll_view_canvas.images = list()
+
+    search_bar_image = PhotoImage(
+    file=relative_to_assets("image_46.png"))
+    search_bar = scroll_view_canvas.create_image(
+        621.0+82,
+        81.99999999999994,
+        image=search_bar_image,
+        tag="search_tab_element"
+    )
+
+    cancel_search_image = PhotoImage(
+        file=relative_to_assets("image_47.png"))
+    cancel_search = scroll_view_canvas.create_image(
+        973.0+82,
+        80.99999999999994,
+        image=cancel_search_image,
+        tag="search_tab_element"
+    )
+
+    scroll_view_canvas.create_text(
+        292.0+82,
+        70.99999999999994,
+        anchor="nw",
+        text="Post Malone",
+        fill="#303030",
+        font=("RobotoRoman Regular", 12),
+        tag="search_tab_element"
+    )
+
+    scroll_view_canvas.create_text(
+        247.0+82,
+        131.99999999999994,
+        anchor="nw",
+        text="Songs",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16),
+        tag="search_result_element"
+    )
+
+    small_frame_image = PhotoImage(
+        file=relative_to_assets("image_48.png"))
+    small_frame = scroll_view_canvas.create_image(
+        621.0+82,
+        195.99999999999994,
+        image=small_frame_image,
+        tag="search_result_element"
+    )
+
+    cover_art_image = PhotoImage(
+        file=relative_to_assets("image_49.png"))
+    cover_art = scroll_view_canvas.create_image(
+        276.0+82,
+        195.99999999999994,
+        image=cover_art_image,
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        316.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text="Congratulations",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 12),
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        560.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text="Post Malone",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 12),
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        750.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text="Scorpion",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 12),
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        931.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text="3:47",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 9),
+        tag="search_result_element"
+    )
+
+    heart_button = scroll_view_canvas.create_image(
+        895.0+82,
+        195.99999999999994,
+        image=heart_empty_image,
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        247.0+82,
+        339.99999999999994,
+        anchor="nw",
+        text="YouTube",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16),
+        tag="search_result_element"
+    )
+
+    large_frame_image = PhotoImage(
+        file=relative_to_assets("image_50.png"))
+    large_frame = scroll_view_canvas.create_image(
+        621.0+82,
+        421.99999999999994,
+        image=large_frame_image,
+        tag="search_result_element"
+    )
+
+    video_thumbnail_image = PhotoImage(
+        file=relative_to_assets("image_51.png"))
+    video_thumbnail = scroll_view_canvas.create_image(
+        319.0+82,
+        420.99999999999994,
+        image=video_thumbnail_image,
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        402.0+82,
+        419.99999999999994,
+        anchor="nw",
+        text="Lea Makhoul",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 10),
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        402.0+82,
+        400.99999999999994,
+        anchor="nw",
+        text="Lea Makhoul - RATATA (Official Music Video) ft. B.O.X",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 12),
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        931.0+82,
+        410.99999999999994,
+        anchor="nw",
+        text="3:08",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 10),
+        tag="search_result_element"
+    )
+
+    heart_button_2 = scroll_view_canvas.create_image(
+        895.0+82,
+        421.99999999999994,
+        image=heart_empty_image,
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.images.append(search_bar_image)
+    scroll_view_canvas.images.append(cancel_search_image)
+    scroll_view_canvas.images.append(small_frame_image)
+    scroll_view_canvas.images.append(cover_art_image)
+    scroll_view_canvas.images.append(large_frame_image)
+    scroll_view_canvas.images.append(video_thumbnail_image)
+
 def check_textbox_content(edit_canvas, canvas_window, text_entry):
     description_state = "normal"
     if type(text_entry) == Text:
@@ -314,6 +506,8 @@ def populate_tracks(playlist: Playlist):
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
+    scroll_view_canvas.delete("search_tab_element")
+    scroll_view_canvas.delete("search_result_element")
 
     scroll_view_canvas.create_rectangle(
         300.0,
@@ -590,9 +784,13 @@ def populate_tracks(playlist: Playlist):
 
 def populate_playlists():
     global scroll_view_canvas, canvas
+
+    scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
-    scroll_view_canvas.yview_moveto(0)
+    scroll_view_canvas.delete("search_tab_element")
+    scroll_view_canvas.delete("search_result_element")
+
     scroll_view_canvas.images = list()
 
     playlist_rows = player.split_list(playlist_manager.session.query(Playlist).all(), 3)
@@ -1038,16 +1236,16 @@ button_4.place(
     height=43.0
 )
 
-button_image_5 = PhotoImage(
+search_button_image = PhotoImage(
     file=relative_to_assets("button_5.png"))
-button_5 = Button(
-    image=button_image_5,
+search_button = Button(
+    image=search_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_5 clicked"),
+    command=search_tab,
     relief="flat"
 )
-button_5.place(
+search_button.place(
     x=0.0,
     y=95.99999999999994,
     width=218.0,
