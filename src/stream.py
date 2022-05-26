@@ -709,7 +709,7 @@ class Stream():
             if genre:
                 print("Genre:", genre)
 
-    def _media_time_elapsed(self, event) -> None:
+    def _media_time_elapsed(self, event=None) -> None:
         """
         A private callback method for vlc.EventType.MediaPlayerTimeChanged
 
@@ -722,7 +722,6 @@ class Stream():
         -------
         None
         """
-        print(type(event))
         current_time = self.player.get_time() / 1000.0
         current_position = self.player.get_position()
 
@@ -782,6 +781,9 @@ class Stream():
         time_increment = int(seconds * 1000.0)
         self.player.set_time(current_time + time_increment)
 
+        # Update elapsed time
+        self._media_time_elapsed()
+
     def skip_backwards(self, seconds: float) -> None:
         """
         Skip backwards in the current audio playback
@@ -801,6 +803,9 @@ class Stream():
         current_time = self.player.get_time()
         time_increment = int(seconds * 1000.0)
         self.player.set_time(current_time - time_increment)
+
+        # Update elapsed time
+        self._media_time_elapsed()
 
     def set_rate(self, rate: float=1.0) -> None:
         """
