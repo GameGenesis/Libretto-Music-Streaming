@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from enum import Enum
 from typing import Any, Callable, Optional
 
+import pafy
 import vlc
 from pytube import YouTube
 from moviepy.editor import AudioFileClip
@@ -525,7 +526,12 @@ class StreamData:
         playlist_manager = PlaylistManager()
         playlist_manager.open_session()
         playlist = playlist_manager.get_or_create_playlist(playlist_name)
-        track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, self.default_stream, playlist)
+
+        # Check whether the stream is a YouTube stream, since they are temporary streams.
+        # If so, store the video url instead
+        stream = self.default_stream if not self.youtube_streams else self.url
+
+        track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, stream, playlist)
 
         if playlist.downloaded:
             path = self.download_stream()
@@ -540,7 +546,12 @@ class StreamData:
 
 class Stream():
     def __init__(self, url: str, time_elapsed_callback: Optional[Callable]=None) -> None:
-        self.stream = url
+        if StreamUtility.is_youtube_url(url):
+            stream = pafy.new(url).getbestaudio().url
+        else:
+            stream = url
+
+        self.stream = stream
         self.time_elapsed_callback = time_elapsed_callback
         self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
         self.looping = False
