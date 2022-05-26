@@ -615,7 +615,12 @@ class Stream():
         time_elapsed_callback : Callable, optional
             The function that is called when the stream is played and the time changes
         """
-        self.stream = url
+        if StreamUtility.is_youtube_url(url):
+            stream = pafy.new(url).getbestaudio().url
+        else:
+            stream = url
+
+        self.stream = stream
         self.time_elapsed_callback = time_elapsed_callback
         self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
         self.looping = False
