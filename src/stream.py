@@ -108,7 +108,21 @@ class StreamUtility:
 
     @staticmethod
     def is_supported_stream(stream_url: str, supported_extensions: list[str]) -> bool:
-        """Checks if the stream url contains any of the specified extensions"""
+        """
+        Checks if the stream url contains any of the specified extensions
+
+        Parameters
+        ----------
+        stream_url : str
+            The url of the stream
+        supported_extensions: list[str]
+            A list of supported extensions (e.g. ".mp3")
+
+        Returns
+        -------
+        bool
+            if the stream url contains any of the supported extensions
+        """
         return any(extension in stream_url for extension in supported_extensions)
 
     @staticmethod
@@ -189,7 +203,20 @@ class StreamUtility:
         return streams, youtube_streams
 
     @staticmethod
-    def get_stream_duration(stream_url: str):
+    def get_stream_duration(stream_url: str) -> int:
+        """
+        Returns the duration of the stream in seconds
+
+        Parameters
+        ----------
+        stream_url : str
+            The url of the stream
+
+        Returns
+        -------
+        int
+            the duration of the stream in seconds
+        """
         instance = vlc.Instance()
         player = instance.media_player_new()
         player.audio_set_mute(True)
@@ -314,7 +341,20 @@ class StreamData:
                 self.duration = StreamUtility.get_stream_duration(self.default_stream)
             else:
                 yt = YouTube(self.url)
-                metadata = yt.metadata[0] if type(yt.metadata) is list and yt.metadata else (yt.metadata.metadata[0] if type(yt.metadata.metadata) is list else yt.metadata.metadata)
+
+                # Get YouTube song metadata if it exists
+                if yt.metadata:
+                    if type(yt.metadata) is list:
+                        metadata = yt.metadata[0]
+                    elif type(yt.metadata.metadata) is list and yt.metadata.metadata:
+                        metadata = yt.metadata.metadata[0]
+                    elif yt.metadata.metadata:
+                        metadata = yt.metadata.metadata
+                    else:
+                        metadata = None
+                else:
+                    metadata = None
+
                 self.title = metadata.get("Song") if metadata else None
                 if not self.title:
                     self.title = yt.title
@@ -523,6 +563,19 @@ class StreamData:
             return file_path
 
     def add_to_playlist(self, playlist_name: str) -> None:
+        """
+        Creates a new database Track object and populates it with information from the StreamData obejct such as title, artist, duration, etc.
+        Then, adds this Track object to the playlist specified (Creates a new playlist with the name if it doesn't exist)
+
+        Parameters
+        ----------
+        playlist_name : str
+            The name of the playlist to add the track to
+
+        Returns
+        -------
+        None
+        """
         playlist_manager = PlaylistManager()
         playlist_manager.open_session()
         playlist = playlist_manager.get_or_create_playlist(playlist_name)
@@ -542,16 +595,27 @@ class StreamData:
         playlist_manager.close_session()
 
     def add_to_liked_songs(self) -> None:
+        """
+        Creates a new database Track object and populates it with information from the StreamData obejct such as title, artist, duration, etc.
+        Then, adds this Track object to the "Liked Songs" Playlist
+
+        Returns
+        -------
+        None
+        """
         self.add_to_playlist("Liked Songs")
 
 class Stream():
     def __init__(self, url: str, time_elapsed_callback: Optional[Callable]=None) -> None:
-        if StreamUtility.is_youtube_url(url):
-            stream = pafy.new(url).getbestaudio().url
-        else:
-            stream = url
-
-        self.stream = stream
+        """
+        Parameters
+        ----------
+        url : str
+            The stream url
+        time_elapsed_callback : Callable, optional
+            The function that is called when the stream is played and the time changes
+        """
+        self.stream = url
         self.time_elapsed_callback = time_elapsed_callback
         self.is_playlist = StreamUtility.is_stream_playlist(self.stream)
         self.looping = False
@@ -561,7 +625,21 @@ class Stream():
         self.player = self.vlc_instace.media_player_new()
 
     def play(self, continuous_play: bool=False, start_time: float=0.0) -> None:
-        """Play a stream using the VLC media player"""
+        """
+        Play a stream using the VLC media player
+
+        Parameters
+        ----------
+        continuous_play : bool
+            Whether or not the program should be paused while the content is playing.
+            Prints track info for supported streams
+        start_time: float
+            The time the track should start playing at in seconds
+
+        Returns
+        -------
+        None
+        """
 
         # self.player.audio_set_mute(False)
 
@@ -576,7 +654,7 @@ class Stream():
             self.player.set_media(self.media)
 
         self.vlc_event_manager = self.player.event_manager()
-        self.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerTimeChanged, self.media_time_elapsed)
+        self.vlc_event_manager.event_attach(vlc.EventType.MediaPlayerTimeChanged, self._media_time_elapsed)
 
         self.player.play()
         # Wait until the vlc player starts playing
@@ -626,7 +704,20 @@ class Stream():
             if genre:
                 print("Genre:", genre)
 
-    def media_time_elapsed(self, event):
+    def _media_time_elapsed(self, event) -> None:
+        """
+        A private callback method for vlc.EventType.MediaPlayerTimeChanged
+
+        Parameters
+        ----------
+        event : vlc.Event
+            The callback event information
+
+        Returns
+        -------
+        None
+        """
+        print(type(event))
         current_time = self.player.get_time() / 1000.0
         current_position = self.player.get_position()
 
@@ -634,18 +725,51 @@ class Stream():
             self.time_elapsed_callback(current_time, current_position)
 
     def stop(self) -> None:
+        """
+        Stops audio playback
+
+        Returns
+        -------
+        None
+        """
         if self.player:
             self.player.stop()
 
     def pause(self) -> None:
+        """
+        Pauses audio playback
+
+        Returns
+        -------
+        None
+        """
         if self.player:
             self.player.pause()
 
     def unpause(self) -> None:
+        """
+        Unpauses audio playback
+
+        Returns
+        -------
+        None
+        """
         if self.player:
             self.player.play()
 
     def skip_forwards(self, seconds: float) -> None:
+        """
+        Skip forwards in the current audio playback
+
+        Parameters
+        ----------
+        seconds : float
+            The amount of time in seconds to skip forwards
+
+        Returns
+        -------
+        None
+        """
         if not self.player:
             return
 
@@ -654,6 +778,18 @@ class Stream():
         self.player.set_time(current_time + time_increment)
 
     def skip_backwards(self, seconds: float) -> None:
+        """
+        Skip backwards in the current audio playback
+
+        Parameters
+        ----------
+        seconds : float
+            The amount of time in seconds to skip backwards
+
+        Returns
+        -------
+        None
+        """
         if not self.player:
             return
 
@@ -662,12 +798,36 @@ class Stream():
         self.player.set_time(current_time - time_increment)
 
     def set_rate(self, rate: float=1.0) -> None:
+        """
+        Set the audio playback rate (multiplicative factor)
+
+        Parameters
+        ----------
+        rate : float
+            The rate at which the audio plays at
+
+        Returns
+        -------
+        None
+        """
         if not self.player:
             return
 
         self.player.set_rate(rate)
 
-    def set_loop(self, looping: bool=True):
+    def set_loop(self, looping: bool=True) -> None:
+        """
+        Sets whether the current track should loop
+
+        Parameters
+        ----------
+        looping : bool
+            Whether or not the track should loop
+
+        Returns
+        -------
+        None
+        """
         if looping == self.looping:
             return
 
