@@ -132,29 +132,33 @@ def search_tab():
     file=relative_to_assets("image_46.png"))
     search_bar = scroll_view_canvas.create_image(
         621.0+82,
-        81.99999999999994,
+        82,
         image=search_bar_image,
         tag="search_tab_element"
     )
 
-    cancel_search_image = PhotoImage(
+    cancel_search_button_image = PhotoImage(
         file=relative_to_assets("image_47.png"))
-    cancel_search = scroll_view_canvas.create_image(
+    cancel_search_button = scroll_view_canvas.create_image(
         973.0+82,
-        80.99999999999994,
-        image=cancel_search_image,
+        81,
+        image=cancel_search_button_image,
         tag="search_tab_element"
     )
 
-    scroll_view_canvas.create_text(
-        292.0+82,
-        70.99999999999994,
-        anchor="nw",
-        text="Post Malone",
-        fill="#303030",
-        font=("RobotoRoman Regular", 12),
-        tag="search_tab_element"
+    search_entry = Entry(
+        scroll_view_canvas,
+        width = 50,
+        bg = "#FFFFFF",
+        fg = "#303030",
+        bd = 0,
+        highlightthickness = 0,
+        relief = "ridge",
+        font = ("RobotoRoman Medium", 12),
+        insertbackground = "#303030"
     )
+    search_entry.insert(END, "Post Malone")
+    search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry)
 
     scroll_view_canvas.create_text(
         247.0+82,
@@ -162,7 +166,7 @@ def search_tab():
         anchor="nw",
         text="Songs",
         fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16),
+        font=("RobotoRoman Medium", 16, "bold"),
         tag="search_result_element"
     )
 
@@ -237,7 +241,7 @@ def search_tab():
         anchor="nw",
         text="YouTube",
         fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16),
+        font=("RobotoRoman Medium", 16, "bold"),
         tag="search_result_element"
     )
 
@@ -296,8 +300,11 @@ def search_tab():
         tag="search_result_element"
     )
 
+    scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
+    scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event: search_entry.delete(0, END))
+
     scroll_view_canvas.images.append(search_bar_image)
-    scroll_view_canvas.images.append(cancel_search_image)
+    scroll_view_canvas.images.append(cancel_search_button_image)
     scroll_view_canvas.images.append(small_frame_image)
     scroll_view_canvas.images.append(cover_art_image)
     scroll_view_canvas.images.append(large_frame_image)
@@ -312,8 +319,8 @@ def check_textbox_content(edit_canvas, canvas_window, text_entry):
 
     edit_canvas.itemconfigure(canvas_window, state=description_state)
 
-def edit_textbox(edit_canvas, canvas_window, text_entry):
-    edit_canvas.itemconfigure(canvas_window, state="normal")
+def edit_textbox(canvas, canvas_window, text_entry):
+    canvas.itemconfigure(canvas_window, state="normal")
     text_entry.focus()
 
 def delete_playlist(overlay_window, playlist):
