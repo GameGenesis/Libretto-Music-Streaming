@@ -300,6 +300,10 @@ def search_tab():
         tag="search_result_element"
     )
 
+    scroll_view_canvas.bind("<ButtonPress-1>", lambda event: scroll_view_canvas.focus_set())
+
+    search_entry.bind("<FocusOut>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: check_textbox_content(c, w, e))
+    
     scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
     scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event: search_entry.delete(0, END))
 
@@ -310,14 +314,14 @@ def search_tab():
     scroll_view_canvas.images.append(large_frame_image)
     scroll_view_canvas.images.append(video_thumbnail_image)
 
-def check_textbox_content(edit_canvas, canvas_window, text_entry):
+def check_textbox_content(canvas, canvas_window, text_entry):
     description_state = "normal"
     if type(text_entry) == Text:
         description_state = "hidden" if not text_entry.get("1.0", END).strip() else "normal"
     elif type(text_entry) == Entry:
         description_state = "hidden" if not text_entry.get() else "normal"
 
-    edit_canvas.itemconfigure(canvas_window, state=description_state)
+    canvas.itemconfigure(canvas_window, state=description_state)
 
 def edit_textbox(canvas, canvas_window, text_entry):
     canvas.itemconfigure(canvas_window, state="normal")
