@@ -1,22 +1,20 @@
 # More Info: https://lyricsgenius.readthedocs.io/en/master/, https://github.com/johnwmillr/LyricsGenius
+# Search by title, artist, lyrics, genre
+# Browse categories (genre)
 
+import re
 import lyricsgenius as lg
 
 import config
 
-genius = lg.Genius(config.GENIUS_ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True)
+genius = lg.Genius(config.GENIUS_ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True, verbose=False)
 
 song = genius.search_song(title="Circles", artist="Post Malone")
-song.save_lyrics()
-#from string import digits
-print(song.lyrics[:-8]) #song.lyrics.replace("Embed", "").translate({ord(k): None for k in digits}) OR filter(lambda x: x.isalpha(), song.lyrics.replace("Embed", ""))
 
-import json
-with open('lyrics_postmalone_circles.json') as f:
-    data = json.load(f)
-print(data)
+print(song.artist, song.title, song.url, song.full_title, song.header_image_thumbnail_url, song.header_image_url, song.song_art_image_thumbnail_url, song.song_art_image_url, sep="\n")
+print(re.sub(r"\B\d+Embed", "", song.lyrics))
 
-# When downloading a song (with search through Genius), also download the lyrics json with the album art
+# song.save_lyrics('lyrics.json')
 
 # Search for a song in the search bar; gives the top results with Genius (with a button to load more results, and specify number of results)
 # Also gives results with YouTube search (for podcasts, etc.)
