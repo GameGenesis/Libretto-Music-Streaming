@@ -1,3 +1,4 @@
+from unittest import result
 import config
 import threading
 import time
@@ -161,13 +162,23 @@ def search(search_term: str):
     if search_thread:
         search_thread.join()
 
-    search_thread = threading.Thread(target=lambda: search_multithreaded(search_term))
-    # Make the thread terminate when the user exits the window
-    search_thread.daemon = True
-    search_thread.start()
+    # search_thread = threading.Thread(target=lambda: search_multithreaded(search_term))
+    # # Make the thread terminate when the user exits the window
+    # search_thread.daemon = True
+    # search_thread.start()
+
+    from multiprocessing.pool import ThreadPool
+    pool = ThreadPool(processes=1)
+
+    async_result = pool.apply_async(search_multithreaded, args=(search_term,))
+    song = async_result.get()
+    return song
 
 def search_multithreaded(search_term: str):
     song = genius.search_song(title=search_term)
 
     print(song.artist, song.title, song.url, song.full_title, song.header_image_thumbnail_url, song.header_image_url, song.song_art_image_thumbnail_url, song.song_art_image_url, sep="\n")
-    print(re.sub(r"\B\d+Embed", "", song.lyrics))
+    # Replace html artifact in lyrics (Remove number followed by "Embed" if it comes right after any character that isn't a number)
+    print(re.sub(r"([^0-9])?\d+Embed", r"\1", song.lyrics))
+
+    return song
