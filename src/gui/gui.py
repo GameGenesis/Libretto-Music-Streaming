@@ -123,6 +123,7 @@ def populate_search_results(search_entry):
 
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("search_result_element")
+    scroll_view_canvas.focus_set()
 
     scroll_view_canvas.create_text(
         247.0+82,
@@ -135,6 +136,7 @@ def populate_search_results(search_entry):
     )
 
     for row, result in enumerate(results.get("hits")):
+        final_row = row + 1
         objs = list()
 
         small_frame_image = PhotoImage(
@@ -211,6 +213,16 @@ def populate_search_results(search_entry):
         for obj in objs:
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, url=result.get("result").get("url"): webbrowser.open(url))
 
+    scroll_view_canvas.create_rectangle(
+        300.0,
+        330.0 + (final_row * 52.0),
+        1106.0,
+        340.0 + (final_row * 52.0),
+        fill="#202020",
+        outline="",
+        tag="search_result_element"
+    )
+
     # scroll_view_canvas.create_text(
     #     247.0+82,
     #     339.99999999999994,
@@ -279,6 +291,11 @@ def populate_search_results(search_entry):
     # scroll_view_canvas.images.append(large_frame_image)
     # scroll_view_canvas.images.append(video_thumbnail_image)
 
+def caancel_search(search_entry: Entry):
+    search_entry.delete(0, END)
+    scroll_view_canvas.yview_moveto(0)
+    scroll_view_canvas.delete("search_result_element")
+    scroll_view_canvas.focus_set()
 
 def search_tab():
     global scroll_view_canvas, canvas
@@ -328,7 +345,7 @@ def search_tab():
     search_entry.bind("<Return>", lambda event, e=search_entry: populate_search_results(e))
 
     scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
-    scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event: search_entry.delete(0, END))
+    scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event, e=search_entry: caancel_search(e))
 
     scroll_view_canvas.images.append(search_bar_image)
     scroll_view_canvas.images.append(cancel_search_button_image)
