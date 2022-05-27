@@ -13,6 +13,7 @@ import inspect
 import os
 from pathlib import Path
 import sys
+import webbrowser
 
 from tkinter import END, WORD, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
 
@@ -134,44 +135,48 @@ def populate_search_results(search_entry):
     )
 
     for row, result in enumerate(results.get("hits")):
+        objs = list()
+
         small_frame_image = PhotoImage(
             file=relative_to_assets("image_48.png"))
-        small_frame = scroll_view_canvas.create_image(
+        objs.append(scroll_view_canvas.create_image(
             621.0+82,
             195.99999999999994 + (row * 66),
             image=small_frame_image,
             tag="search_result_element"
-        )
+        ))
 
         cover_art_webimage = utils.WebImage(result.get("result").get("header_image_thumbnail_url"))
         cover_art_webimage.resize((40, 40))
         cover_art_image = cover_art_webimage.get()
-        cover_art = scroll_view_canvas.create_image(
+        objs.append(scroll_view_canvas.create_image(
             276.0+82,
             195.99999999999994 + (row * 66),
             image=cover_art_image,
             tag="search_result_element"
-        )
+        ))
 
-        scroll_view_canvas.create_text(
+        title = player.truncate_string(result.get("result").get("title"), 30)
+        objs.append(scroll_view_canvas.create_text(
             316.0+82,
             184.99999999999994 + (row * 66),
             anchor="nw",
-            text=result.get("result").get("title"),
+            text=title,
             fill="#FFFFFF",
             font=("RobotoRoman Medium", 12),
             tag="search_result_element"
-        )
+        ))
 
-        scroll_view_canvas.create_text(
+        artist = player.truncate_string(result.get("result").get("artist_names"), 30)
+        objs.append(scroll_view_canvas.create_text(
             560.0+82,
             184.99999999999994 + (row * 66),
             anchor="nw",
-            text=result.get("result").get("artist_names"),
+            text=artist,
             fill="#FFFFFF",
             font=("RobotoRoman Medium", 12),
             tag="search_result_element"
-        )
+        ))
 
         # scroll_view_canvas.create_text(
         #     750.0+82,
@@ -183,7 +188,7 @@ def populate_search_results(search_entry):
         #     tag="search_result_element"
         # )
 
-        scroll_view_canvas.create_text(
+        objs.append(scroll_view_canvas.create_text(
             931.0+82,
             184.99999999999994 + (row * 66),
             anchor="nw",
@@ -191,7 +196,7 @@ def populate_search_results(search_entry):
             fill="#FFFFFF",
             font=("RobotoRoman Light", 9),
             tag="search_result_element"
-        )
+        ))
 
         heart_button = scroll_view_canvas.create_image(
             895.0+82,
@@ -202,6 +207,9 @@ def populate_search_results(search_entry):
 
         scroll_view_canvas.images.append(small_frame_image)
         scroll_view_canvas.images.append(cover_art_image)
+
+        for obj in objs:
+            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, url=result.get("result").get("url"): webbrowser.open(url))
 
     # scroll_view_canvas.create_text(
     #     247.0+82,
@@ -311,8 +319,8 @@ def search_tab():
         font = ("RobotoRoman Medium", 12),
         insertbackground = "#303030"
     )
-    search_entry.insert(END, "Post Malone")
     search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry, tag="search_tab_element")
+    check_textbox_content(scroll_view_canvas, search_entry_window, search_entry)
 
     scroll_view_canvas.bind("<ButtonPress-1>", lambda event: scroll_view_canvas.focus_set())
 
