@@ -118,7 +118,7 @@ def populate_search_results(search_entry):
     global heart_empty_image
 
     search_term = search_entry.get()
-    song = player.search(search_term)
+    results = player.search(search_term)
 
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("search_result_element")
@@ -133,71 +133,75 @@ def populate_search_results(search_entry):
         tag="search_result_element"
     )
 
-    small_frame_image = PhotoImage(
-        file=relative_to_assets("image_48.png"))
-    small_frame = scroll_view_canvas.create_image(
-        621.0+82,
-        195.99999999999994,
-        image=small_frame_image,
-        tag="search_result_element"
-    )
+    for row, result in enumerate(results.get("hits")):
+        small_frame_image = PhotoImage(
+            file=relative_to_assets("image_48.png"))
+        small_frame = scroll_view_canvas.create_image(
+            621.0+82,
+            195.99999999999994 + (row * 66),
+            image=small_frame_image,
+            tag="search_result_element"
+        )
 
-    cover_art_webimage = utils.WebImage(song.header_image_thumbnail_url)
-    cover_art_webimage.resize((40, 40))
-    cover_art_image = cover_art_webimage.get()
-    cover_art = scroll_view_canvas.create_image(
-        276.0+82,
-        195.99999999999994,
-        image=cover_art_image,
-        tag="search_result_element"
-    )
+        cover_art_webimage = utils.WebImage(result.get("result").get("header_image_thumbnail_url"))
+        cover_art_webimage.resize((40, 40))
+        cover_art_image = cover_art_webimage.get()
+        cover_art = scroll_view_canvas.create_image(
+            276.0+82,
+            195.99999999999994 + (row * 66),
+            image=cover_art_image,
+            tag="search_result_element"
+        )
 
-    scroll_view_canvas.create_text(
-        316.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text=song.title,
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 12),
-        tag="search_result_element"
-    )
+        scroll_view_canvas.create_text(
+            316.0+82,
+            184.99999999999994 + (row * 66),
+            anchor="nw",
+            text=result.get("result").get("title"),
+            fill="#FFFFFF",
+            font=("RobotoRoman Medium", 12),
+            tag="search_result_element"
+        )
 
-    scroll_view_canvas.create_text(
-        560.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text=song.artist,
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 12),
-        tag="search_result_element"
-    )
+        scroll_view_canvas.create_text(
+            560.0+82,
+            184.99999999999994 + (row * 66),
+            anchor="nw",
+            text=result.get("result").get("artist_names"),
+            fill="#FFFFFF",
+            font=("RobotoRoman Medium", 12),
+            tag="search_result_element"
+        )
 
-    # scroll_view_canvas.create_text(
-    #     750.0+82,
-    #     184.99999999999994,
-    #     anchor="nw",
-    #     text="Scorpion",
-    #     fill="#FFFFFF",
-    #     font=("RobotoRoman Medium", 12),
-    #     tag="search_result_element"
-    # )
+        # scroll_view_canvas.create_text(
+        #     750.0+82,
+        #     184.99999999999994,
+        #     anchor="nw",
+        #     text="Scorpion",
+        #     fill="#FFFFFF",
+        #     font=("RobotoRoman Medium", 12),
+        #     tag="search_result_element"
+        # )
 
-    scroll_view_canvas.create_text(
-        931.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text="3:47",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 9),
-        tag="search_result_element"
-    )
+        scroll_view_canvas.create_text(
+            931.0+82,
+            184.99999999999994 + (row * 66),
+            anchor="nw",
+            text="3:47",
+            fill="#FFFFFF",
+            font=("RobotoRoman Light", 9),
+            tag="search_result_element"
+        )
 
-    heart_button = scroll_view_canvas.create_image(
-        895.0+82,
-        195.99999999999994,
-        image=heart_empty_image,
-        tag="search_result_element"
-    )
+        heart_button = scroll_view_canvas.create_image(
+            895.0+82,
+            195.99999999999994 + (row * 66),
+            image=heart_empty_image,
+            tag="search_result_element"
+        )
+
+        scroll_view_canvas.images.append(small_frame_image)
+        scroll_view_canvas.images.append(cover_art_image)
 
     # scroll_view_canvas.create_text(
     #     247.0+82,
@@ -264,8 +268,6 @@ def populate_search_results(search_entry):
     #     tag="search_result_element"
     # )
 
-    scroll_view_canvas.images.append(small_frame_image)
-    scroll_view_canvas.images.append(cover_art_image)
     # scroll_view_canvas.images.append(large_frame_image)
     # scroll_view_canvas.images.append(video_thumbnail_image)
 
