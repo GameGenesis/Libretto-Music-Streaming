@@ -2,8 +2,15 @@
 # Search by title, artist, lyrics, genre
 # Browse categories (genre)
 
+import inspect
+import os
 import re
+import sys
 import lyricsgenius as lg
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
 
 import config
 
@@ -14,7 +21,7 @@ song = genius.search_song(title="Circles", artist="Post Malone")
 print(song.artist, song.title, song.url, song.full_title, song.header_image_thumbnail_url, song.header_image_url, song.song_art_image_thumbnail_url, song.song_art_image_url, sep="\n")
 print(re.sub(r"\B\d+Embed", "", song.lyrics))
 
-# song.save_lyrics('lyrics.json')
+song.save_lyrics('lyrics.json')
 
 # Search for a song in the search bar; gives the top results with Genius (with a button to load more results, and specify number of results)
 # Also gives results with YouTube search (for podcasts, etc.)
