@@ -114,12 +114,163 @@ SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 # App content
 
 def populate_search_results(search_entry):
+    global scroll_view_canvas, canvas
+    global heart_empty_image
+
     search_term = search_entry.get()
-    player.search(search_term)
+    song = player.search(search_term)
+
+    scroll_view_canvas.yview_moveto(0)
+    scroll_view_canvas.delete("search_result_element")
+
+    scroll_view_canvas.create_text(
+        247.0+82,
+        131.99999999999994,
+        anchor="nw",
+        text="Songs",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16, "bold"),
+        tag="search_result_element"
+    )
+
+    small_frame_image = PhotoImage(
+        file=relative_to_assets("image_48.png"))
+    small_frame = scroll_view_canvas.create_image(
+        621.0+82,
+        195.99999999999994,
+        image=small_frame_image,
+        tag="search_result_element"
+    )
+
+    cover_art_image = PhotoImage(
+        file=relative_to_assets("image_49.png"))
+    cover_art = scroll_view_canvas.create_image(
+        276.0+82,
+        195.99999999999994,
+        image=cover_art_image,
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        316.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text=song.title,
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 12),
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.create_text(
+        560.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text=song.artist,
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 12),
+        tag="search_result_element"
+    )
+
+    # scroll_view_canvas.create_text(
+    #     750.0+82,
+    #     184.99999999999994,
+    #     anchor="nw",
+    #     text="Scorpion",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 12),
+    #     tag="search_result_element"
+    # )
+
+    scroll_view_canvas.create_text(
+        931.0+82,
+        184.99999999999994,
+        anchor="nw",
+        text="3:47",
+        fill="#FFFFFF",
+        font=("RobotoRoman Light", 9),
+        tag="search_result_element"
+    )
+
+    heart_button = scroll_view_canvas.create_image(
+        895.0+82,
+        195.99999999999994,
+        image=heart_empty_image,
+        tag="search_result_element"
+    )
+
+    # scroll_view_canvas.create_text(
+    #     247.0+82,
+    #     339.99999999999994,
+    #     anchor="nw",
+    #     text="YouTube",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 16, "bold"),
+    #     tag="search_result_element"
+    # )
+
+    # large_frame_image = PhotoImage(
+    #     file=relative_to_assets("image_50.png"))
+    # large_frame = scroll_view_canvas.create_image(
+    #     621.0+82,
+    #     421.99999999999994,
+    #     image=large_frame_image,
+    #     tag="search_result_element"
+    # )
+
+    # video_thumbnail_image = PhotoImage(
+    #     file=relative_to_assets("image_51.png"))
+    # video_thumbnail = scroll_view_canvas.create_image(
+    #     319.0+82,
+    #     420.99999999999994,
+    #     image=video_thumbnail_image,
+    #     tag="search_result_element"
+    # )
+
+    # scroll_view_canvas.create_text(
+    #     402.0+82,
+    #     419.99999999999994,
+    #     anchor="nw",
+    #     text="Lea Makhoul",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Light", 10),
+    #     tag="search_result_element"
+    # )
+
+    # scroll_view_canvas.create_text(
+    #     402.0+82,
+    #     400.99999999999994,
+    #     anchor="nw",
+    #     text="Lea Makhoul - RATATA (Official Music Video) ft. B.O.X",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Medium", 12),
+    #     tag="search_result_element"
+    # )
+
+    # scroll_view_canvas.create_text(
+    #     931.0+82,
+    #     410.99999999999994,
+    #     anchor="nw",
+    #     text="3:08",
+    #     fill="#FFFFFF",
+    #     font=("RobotoRoman Light", 10),
+    #     tag="search_result_element"
+    # )
+
+    # heart_button_2 = scroll_view_canvas.create_image(
+    #     895.0+82,
+    #     421.99999999999994,
+    #     image=heart_empty_image,
+    #     tag="search_result_element"
+    # )
+
+    scroll_view_canvas.images.append(small_frame_image)
+    scroll_view_canvas.images.append(cover_art_image)
+    # scroll_view_canvas.images.append(large_frame_image)
+    # scroll_view_canvas.images.append(video_thumbnail_image)
+
 
 def search_tab():
     global scroll_view_canvas, canvas
-    global heart_empty_image
 
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
@@ -160,146 +311,6 @@ def search_tab():
     search_entry.insert(END, "Post Malone")
     search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry, tag="search_tab_element")
 
-    scroll_view_canvas.create_text(
-        247.0+82,
-        131.99999999999994,
-        anchor="nw",
-        text="Songs",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16, "bold"),
-        tag="search_result_element"
-    )
-
-    small_frame_image = PhotoImage(
-        file=relative_to_assets("image_48.png"))
-    small_frame = scroll_view_canvas.create_image(
-        621.0+82,
-        195.99999999999994,
-        image=small_frame_image,
-        tag="search_result_element"
-    )
-
-    cover_art_image = PhotoImage(
-        file=relative_to_assets("image_49.png"))
-    cover_art = scroll_view_canvas.create_image(
-        276.0+82,
-        195.99999999999994,
-        image=cover_art_image,
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        316.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text="Congratulations",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 12),
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        560.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text="Post Malone",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 12),
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        750.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text="Scorpion",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 12),
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        931.0+82,
-        184.99999999999994,
-        anchor="nw",
-        text="3:47",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 9),
-        tag="search_result_element"
-    )
-
-    heart_button = scroll_view_canvas.create_image(
-        895.0+82,
-        195.99999999999994,
-        image=heart_empty_image,
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        247.0+82,
-        339.99999999999994,
-        anchor="nw",
-        text="YouTube",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 16, "bold"),
-        tag="search_result_element"
-    )
-
-    large_frame_image = PhotoImage(
-        file=relative_to_assets("image_50.png"))
-    large_frame = scroll_view_canvas.create_image(
-        621.0+82,
-        421.99999999999994,
-        image=large_frame_image,
-        tag="search_result_element"
-    )
-
-    video_thumbnail_image = PhotoImage(
-        file=relative_to_assets("image_51.png"))
-    video_thumbnail = scroll_view_canvas.create_image(
-        319.0+82,
-        420.99999999999994,
-        image=video_thumbnail_image,
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        402.0+82,
-        419.99999999999994,
-        anchor="nw",
-        text="Lea Makhoul",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 10),
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        402.0+82,
-        400.99999999999994,
-        anchor="nw",
-        text="Lea Makhoul - RATATA (Official Music Video) ft. B.O.X",
-        fill="#FFFFFF",
-        font=("RobotoRoman Medium", 12),
-        tag="search_result_element"
-    )
-
-    scroll_view_canvas.create_text(
-        931.0+82,
-        410.99999999999994,
-        anchor="nw",
-        text="3:08",
-        fill="#FFFFFF",
-        font=("RobotoRoman Light", 10),
-        tag="search_result_element"
-    )
-
-    heart_button_2 = scroll_view_canvas.create_image(
-        895.0+82,
-        421.99999999999994,
-        image=heart_empty_image,
-        tag="search_result_element"
-    )
-
     scroll_view_canvas.bind("<ButtonPress-1>", lambda event: scroll_view_canvas.focus_set())
 
     search_entry.bind("<FocusOut>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: check_textbox_content(c, w, e))
@@ -310,10 +321,6 @@ def search_tab():
 
     scroll_view_canvas.images.append(search_bar_image)
     scroll_view_canvas.images.append(cancel_search_button_image)
-    scroll_view_canvas.images.append(small_frame_image)
-    scroll_view_canvas.images.append(cover_art_image)
-    scroll_view_canvas.images.append(large_frame_image)
-    scroll_view_canvas.images.append(video_thumbnail_image)
 
 def check_textbox_content(canvas, canvas_window, text_entry):
     description_state = "normal"
