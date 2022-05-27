@@ -171,14 +171,10 @@ def search(search_term: str):
     pool = ThreadPool(processes=1)
 
     async_result = pool.apply_async(search_multithreaded, args=(search_term,))
-    song = async_result.get()
-    return song
+    results = async_result.get()
+    return results
 
 def search_multithreaded(search_term: str):
-    song = genius.search_song(title=search_term)
-
-    print(song.artist, song.title, song.url, song.full_title, song.header_image_thumbnail_url, song.header_image_url, song.song_art_image_thumbnail_url, song.song_art_image_url, sep="\n")
-    # Replace html artifact in lyrics (Remove number followed by "Embed" if it comes right after any character that isn't a number)
-    print(re.sub(r"([^0-9])?\d+Embed", r"\1", song.lyrics))
-
-    return song
+    results = genius.search(search_term)
+    # print(results)
+    return results
