@@ -1,5 +1,7 @@
-from tkinter import Canvas
-
+from tkinter import Canvas, Image
+from PIL import ImageTk, Image
+import requests
+from io import BytesIO
 
 def clamp(value: float, min_value: float, max_value: float):
     return max(min(value, max_value), min_value)
@@ -79,3 +81,16 @@ class Slider:
         self.current_pos = lerp(self.start_pos, self.end_pos, percent)
         self.canvas.delete(self.slider_foreground)
         self.slider_foreground = round_rectangle(self.canvas, self.x1, self.y1, self.current_pos, self.y2, radius=self.radius, fill=self.fg)
+
+class WebImage:
+    def __init__(self, url: str):
+          request = requests.get(url)
+          self.image = Image.open(BytesIO(request.content))
+          self.photoimage = ImageTk.PhotoImage(self.image)
+
+    def resize(self, size: tuple[int, int]):
+        self.image = self.image.resize(size)
+        self.photoimage = ImageTk.PhotoImage(self.image)
+
+    def get(self):
+        return self.photoimage
