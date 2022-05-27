@@ -142,8 +142,9 @@ def populate_search_results(search_entry):
         tag="search_result_element"
     )
 
-    cover_art_image = PhotoImage(
-        file=relative_to_assets("image_49.png"))
+    cover_art_webimage = utils.WebImage(song.header_image_thumbnail_url)
+    cover_art_webimage.resize((40, 40))
+    cover_art_image = cover_art_webimage.get()
     cover_art = scroll_view_canvas.create_image(
         276.0+82,
         195.99999999999994,
