@@ -1,11 +1,20 @@
+import config
 import threading
 import time
+import re
+
 from typing import Any
+
+import lyricsgenius as lg
 
 from tkinter import Canvas, PhotoImage
 
 from stream import Stream
 from database import Playlist, Track, playlist_manager
+
+
+genius = None
+search_thread = None
 
 gui_canvas = None
 gui_elapsed_time_text = None
@@ -18,7 +27,9 @@ music_thread = None
 stream = None
 
 def init(canvas: Canvas, elapsed_time_text: int, track_slider):
-    global gui_canvas, gui_elapsed_time_text, gui_track_slider
+    global genius, gui_canvas, gui_elapsed_time_text, gui_track_slider
+
+    genius = lg.Genius(config.GENIUS_ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True, verbose=False)
 
     gui_canvas = canvas
     gui_elapsed_time_text = elapsed_time_text
@@ -144,3 +155,19 @@ def split_list(list: list[Any], size: int):
 
 def get_formatted_time(seconds: int):
     return time.strftime('%#M:%S', time.gmtime(seconds))
+
+def search(search_term: str):
+    global search_thread
+    if search_thread:
+        search_thread.join()
+
+    search_thread = threading.Thread(target=lambda: search_multithreaded(search_term))
+    # Make the thread terminate when the user exits the window
+    search_thread.daemon = True
+    search_thread.start()
+
+def search_multithreaded(search_term: str):
+    song = genius.search_song(title=search_term)
+
+    print(song.artist, song.title, song.url, song.full_title, song.header_image_thumbnail_url, song.header_image_url, song.song_art_image_thumbnail_url, song.song_art_image_url, sep="\n")
+    print(re.sub(r"\B\d+Embed", "", song.lyrics))

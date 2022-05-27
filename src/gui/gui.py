@@ -113,8 +113,9 @@ SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 # App content
 
-def populate_search_results():
-    pass
+def populate_search_results(search_entry):
+    search_term = search_entry.get()
+    player.search(search_term)
 
 def search_tab():
     global scroll_view_canvas, canvas
@@ -133,8 +134,7 @@ def search_tab():
     search_bar = scroll_view_canvas.create_image(
         621.0+82,
         82,
-        image=search_bar_image,
-        tag="search_tab_element"
+        image=search_bar_image
     )
 
     cancel_search_button_image = PhotoImage(
@@ -158,7 +158,7 @@ def search_tab():
         insertbackground = "#303030"
     )
     search_entry.insert(END, "Post Malone")
-    search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry)
+    search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry, tag="search_tab_element")
 
     scroll_view_canvas.create_text(
         247.0+82,
@@ -303,7 +303,8 @@ def search_tab():
     scroll_view_canvas.bind("<ButtonPress-1>", lambda event: scroll_view_canvas.focus_set())
 
     search_entry.bind("<FocusOut>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: check_textbox_content(c, w, e))
-    
+    search_entry.bind("<Return>", lambda event, e=search_entry: populate_search_results(e))
+
     scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
     scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event: search_entry.delete(0, END))
 
