@@ -812,9 +812,8 @@ def populate_tracks(playlist: Playlist):
         scroll_view_canvas.images.append(track_frame_image)
         for obj in objs:
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
-                lambda event, track_id=track.id:
-                player.play_new_track(canvas, track_id, track_title_text, track_artist_text,
-                    heart_button, heart_empty_image, heart_full_image, play_button, play_button_image, pause_button_image, total_time_text))
+                lambda event, track_id=track.id: player.play_database_track(track_id)
+            )
 
     scroll_view_canvas.create_rectangle(
         300.0,
@@ -1049,8 +1048,7 @@ play_button = canvas.create_image(
     image=play_button_image
 )
 
-canvas.tag_bind(play_button, "<ButtonPress-1>", lambda event:
-    player.play_pause_track(canvas, play_button, play_button_image, pause_button_image))
+canvas.tag_bind(play_button, "<ButtonPress-1>", lambda event: player.play_pause_track())
 
 image_image_3 = PhotoImage(
     file=relative_to_assets("image_3.png"))
@@ -1106,7 +1104,7 @@ loop_button = canvas.create_image(
     image=no_loop_button_image
 )
 
-canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop(canvas, loop_button, no_loop_button_image, loop_button_image))
+canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop())
 
 track_slider = utils.Slider(canvas, 317.0, 699.0, 707.0, 704.0)
 
@@ -1402,5 +1400,9 @@ button_10.place(
     height=33.0,
 )
 
-player.init(canvas, elapsed_time_text, track_slider)
+player.init(
+    canvas, elapsed_time_text, track_slider, heart_button, heart_empty_image,
+    heart_full_image, loop_button, no_loop_button_image, loop_button_image,
+    play_button, play_button_image, pause_button_image, track_title_text, track_artist_text, total_time_text
+)
 window.mainloop()

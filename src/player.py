@@ -1,10 +1,8 @@
-from unittest import result
 import config
 import threading
 import time
-import re
 
-from typing import Any
+from typing import Any, Optional
 
 import lyricsgenius as lg
 from youtubesearchpython import VideosSearch
@@ -23,27 +21,52 @@ gui_elapsed_time_text = None
 gui_track_slider = None
 past_time = 0
 
+gui_heart_button, gui_heart_empty_image, gui_heart_full_image = None, None, None
+gui_loop_button, gui_no_loop_button_image, gui_loop_button_image = None, None, None
+gui_play_button, gui_play_button_image, gui_pause_button_image = None, None, None
+gui_track_title_text, gui_track_artist_text, gui_total_time_text = None, None, None
+
 looping = False
 playing = False
 music_thread = None
 stream = None
 
-def init(canvas: Canvas, elapsed_time_text: int, track_slider):
-    global genius, gui_canvas, gui_elapsed_time_text, gui_track_slider
+def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
+    loop_button: int, no_loop_button_image: PhotoImage, loop_button_image: PhotoImage,
+    play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
+    track_title_text: int, track_artist_text: int, total_time_text: int):
+    global genius
+    global gui_canvas, gui_elapsed_time_text, gui_track_slider, gui_heart_button, gui_heart_empty_image, gui_heart_full_image
+    global gui_loop_button, gui_no_loop_button_image, gui_loop_button_image
+    global gui_play_button, gui_play_button_image, gui_pause_button_image
+    global gui_track_title_text, gui_track_artist_text, gui_total_time_text
 
     genius = lg.Genius(config.GENIUS_ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True, verbose=False)
 
     gui_canvas = canvas
     gui_elapsed_time_text = elapsed_time_text
     gui_track_slider = track_slider
+    gui_heart_button = heart_button
+    gui_heart_empty_image = heart_empty_image
+    gui_heart_full_image = heart_full_image
+    gui_loop_button = loop_button
+    gui_no_loop_button_image = no_loop_button_image
+    gui_loop_button_image = loop_button_image
+    gui_play_button = play_button
+    gui_play_button_image = play_button_image
+    gui_pause_button_image = pause_button_image
+    gui_track_title_text = track_title_text
+    gui_track_artist_text = track_artist_text
+    gui_total_time_text = total_time_text
 
 def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
     truncated_len = max_length-len(continuation_str)
     truncated_str = f"{string[:truncated_len]}{continuation_str}"
     return truncated_str if len(string) > max_length else string
 
-def toggle_track_like(track: Track, canvas: Canvas,
-    heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage):
+def toggle_track_like(track: Track):
+    global gui_canvas, gui_heart_button, gui_heart_empty_image, gui_heart_full_image
+
     liked_track = playlist_manager.track_is_liked(track)
     if liked_track:
         playlist_manager.remove_track_from_liked_songs(track)
@@ -51,7 +74,7 @@ def toggle_track_like(track: Track, canvas: Canvas,
         playlist_manager.add_track_to_liked_songs(track)
 
     liked_track = not liked_track
-    canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
+    gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
 
 def skip_backwards():
     if not stream:
@@ -65,32 +88,35 @@ def skip_forwards():
 
     stream.skip_forwards(10.0)
 
-def toggle_loop(canvas: Canvas, loop_button: int, no_loop_button_image: PhotoImage, loop_button_image: PhotoImage):
+def toggle_loop():
     global looping
+    global gui_canvas, gui_loop_button, gui_no_loop_button_image, gui_loop_button_image
     if not stream:
         return
 
     looping = not looping
     stream.set_loop(looping)
 
-    canvas.itemconfig(loop_button, image=loop_button_image if looping else no_loop_button_image)
+    gui_canvas.itemconfig(gui_loop_button, image=gui_loop_button_image if looping else gui_no_loop_button_image)
 
-def configure_play_state(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
+def configure_play_state():
     global stream, playing
+    global gui_canvas, gui_play_button, gui_play_button_image, gui_pause_button_image
     if playing:
         stream.unpause()
-        canvas.itemconfig(play_button, image=pause_button_image)
+        gui_canvas.itemconfig(gui_play_button, image=gui_pause_button_image)
     else:
         stream.pause()
-        canvas.itemconfig(play_button, image=play_button_image)
+        gui_canvas.itemconfig(gui_play_button, image=gui_play_button_image)
 
-def play_pause_track(canvas: Canvas, play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage):
+def play_pause_track():
     global stream, playing
+    global gui_canvas, gui_play_button, gui_play_button_image, gui_pause_button_image
     if not stream:
         return
 
     playing = not playing
-    configure_play_state(canvas, play_button, play_button_image, pause_button_image)
+    configure_play_state()
 
 def update_elapsed_time(current_time, current_position):
     global gui_canvas, gui_elapsed_time_text, past_time
@@ -102,40 +128,40 @@ def update_elapsed_time(current_time, current_position):
     
     past_time = int(current_time)
 
-def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_artist_text: int,
-    heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
-    play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
-    total_time_text: int):
-    global music_thread, stream, playing
+def play_database_track(track_id: int):
+    track = playlist_manager.get_track(id=track_id)
+    play_track(track.stream.url, track.title, track.artist, track.duration, track)
+
+def play_track(stream_url: str, title: str, artist: str, duration: int, track: Optional[Track]=None):
+    global music_thread, stream, playing, gui_canvas
     if stream:
         stream.stop()
     if music_thread:
         music_thread.join()
 
-    track = playlist_manager.get_track(id=track_id)
+    title = truncate_string(title, 16)
+    artist = truncate_string(artist, 16)
 
-    title = truncate_string(track.title, 16)
-    artist = truncate_string(track.artist, 16)
+    gui_canvas.itemconfig(gui_track_title_text, text=title)
+    gui_canvas.itemconfig(gui_track_artist_text, text=artist)
 
-    canvas.itemconfig(track_title_text, text=title)
-    canvas.itemconfig(track_artist_text, text=artist)
+    if track:
+        liked_track = playlist_manager.track_is_liked(track)
+        gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
+        gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
 
-    liked_track = playlist_manager.track_is_liked(track)
-    canvas.itemconfig(heart_button, image=heart_full_image if liked_track else heart_empty_image)
-    canvas.tag_bind(heart_button, "<ButtonPress-1>", lambda event, track=track, canvas=canvas:
-        toggle_track_like(track, canvas, heart_button, heart_empty_image, heart_full_image))
+    track_duration = get_formatted_time(duration)
+    gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
 
-    track_duration = get_formatted_time(track.duration)
-    canvas.itemconfig(total_time_text, text=track_duration)
-
-    stream = Stream(track.stream.url, update_elapsed_time)
+    stream = Stream(stream_url, update_elapsed_time)
+    stream.set_loop(looping)
     music_thread = threading.Thread(target=lambda: stream.play())
     # Make the thread terminate when the user exits the window
     music_thread.daemon = True
     music_thread.start()
 
     playing = True
-    configure_play_state(canvas, play_button, play_button_image, pause_button_image)
+    configure_play_state()
 
 def _play(url):
     global music_thread, stream, playing
