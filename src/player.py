@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 import lyricsgenius as lg
+from youtubesearchpython import VideosSearch
 
 from tkinter import Canvas, PhotoImage
 
@@ -136,6 +137,21 @@ def play_new_track(canvas: Canvas, track_id: int, track_title_text: int, track_a
     playing = True
     configure_play_state(canvas, play_button, play_button_image, pause_button_image)
 
+def _play(url):
+    global music_thread, stream, playing
+    if stream:
+        stream.stop()
+    if music_thread:
+        music_thread.join()
+    
+    stream = Stream(url)
+    music_thread = threading.Thread(target=lambda: stream.play())
+    # Make the thread terminate when the user exits the window
+    music_thread.daemon = True
+    music_thread.start()
+
+    playing = True
+
 def get_playlist_info(playlist: Playlist):
     total_duration = playlist.get_total_duration()
     hours = total_duration // 3600
@@ -176,5 +192,9 @@ def search(search_term: str):
 
 def search_multithreaded(search_term: str):
     results = genius.search(search_term)
-    # print(results)
     return results
+
+def get_song_yt(search_term: str) -> str | dict:
+    videosSearch = VideosSearch(search_term, limit = 1)
+    result = videosSearch.result()["result"][0]
+    return result
