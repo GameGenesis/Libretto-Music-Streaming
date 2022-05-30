@@ -117,7 +117,7 @@ SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 def play_search_track(full_track_title, url):
     webbrowser.open(url)
     result = player.get_song_yt(full_track_title)
-    player._play(result["link"])
+    player.play_track(result["link"], result["title"], result["channel"]["name"], result["duration"])
 
 def populate_search_results(search_entry):
     global scroll_view_canvas, canvas

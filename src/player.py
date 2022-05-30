@@ -125,7 +125,7 @@ def update_elapsed_time(current_time, current_position):
 
     if int(current_time) != past_time:
         gui_track_slider.set_position(current_position)
-    
+
     past_time = int(current_time)
 
 def play_database_track(track_id: int):
@@ -162,21 +162,6 @@ def play_track(stream_url: str, title: str, artist: str, duration: int, track: O
 
     playing = True
     configure_play_state()
-
-def _play(url):
-    global music_thread, stream, playing
-    if stream:
-        stream.stop()
-    if music_thread:
-        music_thread.join()
-    
-    stream = Stream(url)
-    music_thread = threading.Thread(target=lambda: stream.play())
-    # Make the thread terminate when the user exits the window
-    music_thread.daemon = True
-    music_thread.start()
-
-    playing = True
 
 def get_playlist_info(playlist: Playlist):
     total_duration = playlist.get_total_duration()
