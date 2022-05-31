@@ -25,7 +25,8 @@ print(re.sub(r"([^0-9])?\d+Embed", r"\1", song.lyrics))
 
 print()
 
-# Top 100 song results in the Pop genre
+# Top 100 song results in the Pop genre (20 results per page; 50 pages max)
+# Main Genius genre tags: rap, pop, r-b, rock, country, or non-music (x, lit, law, news, sports, screen, tech, meta, history)
 tag_results = list()
 for i in range(5):
     for result in genius.tag("pop", page=i).get("hits"):

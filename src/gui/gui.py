@@ -149,6 +149,8 @@ def populate_search_results(search_entry):
         tag="search_result_element"
     )
 
+    final_row = 0
+
     for row, result in enumerate(results.get("hits")):
         final_row = row + 1
         objs = list()
@@ -197,7 +199,7 @@ def populate_search_results(search_entry):
         # Album name
 
         heart_button = scroll_view_canvas.create_image(
-            945.0+82,
+            960.0+82,
             195.99999999999994 + (row * 66),
             image=heart_empty_image,
             tag="search_result_element"
