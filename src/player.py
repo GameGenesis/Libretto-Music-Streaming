@@ -556,7 +556,31 @@ class Utils:
 class Slider:
     def __init__(self, canvas: Canvas,
         x1: float, y1: float, x2: float, y2: float, radius: int=5,
-        bg="#838383", fg="#DADADA") -> None:
+        bg: str="#838383", fg: str="#DADADA") -> None:
+        """
+        Parameters
+        ----------
+        canvas : Canvas
+            The canvas on which to create the slider
+        x1 : float
+            The first or leftmost x coordinate
+        y1 : float
+            The first or topmost y coordinate
+        x2 : float
+            The second or rightmost x coordinate
+        y2 : float
+            The second or bottommost y coordinate
+        radius : int
+            The radius of the slider
+        bg : str
+            The background color (The color of the slider background rectangle)
+        fg : str
+            The foreground color (The color of the moving slider rectangle)
+
+        Returns
+        -------
+        None
+        """
         self.canvas = canvas
 
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
@@ -567,7 +591,19 @@ class Slider:
         self.slider_background = Utils.round_rectangle(canvas, x1, y1, x2, y2, radius=radius, fill=bg)
         self.slider_foreground = Utils.round_rectangle(canvas, x1, y1, x1, y2, radius=0, fill=fg)
 
-    def set_position(self, percent: float):
+    def set_position(self, percent: float) -> None:
+        """
+        Sets the position of the slider based on a percent (decimal form)
+
+        Parameters
+        ----------
+        percent : float
+            The position of the slider
+
+        Returns
+        -------
+        None
+        """
         self.current_pos = Utils.lerp(self.start_pos, self.end_pos, percent)
         self.canvas.delete(self.slider_foreground)
         self.slider_foreground = Utils.round_rectangle(self.canvas, self.x1, self.y1, self.current_pos, self.y2, radius=self.radius, fill=self.fg)
