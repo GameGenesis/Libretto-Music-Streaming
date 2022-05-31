@@ -11,6 +11,10 @@ from tkinter import Canvas, PhotoImage
 from stream import Stream, StreamData
 from database import Playlist, Track, playlist_manager
 
+from PIL import ImageTk, Image
+import requests
+from io import BytesIO
+
 
 genius = None
 
@@ -61,12 +65,20 @@ def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int
     gui_album_cover_art = album_cover_art
     gui_album_cover_art_image = album_cover_art_image
 
-def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
-    truncated_len = max_length-len(continuation_str)
-    truncated_str = f"{string[:truncated_len]}{continuation_str}"
-    return truncated_str if len(string) > max_length else string
+def toggle_track_like(track: Track) -> None:
+    """
+    Add or remove a track from Liked Songs
 
-def toggle_track_like(track: Track):
+    Parameters
+    ----------
+    track : Track
+        The track database object to add or remove from the "Liked Songs" playlist
+
+    Returns
+    -------
+    bool
+        if the stream is a playlist type
+    """
     global gui_canvas, gui_heart_button, gui_heart_empty_image, gui_heart_full_image
 
     liked_track = playlist_manager.track_is_liked(track)
@@ -123,7 +135,7 @@ def play_pause_track():
 def update_elapsed_time(current_time, current_position):
     global gui_canvas, gui_elapsed_time_text, past_time
 
-    gui_canvas.itemconfig(gui_elapsed_time_text, text=get_formatted_time(int(current_time)))
+    gui_canvas.itemconfig(gui_elapsed_time_text, text=Utils.get_formatted_time(int(current_time)))
 
     if int(current_time) != past_time:
         gui_track_slider.set_position(current_position)
@@ -132,15 +144,14 @@ def update_elapsed_time(current_time, current_position):
 
 def play_database_track(track_id: int):
     track = playlist_manager.get_track(id=track_id)
-    play_track(track.stream.url, track.title, track.artist, track.duration, track)
+    play_track(track.stream.url, track.title, track.artist, track.duration, track, cover_art_url=track.cover_art_url)
 
-def play_search_track(track_title: str, cover_art_image: PhotoImage):
+def play_search_track(track_title: str, cover_art_url: str):
     result = get_song_yt(track_title)
-
-    play_track(result["link"], result["title"], result["channel"]["name"], get_unformatted_time(result["duration"]), cover_art_image=cover_art_image)
+    play_track(result["link"], result["title"], result["channel"]["name"], Utils.get_unformatted_time(result["duration"]), cover_art_url=cover_art_url)
 
 def play_track(stream_url: str, title: str, artist: str, duration: int,
-    track: Optional[Track]=None, cover_art_image: Optional[PhotoImage]=None):
+    track: Optional[Track]=None, cover_art_url: Optional[str]=None):
     global stream, playing, looping
     global gui_canvas, gui_heart_button, gui_heart_full_image, gui_heart_empty_image
     global gui_track_title_text, gui_track_artist_text, gui_total_time_text
@@ -152,23 +163,27 @@ def play_track(stream_url: str, title: str, artist: str, duration: int,
         track_id = StreamData(stream_url).add_to_playlist()
         track = playlist_manager.get_track(id=track_id)
 
+    if cover_art_url:
+        playlist_manager.add_track_cover_art(track, cover_art_url)
+        cover_art_image = create_image(cover_art_url, (54, 54))
+        gui_canvas.images = list()
+        gui_canvas.images.append(cover_art_image)
+        gui_canvas.itemconfig(gui_album_cover_art, image=cover_art_image)
+    else:
+        gui_canvas.itemconfig(gui_album_cover_art, image=gui_album_cover_art_image)
+
     liked_track = playlist_manager.track_is_liked(track)
     gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
     gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
 
-    title = truncate_string(title, 16)
-    artist = truncate_string(artist, 16)
+    title = Utils.truncate_string(title, 16)
+    artist = Utils.truncate_string(artist, 16)
 
     gui_canvas.itemconfig(gui_track_title_text, text=title)
     gui_canvas.itemconfig(gui_track_artist_text, text=artist)
 
-    track_duration = get_formatted_time(duration)
+    track_duration = Utils.get_formatted_time(duration)
     gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
-
-    if cover_art_image:
-        gui_canvas.itemconfig(gui_album_cover_art, image=cover_art_image)
-    else:
-        gui_canvas.itemconfig(gui_album_cover_art, image=gui_album_cover_art_image)
 
     stream = Stream(stream_url, update_elapsed_time)
     stream.set_loop(looping)
@@ -189,23 +204,6 @@ def get_playlist_info(playlist: Playlist):
     playlist_information = f"{formatted_length}, {formatted_time}"
     return playlist_information
 
-def split_list(list: list[Any], size: int):
-    """
-    Splits a list into smaller-sized lists of a specified size
-    """
-    return (list[index:index+size] for index in range(0, len(list), size))
-
-def get_formatted_time(seconds: int):
-    return time.strftime('%#M:%S', time.gmtime(seconds))
-
-def get_unformatted_time(time_str: str):
-    h = 0
-    if time_str.count(":") == 1:
-        m, s = time_str.split(":")
-    else:
-        h, m, s = time_str.split(":")
-    return int(h) * 3600 + int(m) * 60 + int(s)
-
 def search(search_term: str):
     results = genius.search(search_term)
     return results
@@ -214,3 +212,135 @@ def get_song_yt(search_term: str) -> str | dict:
     videosSearch = VideosSearch(search_term, limit = 1)
     result = videosSearch.result()["result"][0]
     return result
+
+def create_image(image_url: str, size: tuple[int, int]) -> PhotoImage:
+    webimage = WebImage(image_url)
+    webimage.resize(size)
+    return webimage.get()
+
+# Utils
+
+class Utils:
+    @staticmethod
+    def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
+        truncated_len = max_length-len(continuation_str)
+        truncated_str = f"{string[:truncated_len]}{continuation_str}"
+        return truncated_str if len(string) > max_length else string
+
+    @staticmethod
+    def split_list(list: list[Any], size: int):
+        """
+        Splits a list into smaller-sized lists of a specified size
+        """
+        return (list[index:index+size] for index in range(0, len(list), size))
+
+    @staticmethod
+    def get_formatted_time(seconds: int):
+        return time.strftime('%#M:%S', time.gmtime(seconds))
+
+    @staticmethod
+    def get_unformatted_time(time_str: str):
+        h = 0
+        if time_str.count(":") == 1:
+            m, s = time_str.split(":")
+        else:
+            h, m, s = time_str.split(":")
+        return int(h) * 3600 + int(m) * 60 + int(s)
+
+    @staticmethod
+    def clamp(value: float, min_value: float, max_value: float):
+        return max(min(value, max_value), min_value)
+
+    @staticmethod
+    def clamp_01(value: float):
+        return Utils.clamp(value, 0.0, 1.0)
+
+    @staticmethod
+    def lerp(a: float, b: float, t: float):
+        """
+        Linearly interpolates between the points a and b by the interpolant t. The parameter t is clamped to the range [0, 1].
+
+        Use Case
+        --------
+        When t = 0, returns a
+
+        When t = 1, returns b
+
+        When t = 0.5, returns the midpoint of a and b
+
+        Parameters
+        ----------
+        a : float
+            The start value, returned when t = 0
+        b : float
+            The start value, returned when t = 1
+        t : float
+            The value used to interpolate between a and b
+
+        Returns
+        -------
+        float
+            The interpolated float result between the two float values
+        """
+        t = Utils.clamp_01(t)
+        return a + (b - a) * t
+
+    @staticmethod
+    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs):
+        # Source: https://stackoverflow.com/a/44100075
+        points = [x1+radius, y1,
+                x1+radius, y1,
+                x2-radius, y1,
+                x2-radius, y1,
+                x2, y1,
+                x2, y1+radius,
+                x2, y1+radius,
+                x2, y2-radius,
+                x2, y2-radius,
+                x2, y2,
+                x2-radius, y2,
+                x2-radius, y2,
+                x1+radius, y2,
+                x1+radius, y2,
+                x1, y2,
+                x1, y2-radius,
+                x1, y2-radius,
+                x1, y1+radius,
+                x1, y1+radius,
+                x1, y1]
+
+        return canvas.create_polygon(points, **kwargs, smooth=True)
+
+
+class Slider:
+    def __init__(self, canvas: Canvas,
+        x1: float, y1: float, x2: float, y2: float, radius: int=5,
+        bg="#838383", fg="#DADADA") -> None:
+        self.canvas = canvas
+
+        self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
+        self.start_pos, self.end_pos = x1, x2
+
+        self.radius, self.bg, self.fg = radius, bg, fg
+
+        self.slider_background = Utils.round_rectangle(canvas, x1, y1, x2, y2, radius=radius, fill=bg)
+        self.slider_foreground = Utils.round_rectangle(canvas, x1, y1, x1, y2, radius=0, fill=fg)
+
+    def set_position(self, percent: float):
+        self.current_pos = Utils.lerp(self.start_pos, self.end_pos, percent)
+        self.canvas.delete(self.slider_foreground)
+        self.slider_foreground = Utils.round_rectangle(self.canvas, self.x1, self.y1, self.current_pos, self.y2, radius=self.radius, fill=self.fg)
+
+
+class WebImage:
+    def __init__(self, url: str):
+          request = requests.get(url)
+          self.image = Image.open(BytesIO(request.content))
+          self.photoimage = ImageTk.PhotoImage(self.image)
+
+    def resize(self, size: tuple[int, int]):
+        self.image = self.image.resize(size)
+        self.photoimage = ImageTk.PhotoImage(self.image)
+
+    def get(self):
+        return self.photoimage
