@@ -23,6 +23,7 @@ gui_heart_button, gui_heart_empty_image, gui_heart_full_image = None, None, None
 gui_loop_button, gui_no_loop_button_image, gui_loop_button_image = None, None, None
 gui_play_button, gui_play_button_image, gui_pause_button_image = None, None, None
 gui_track_title_text, gui_track_artist_text, gui_total_time_text = None, None, None
+gui_album_cover_art, gui_album_cover_art_image = None, None
 
 looping = False
 playing = False
@@ -31,12 +32,14 @@ stream = None
 def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
     loop_button: int, no_loop_button_image: PhotoImage, loop_button_image: PhotoImage,
     play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
-    track_title_text: int, track_artist_text: int, total_time_text: int):
+    track_title_text: int, track_artist_text: int, total_time_text: int,
+    album_cover_art: int, album_cover_art_image: PhotoImage):
     global genius
     global gui_canvas, gui_elapsed_time_text, gui_track_slider, gui_heart_button, gui_heart_empty_image, gui_heart_full_image
     global gui_loop_button, gui_no_loop_button_image, gui_loop_button_image
     global gui_play_button, gui_play_button_image, gui_pause_button_image
     global gui_track_title_text, gui_track_artist_text, gui_total_time_text
+    global gui_album_cover_art, gui_album_cover_art_image
 
     genius = lg.Genius(config.GENIUS_ACCESS_TOKEN, skip_non_songs=True, excluded_terms=["(Remix)", "(Live)"], remove_section_headers=True, verbose=False)
 
@@ -55,6 +58,8 @@ def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int
     gui_track_title_text = track_title_text
     gui_track_artist_text = track_artist_text
     gui_total_time_text = total_time_text
+    gui_album_cover_art = album_cover_art
+    gui_album_cover_art_image = album_cover_art_image
 
 def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
     truncated_len = max_length-len(continuation_str)
@@ -129,29 +134,27 @@ def play_database_track(track_id: int):
     track = playlist_manager.get_track(id=track_id)
     play_track(track.stream.url, track.title, track.artist, track.duration, track)
 
-def play_search_track(track_title: str):
-    global stream
-    if stream:
-        stream.stop()
-    
+def play_search_track(track_title: str, cover_art_image: PhotoImage):
     result = get_song_yt(track_title)
-    play_track(result["link"], result["title"], result["channel"]["name"], get_unformatted_time(result["duration"]))
 
-def play_track(stream_url: str, title: str, artist: str, duration: int, track: Optional[Track]=None):
-    global stream, playing, gui_canvas
+    play_track(result["link"], result["title"], result["channel"]["name"], get_unformatted_time(result["duration"]), cover_art_image=cover_art_image)
+
+def play_track(stream_url: str, title: str, artist: str, duration: int,
+    track: Optional[Track]=None, cover_art_image: Optional[PhotoImage]=None):
+    global stream, playing, looping
+    global gui_canvas, gui_heart_button, gui_heart_full_image, gui_heart_empty_image
+    global gui_track_title_text, gui_track_artist_text, gui_total_time_text
+    global gui_album_cover_art, gui_album_cover_art_image
     if stream:
         stream.stop()
 
-    if track:
-        liked_track = playlist_manager.track_is_liked(track)
-        gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
-        gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
-    else:
+    if not track:
         track_id = StreamData(stream_url).add_to_playlist()
         track = playlist_manager.get_track(id=track_id)
-        liked_track = playlist_manager.track_is_liked(track)
-        gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
-        gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
+
+    liked_track = playlist_manager.track_is_liked(track)
+    gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
+    gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
 
     title = truncate_string(title, 16)
     artist = truncate_string(artist, 16)
@@ -161,6 +164,11 @@ def play_track(stream_url: str, title: str, artist: str, duration: int, track: O
 
     track_duration = get_formatted_time(duration)
     gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
+
+    if cover_art_image:
+        gui_canvas.itemconfig(gui_album_cover_art, image=cover_art_image)
+    else:
+        gui_canvas.itemconfig(gui_album_cover_art, image=gui_album_cover_art_image)
 
     stream = Stream(stream_url, update_elapsed_time)
     stream.set_loop(looping)

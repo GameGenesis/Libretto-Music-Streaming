@@ -112,9 +112,21 @@ style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 
-def play_search_track(title):
+def play_search_track(title, cover_art_url):
+    global canvas
+    if player.stream:
+        player.stream.stop()
+
     full_title = f"{title} Official Audio"
-    player.play_search_track(full_title)
+
+    cover_art_webimage = utils.WebImage(cover_art_url)
+    cover_art_webimage.resize((54, 54))
+    cover_art_image = cover_art_webimage.get()
+
+    canvas.images = list()
+    canvas.images.append(cover_art_image)
+
+    player.play_search_track(full_title, cover_art_image)
 
 def populate_search_results(search_entry):
     global scroll_view_canvas, canvas
@@ -195,7 +207,7 @@ def populate_search_results(search_entry):
         scroll_view_canvas.images.append(cover_art_image)
 
         for obj in objs:
-            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get("result").get("full_title"): play_search_track(title))
+            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get("result").get("full_title"), cover_art_url=result.get("result").get("header_image_thumbnail_url"): play_search_track(title, cover_art_url))
 
     scroll_view_canvas.create_rectangle(
         300.0,
@@ -1103,12 +1115,12 @@ total_time_text = canvas.create_text(
     font=("RobotoRoman Light", 9)
 )
 
-image_image_12 = PhotoImage(
+album_cover_art_image = PhotoImage(
     file=relative_to_assets("image_12.png"))
-image_12 = canvas.create_image(
+album_cover_art = canvas.create_image(
     43.0,
     681.0,
-    image=image_image_12
+    image=album_cover_art_image
 )
 
 track_artist_text = canvas.create_text(
@@ -1380,6 +1392,7 @@ button_10.place(
 player.init(
     canvas, elapsed_time_text, track_slider, heart_button, heart_empty_image,
     heart_full_image, loop_button, no_loop_button_image, loop_button_image,
-    play_button, play_button_image, pause_button_image, track_title_text, track_artist_text, total_time_text
+    play_button, play_button_image, pause_button_image, track_title_text, track_artist_text, total_time_text,
+    album_cover_art, album_cover_art_image
 )
 window.mainloop()
