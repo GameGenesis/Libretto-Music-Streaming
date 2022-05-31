@@ -610,14 +610,44 @@ class Slider:
 
 
 class WebImage:
-    def __init__(self, url: str):
-          request = requests.get(url)
-          self.image = Image.open(BytesIO(request.content))
-          self.photoimage = ImageTk.PhotoImage(self.image)
+    def __init__(self, url: str) -> None:
+        """
+        Parameters
+        ----------
+        url : str
+            The url of the image
 
-    def resize(self, size: tuple[int, int]):
+        Returns
+        -------
+        None
+        """
+        request = requests.get(url)
+        self.image = Image.open(BytesIO(request.content))
+        self.photoimage = ImageTk.PhotoImage(self.image)
+
+    def resize(self, size: tuple[int, int]) -> None:
+        """
+        Resizes the image
+
+        Parameters
+        ----------
+        size : tuple[int, int]
+            The new size of the image
+
+        Returns
+        -------
+        None
+        """
         self.image = self.image.resize(size)
         self.photoimage = ImageTk.PhotoImage(self.image)
 
-    def get(self):
+    def get(self) -> PhotoImage:
+        """
+        Returns the created tkinter PhotoImage
+
+        Returns
+        -------
+        PhotoImage
+            The created tkinter PhotoImage
+        """
         return self.photoimage
