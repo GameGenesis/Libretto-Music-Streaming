@@ -562,48 +562,62 @@ class StreamData:
                 f.write(block)
             return file_path
 
-    def add_to_playlist(self, playlist_name: str) -> None:
+    def add_to_playlist(self, playlist_name: Optional[str]=None) -> int:
         """
         Creates a new database Track object and populates it with information from the StreamData obejct such as title, artist, duration, etc.
         Then, adds this Track object to the playlist specified (Creates a new playlist with the name if it doesn't exist)
 
         Parameters
         ----------
-        playlist_name : str
-            The name of the playlist to add the track to
+        playlist_name : str, optional
+            The name of the playlist to add the track to. If not specified,
+            creates the track database object and assigns no playlists
 
         Returns
         -------
-        None
+        int
+            the id of the database track object
         """
         playlist_manager = PlaylistManager()
         playlist_manager.open_session()
-        playlist = playlist_manager.get_or_create_playlist(playlist_name)
+
+        # If a playlist name is specified, get or create the playlist
+        if playlist_name:
+            playlist = playlist_manager.get_or_create_playlist(playlist_name)
 
         # Check whether the stream is a YouTube stream, since they are temporary streams.
         # If so, store the video url instead
         stream = self.default_stream if not self.youtube_streams else self.url
 
-        track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, stream, playlist)
+        if playlist_name:
+            track = playlist_manager.create_and_add_track_to_playlist(self.title, self.artist, self.album, self.duration, stream, playlist)
 
-        if playlist.downloaded:
-            path = self.download_stream()
-            if path:
-                track.path = path
+            # Download the track and store the download path if the playlist is local
+            if playlist.downloaded:
+                path = self.download_stream()
+                if path:
+                    track.path = path
+        else:
+            track = playlist_manager.create_track(self.title, self.artist, self.album, self.duration, stream)
+
+        track_id = track.id
 
         playlist_manager.commit_session()
         playlist_manager.close_session()
 
-    def add_to_liked_songs(self) -> None:
+        return track_id
+
+    def add_to_liked_songs(self) -> int:
         """
         Creates a new database Track object and populates it with information from the StreamData obejct such as title, artist, duration, etc.
         Then, adds this Track object to the "Liked Songs" Playlist
 
         Returns
         -------
-        None
+        int
+            the id of the database track object
         """
-        self.add_to_playlist("Liked Songs")
+        return self.add_to_playlist("Liked Songs")
 
 class Stream():
     def __init__(self, url: str, time_elapsed_callback: Optional[Callable]=None) -> None:
