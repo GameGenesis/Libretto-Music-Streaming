@@ -142,18 +142,22 @@ def play_track(stream_url: str, title: str, artist: str, duration: int, track: O
     if stream:
         stream.stop()
 
+    if track:
+        liked_track = playlist_manager.track_is_liked(track)
+        gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
+        gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
+    else:
+        track_id = StreamData(stream_url).add_to_playlist()
+        track = playlist_manager.get_track(id=track_id)
+        liked_track = playlist_manager.track_is_liked(track)
+        gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
+        gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
+
     title = truncate_string(title, 16)
     artist = truncate_string(artist, 16)
 
     gui_canvas.itemconfig(gui_track_title_text, text=title)
     gui_canvas.itemconfig(gui_track_artist_text, text=artist)
-
-    if track:
-        liked_track = playlist_manager.track_is_liked(track)
-        gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
-        gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
-    # else:
-    #     StreamData(stream_url).add_to_liked_songs()
 
     track_duration = get_formatted_time(duration)
     gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
