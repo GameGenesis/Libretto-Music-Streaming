@@ -1,19 +1,19 @@
 import config
 import time
 
-from typing import Any, Optional
+from typing import Optional
 
 import lyricsgenius as lg
 from youtubesearchpython import VideosSearch
+
+from PIL import ImageTk, Image
+import requests
+from io import BytesIO
 
 from tkinter import _CanvasItemId, Canvas, PhotoImage
 
 from stream import Stream, StreamData
 from database import Playlist, Track, playlist_manager
-
-from PIL import ImageTk, Image
-import requests
-from io import BytesIO
 
 
 genius = None
