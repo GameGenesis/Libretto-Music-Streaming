@@ -1,5 +1,4 @@
 import config
-import threading
 import time
 
 from typing import Any, Optional
@@ -9,12 +8,11 @@ from youtubesearchpython import VideosSearch
 
 from tkinter import Canvas, PhotoImage
 
-from stream import Stream
+from stream import Stream, StreamData
 from database import Playlist, Track, playlist_manager
 
 
 genius = None
-search_thread = None
 
 gui_canvas = None
 gui_elapsed_time_text = None
@@ -28,7 +26,6 @@ gui_track_title_text, gui_track_artist_text, gui_total_time_text = None, None, N
 
 looping = False
 playing = False
-music_thread = None
 stream = None
 
 def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
@@ -132,12 +129,18 @@ def play_database_track(track_id: int):
     track = playlist_manager.get_track(id=track_id)
     play_track(track.stream.url, track.title, track.artist, track.duration, track)
 
-def play_track(stream_url: str, title: str, artist: str, duration: int, track: Optional[Track]=None):
-    global music_thread, stream, playing, gui_canvas
+def play_search_track(track_title: str):
+    global stream
     if stream:
         stream.stop()
-    if music_thread:
-        music_thread.join()
+    
+    result = get_song_yt(track_title)
+    play_track(result["link"], result["title"], result["channel"]["name"], get_unformatted_time(result["duration"]))
+
+def play_track(stream_url: str, title: str, artist: str, duration: int, track: Optional[Track]=None):
+    global stream, playing, gui_canvas
+    if stream:
+        stream.stop()
 
     title = truncate_string(title, 16)
     artist = truncate_string(artist, 16)
@@ -149,16 +152,15 @@ def play_track(stream_url: str, title: str, artist: str, duration: int, track: O
         liked_track = playlist_manager.track_is_liked(track)
         gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
         gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
+    # else:
+    #     StreamData(stream_url).add_to_liked_songs()
 
     track_duration = get_formatted_time(duration)
     gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
 
     stream = Stream(stream_url, update_elapsed_time)
     stream.set_loop(looping)
-    music_thread = threading.Thread(target=lambda: stream.play())
-    # Make the thread terminate when the user exits the window
-    music_thread.daemon = True
-    music_thread.start()
+    stream.play()
 
     playing = True
     configure_play_state()
@@ -184,24 +186,15 @@ def split_list(list: list[Any], size: int):
 def get_formatted_time(seconds: int):
     return time.strftime('%#M:%S', time.gmtime(seconds))
 
+def get_unformatted_time(time_str: str):
+    h = 0
+    if time_str.count(":") == 1:
+        m, s = time_str.split(":")
+    else:
+        h, m, s = time_str.split(":")
+    return int(h) * 3600 + int(m) * 60 + int(s)
+
 def search(search_term: str):
-    global search_thread
-    if search_thread:
-        search_thread.join()
-
-    # search_thread = threading.Thread(target=lambda: search_multithreaded(search_term))
-    # # Make the thread terminate when the user exits the window
-    # search_thread.daemon = True
-    # search_thread.start()
-
-    from multiprocessing.pool import ThreadPool
-    pool = ThreadPool(processes=1)
-
-    async_result = pool.apply_async(search_multithreaded, args=(search_term,))
-    results = async_result.get()
-    return results
-
-def search_multithreaded(search_term: str):
     results = genius.search(search_term)
     return results
 

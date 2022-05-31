@@ -13,7 +13,6 @@ import inspect
 import os
 from pathlib import Path
 import sys
-import webbrowser
 
 from tkinter import END, WORD, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
 
@@ -112,12 +111,10 @@ style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
-# App content
 
-def play_search_track(full_track_title, url):
-    webbrowser.open(url)
-    result = player.get_song_yt(full_track_title)
-    player.play_track(result["link"], result["title"], result["channel"]["name"], result["duration"])
+def play_search_track(title):
+    full_title = f"{title} Official Audio"
+    player.play_search_track(full_title)
 
 def populate_search_results(search_entry):
     global scroll_view_canvas, canvas
@@ -187,28 +184,8 @@ def populate_search_results(search_entry):
 
         # Album name
 
-        # scroll_view_canvas.create_text(
-        #     750.0+82,
-        #     184.99999999999994,
-        #     anchor="nw",
-        #     text="Scorpion",
-        #     fill="#FFFFFF",
-        #     font=("RobotoRoman Medium", 12),
-        #     tag="search_result_element"
-        # )
-
-        objs.append(scroll_view_canvas.create_text(
-            931.0+82,
-            184.99999999999994 + (row * 66),
-            anchor="nw",
-            text="3:47",
-            fill="#FFFFFF",
-            font=("RobotoRoman Light", 9),
-            tag="search_result_element"
-        ))
-
         heart_button = scroll_view_canvas.create_image(
-            895.0+82,
+            945.0+82,
             195.99999999999994 + (row * 66),
             image=heart_empty_image,
             tag="search_result_element"
@@ -218,7 +195,7 @@ def populate_search_results(search_entry):
         scroll_view_canvas.images.append(cover_art_image)
 
         for obj in objs:
-            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get("result").get("full_title"), url=result.get("result").get("url"): play_search_track(title, url))
+            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get("result").get("full_title"): play_search_track(title))
 
     scroll_view_canvas.create_rectangle(
         300.0,
