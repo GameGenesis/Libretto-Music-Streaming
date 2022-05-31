@@ -6,7 +6,7 @@ from typing import Any, Optional
 import lyricsgenius as lg
 from youtubesearchpython import VideosSearch
 
-from tkinter import Canvas, PhotoImage
+from tkinter import _CanvasItemId, Canvas, PhotoImage
 
 from stream import Stream, StreamData
 from database import Playlist, Track, playlist_manager
@@ -351,28 +351,80 @@ def create_image(image_url: str, size: tuple[int, int]) -> PhotoImage:
     webimage.resize(size)
     return webimage.get()
 
-# Utils
 
 class Utils:
     @staticmethod
     def truncate_string(string: str, max_length: int, continuation_str: str="..") -> str:
+        """
+        Returns a string that is cut off to a certain length (including the continuation string)
+
+        Parameters
+        ----------
+        string : str
+            The original string to truncate
+        max_length : int
+            The max permissable length of the string (including the continuation string)
+
+        Returns
+        -------
+        str
+            The new truncated string
+        """
         truncated_len = max_length-len(continuation_str)
         truncated_str = f"{string[:truncated_len]}{continuation_str}"
         return truncated_str if len(string) > max_length else string
 
     @staticmethod
-    def split_list(list: list[Any], size: int):
+    def split_list(list: list, size: int) -> list:
         """
         Splits a list into smaller-sized lists of a specified size
+
+        Parameters
+        ----------
+        list : list
+            The original list to split
+        size : int
+            The maximum number of elements in each sub-list
+
+        Returns
+        -------
+        list
+            The split list
         """
         return (list[index:index+size] for index in range(0, len(list), size))
 
     @staticmethod
-    def get_formatted_time(seconds: int):
+    def get_formatted_time(seconds: int) -> str:
+        """
+        Returns a formatted time string in (m:ss) format from a seconds int
+
+        Parameters
+        ----------
+        seconds : int
+            The amount of time in seconds
+
+        Returns
+        -------
+        str
+            The formatted time string
+        """
         return time.strftime('%#M:%S', time.gmtime(seconds))
 
     @staticmethod
-    def get_unformatted_time(time_str: str):
+    def get_unformatted_time(time_str: str) -> int:
+        """
+        Returns a the time in seconds from a formatted time string (h:m:s) or (m:s)
+
+        Parameters
+        ----------
+        time_str : str
+            The formatted time string
+
+        Returns
+        -------
+        int
+            The time in seconds
+        """
         h = 0
         if time_str.count(":") == 1:
             m, s = time_str.split(":")
@@ -381,15 +433,45 @@ class Utils:
         return int(h) * 3600 + int(m) * 60 + int(s)
 
     @staticmethod
-    def clamp(value: float, min_value: float, max_value: float):
+    def clamp(value: float, min_value: float, max_value: float) -> float:
+        """
+        Returns a value clamped between a min and max
+
+        Parameters
+        ----------
+        value : float
+            The original value to be clamped
+        min_value : float
+            The minimum value (lower limit)
+        max_value : float
+            The maximum value (upper limit)
+
+        Returns
+        -------
+        float
+            The clamped value
+        """
         return max(min(value, max_value), min_value)
 
     @staticmethod
-    def clamp_01(value: float):
+    def clamp_01(value: float) -> float:
+        """
+        Returns a value clamped between 0 and 1
+
+        Parameters
+        ----------
+        value : float
+            The original value to be clamped
+
+        Returns
+        -------
+        float
+            The clamped value
+        """
         return Utils.clamp(value, 0.0, 1.0)
 
     @staticmethod
-    def lerp(a: float, b: float, t: float):
+    def lerp(a: float, b: float, t: float) -> float:
         """
         Linearly interpolates between the points a and b by the interpolant t. The parameter t is clamped to the range [0, 1].
 
@@ -419,8 +501,34 @@ class Utils:
         return a + (b - a) * t
 
     @staticmethod
-    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs):
-        # Source: https://stackoverflow.com/a/44100075
+    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs) -> _CanvasItemId:
+        """
+        Creates a rounded rectangle tkinter canvas element with a specified radius
+
+        Source
+        ------
+        This code was taken from a Stack Overflow answer: https://stackoverflow.com/a/44100075
+
+        Parameters
+        ----------
+        canvas : Canvas
+            The canvas on which to create the rounded rectangle
+        x1 : float
+            The first or leftmost x coordinate
+        y1 : float
+            The first or topmost y coordinate
+        x2 : float
+            The second or rightmost x coordinate
+        y2 : float
+            The second or bottommost y coordinate
+        radius : int
+            The radius of the rounded rectangle
+
+        Returns
+        -------
+        _CanvasItemId
+            The id of the created canvas item
+        """
         points = [x1+radius, y1,
                 x1+radius, y1,
                 x2-radius, y1,
