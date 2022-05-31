@@ -598,7 +598,7 @@ class StreamData:
                 if path:
                     track.path = path
         else:
-            track = playlist_manager.create_track(self.title, self.artist, self.album, self.duration, stream)
+            track = playlist_manager.get_or_create_track(self.title, self.artist, self.album, self.duration, stream)
 
         track_id = track.id
 

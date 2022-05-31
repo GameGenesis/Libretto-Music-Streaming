@@ -133,6 +133,14 @@ class PlaylistManager:
             track = self.session.query(Track).filter_by(id=id).first()
         return track
 
+    def get_or_create_track(self, title: str, artist: str, album: str, duration: int, stream_url: str):
+        track = self.get_track(title=title)
+        if track == None:
+            track = Track(title=title, artist=artist, album=album, duration=duration, playlists=[], stream_url=stream_url)
+            self.session.add(track)
+            self.session.commit()
+        return track
+
     def get_playlist(self, title) -> Playlist:
         playlist = self.session.query(Playlist).filter_by(title=title).first()
         return playlist
@@ -183,13 +191,8 @@ class PlaylistManager:
         self.session.commit()
 
     def create_and_add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist) -> Track:
-        track = self.get_track(title=title)
-        if track == None:
-            track = Track(title=title, artist=artist, album=album, duration=duration, playlists=[playlist], stream_url=stream_url)
-            self.session.add(track)
-            self.session.commit()
-        else:
-            self.add_track_to_playlist(track, playlist)
+        track = self.get_or_create_track(title, artist, album, duration, stream_url)
+        self.add_track_to_playlist(track, playlist)
         return track
 
     def add_track_to_liked_songs(self, track: Track):
