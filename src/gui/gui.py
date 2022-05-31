@@ -22,7 +22,6 @@ sys.path.insert(0, parentdir)
 
 from database import Playlist, playlist_manager
 import player
-import utils
 
 
 HIGH_RES = False
@@ -118,15 +117,7 @@ def play_search_track(title, cover_art_url):
         player.stream.stop()
 
     full_title = f"{title} Official Audio"
-
-    cover_art_webimage = utils.WebImage(cover_art_url)
-    cover_art_webimage.resize((54, 54))
-    cover_art_image = cover_art_webimage.get()
-
-    canvas.images = list()
-    canvas.images.append(cover_art_image)
-
-    player.play_search_track(full_title, cover_art_image)
+    player.play_search_track(full_title, cover_art_url)
 
 def populate_search_results(search_entry):
     global scroll_view_canvas, canvas
@@ -164,9 +155,7 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
-        cover_art_webimage = utils.WebImage(result.get("result").get("header_image_thumbnail_url"))
-        cover_art_webimage.resize((40, 40))
-        cover_art_image = cover_art_webimage.get()
+        cover_art_image = player.create_image(result.get("result").get("header_image_thumbnail_url"), (40, 40))
         objs.append(scroll_view_canvas.create_image(
             276.0+82,
             195.99999999999994 + (row * 66),
@@ -174,7 +163,7 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
-        title = player.truncate_string(result.get("result").get("title"), 30)
+        title = player.Utils.truncate_string(result.get("result").get("title"), 30)
         objs.append(scroll_view_canvas.create_text(
             316.0+82,
             184.99999999999994 + (row * 66),
@@ -185,9 +174,9 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
-        artist = player.truncate_string(result.get("result").get("artist_names"), 30)
+        artist = player.Utils.truncate_string(result.get("result").get("artist_names"), 30)
         objs.append(scroll_view_canvas.create_text(
-            560.0+82,
+            590.0+82,
             184.99999999999994 + (row * 66),
             anchor="nw",
             text=artist,
@@ -573,7 +562,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
-    playlist_title_name = player.truncate_string(playlist.title, 20)
+    playlist_title_name = player.Utils.truncate_string(playlist.title, 20)
     playlist_title = scroll_view_canvas.create_text(
         432.0+82,
         85.0,
@@ -747,7 +736,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
-        track_title = player.truncate_string(track.title, 18)
+        track_title = player.Utils.truncate_string(track.title, 18)
         objs.append(scroll_view_canvas.create_text(
             331.0+82,
             314.99999999999994 + (row * 52),
@@ -758,7 +747,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
-        track_artist = player.truncate_string(track.artist, 16)
+        track_artist = player.Utils.truncate_string(track.artist, 16)
         objs.append(scroll_view_canvas.create_text(
             496.0+82,
             314.99999999999994 + (row * 52),
@@ -769,7 +758,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
-        track_album = player.truncate_string(track.album, 16)
+        track_album = player.Utils.truncate_string(track.album, 16)
         objs.append(scroll_view_canvas.create_text(
             645.0+82,
             314.99999999999994 + (row * 52),
@@ -790,7 +779,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
-        track_duration = player.get_formatted_time(track.duration)
+        track_duration = player.Utils.get_formatted_time(track.duration)
         objs.append(scroll_view_canvas.create_text(
             947.0+82,
             314.99999999999994 + (row * 52),
@@ -837,7 +826,7 @@ def populate_playlists():
 
     scroll_view_canvas.images = list()
 
-    playlist_rows = player.split_list(playlist_manager.session.query(Playlist).all(), 3)
+    playlist_rows = player.Utils.split_list(playlist_manager.session.query(Playlist).all(), 3)
 
     for row, playlists in enumerate(playlist_rows):
         for column, playlist in enumerate(playlists):
@@ -851,7 +840,7 @@ def populate_playlists():
                 tag="playlist_element"
             ))
 
-            playlist_title = player.truncate_string(playlist.title, 20)
+            playlist_title = player.Utils.truncate_string(playlist.title, 20)
             objs.append(scroll_view_canvas.create_text(
                 352.0 + (column * 208),
                 230.99999999999994 + (row * 260),
@@ -1097,7 +1086,7 @@ loop_button = canvas.create_image(
 
 canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop())
 
-track_slider = utils.Slider(canvas, 317.0, 699.0, 707.0, 704.0)
+track_slider = player.Slider(canvas, 317.0, 699.0, 707.0, 704.0)
 
 elapsed_time_text = canvas.create_text(
     310.0,
