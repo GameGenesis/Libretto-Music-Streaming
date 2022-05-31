@@ -92,18 +92,20 @@ class Track(Base):
     stream_id = Column(Integer, ForeignKey("stream.id"))
     stream = relationship("Stream", backref="track")
     liked = Column(Boolean)
+    cover_art_url = Column(String)
     playlists = relationship(
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
     def __init__(self, title: str, artist: str, album: str, duration: int, playlists: list[Playlist], path: str=None, stream_url: str=None,
-        liked: bool=False) -> None:
+        liked: bool=False, cover_art_url: str=None) -> None:
         self.title = title
         self.artist = artist
         self.album = album
         self.duration = duration
         self.playlists = playlists
         self.liked = liked
+        self.cover_art_url = cover_art_url
 
         if path:
             self.path = path
@@ -133,10 +135,12 @@ class PlaylistManager:
             track = self.session.query(Track).filter_by(id=id).first()
         return track
 
-    def get_or_create_track(self, title: str, artist: str, album: str, duration: int, stream_url: str):
+    def get_or_create_track(self, title: str, artist: str, album: str, duration: int, stream_url: str, cover_art_url: str=None):
         track = self.get_track(title=title)
         if track == None:
-            track = Track(title=title, artist=artist, album=album, duration=duration, playlists=[], stream_url=stream_url)
+            if not cover_art_url:
+                cover_art_url = ""
+            track = Track(title=title, artist=artist, album=album, duration=duration, playlists=[], stream_url=stream_url, cover_art_url=cover_art_url)
             self.session.add(track)
             self.session.commit()
         return track
@@ -190,8 +194,8 @@ class PlaylistManager:
         track.playlists = playlists
         self.session.commit()
 
-    def create_and_add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist) -> Track:
-        track = self.get_or_create_track(title, artist, album, duration, stream_url)
+    def create_and_add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist, cover_art_url: str=None) -> Track:
+        track = self.get_or_create_track(title, artist, album, duration, stream_url, cover_art_url=cover_art_url)
         self.add_track_to_playlist(track, playlist)
         return track
 
@@ -199,9 +203,9 @@ class PlaylistManager:
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.add_track_to_playlist(track, liked_songs_playlist)
 
-    def create_and_add_track_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str) -> None:
+    def create_and_add_track_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str, cover_art_url: str=None) -> None:
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
-        self.create_and_add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist)
+        self.create_and_add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist, cover_art_url=cover_art_url)
 
     def remove_track_from_playlist(self, track: Track, playlist: Playlist) -> None:  
         playlists = track.playlists
@@ -237,7 +241,7 @@ playlist_manager = PlaylistManager()
 def test():
     import stream
 
-    stream.StreamData("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q").add_to_liked_songs()
+    # stream.StreamData("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q").add_to_liked_songs()
     stream.StreamData("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/").add_to_liked_songs()
 
     post_malone_stream_urls = [
