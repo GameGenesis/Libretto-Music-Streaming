@@ -76,8 +76,7 @@ def toggle_track_like(track: Track) -> None:
 
     Returns
     -------
-    bool
-        if the stream is a playlist type
+    None
     """
     global gui_canvas, gui_heart_button, gui_heart_empty_image, gui_heart_full_image
 
@@ -90,19 +89,41 @@ def toggle_track_like(track: Track) -> None:
     liked_track = not liked_track
     gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
 
-def skip_backwards():
+def skip_backwards() -> None:
+    """
+    Skips the current playing track backwards by 10s
+
+    Returns
+    -------
+    None
+    """
     if not stream:
         return
 
     stream.skip_backwards(10.0)
 
 def skip_forwards():
+    """
+    Skips the current playing track forwards by 10s
+
+    Returns
+    -------
+    None
+    """
     if not stream:
         return
 
     stream.skip_forwards(10.0)
 
-def toggle_loop():
+def toggle_loop() -> None:
+    """
+    Toggles the current playing track from not looping to looping and vice versa.
+    Also sets the loop button to match the track state
+
+    Returns
+    -------
+    None
+    """
     global looping
     global gui_canvas, gui_loop_button, gui_no_loop_button_image, gui_loop_button_image
     if not stream:
@@ -113,7 +134,15 @@ def toggle_loop():
 
     gui_canvas.itemconfig(gui_loop_button, image=gui_loop_button_image if looping else gui_no_loop_button_image)
 
-def configure_play_state():
+def configure_play_state() -> None:
+    """
+    Pauses or unpauses a track depending on the play state and
+    configures the play/pause button according to whether the track is paused or not
+
+    Returns
+    -------
+    None
+    """
     global stream, playing
     global gui_canvas, gui_play_button, gui_play_button_image, gui_pause_button_image
     if playing:
@@ -123,7 +152,14 @@ def configure_play_state():
         stream.pause()
         gui_canvas.itemconfig(gui_play_button, image=gui_play_button_image)
 
-def play_pause_track():
+def play_pause_track() -> None:
+    """
+    Plays or pauses a track and configures the play/pause button
+
+    Returns
+    -------
+    None
+    """
     global stream, playing
     global gui_canvas, gui_play_button, gui_play_button_image, gui_pause_button_image
     if not stream:
@@ -132,7 +168,21 @@ def play_pause_track():
     playing = not playing
     configure_play_state()
 
-def update_elapsed_time(current_time, current_position):
+def _update_elapsed_time(current_time: float, current_position: float) -> None:
+    """
+    Private callback method to update the elapsed time text and the elapsed time slider
+
+    Parameters
+    ----------
+    current_time : float
+        The time that has passed since the start of the track
+    current_position : float
+        The fraction of the song that has passed (in decimal form)
+
+    Returns
+    -------
+    None
+    """
     global gui_canvas, gui_elapsed_time_text, past_time
 
     gui_canvas.itemconfig(gui_elapsed_time_text, text=Utils.get_formatted_time(int(current_time)))
@@ -142,11 +192,37 @@ def update_elapsed_time(current_time, current_position):
 
     past_time = int(current_time)
 
-def play_database_track(track_id: int):
+def play_database_track(track_id: int) -> None:
+    """
+    Plays a track that is stored in a database
+
+    Parameters
+    ----------
+    track_id : int
+        The id of the track database object
+
+    Returns
+    -------
+    None
+    """
     track = playlist_manager.get_track(id=track_id)
     play_track(track.stream.url, track.title, track.artist, track.duration, track, cover_art_url=track.cover_art_url)
 
-def play_search_track(track_title: str, cover_art_url: str):
+def play_search_track(track_title: str, cover_art_url: str) -> None:
+    """
+    Plays a track from search results
+
+    Parameters
+    ----------
+    track_title : str
+        The full title of the track to search for
+    cover_art_url : str
+        The url for the cover art image
+
+    Returns
+    -------
+    None
+    """
     result = get_song_yt(track_title)
     play_track(result["link"], result["title"], result["channel"]["name"], Utils.get_unformatted_time(result["duration"]), cover_art_url=cover_art_url)
 
@@ -185,14 +261,29 @@ def play_track(stream_url: str, title: str, artist: str, duration: int,
     track_duration = Utils.get_formatted_time(duration)
     gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
 
-    stream = Stream(stream_url, update_elapsed_time)
+    stream = Stream(stream_url, _update_elapsed_time)
     stream.set_loop(looping)
     stream.play()
 
     playing = True
     configure_play_state()
 
-def get_playlist_info(playlist: Playlist):
+def get_playlist_info(playlist: Playlist) -> str:
+    """
+    Gets information about the tracks in the playlist
+
+    Format: (number of songs, length)
+
+    Parameters
+    ----------
+    playlist : Playlist
+        The playlist from which to return information
+
+    Returns
+    -------
+    str
+        A formatted string with the information to display about the playlist
+    """
     total_duration = playlist.get_total_duration()
     hours = total_duration // 3600
     mins = (total_duration - (hours * 3600)) // 60
@@ -204,16 +295,58 @@ def get_playlist_info(playlist: Playlist):
     playlist_information = f"{formatted_length}, {formatted_time}"
     return playlist_information
 
-def search(search_term: str):
+def search(search_term: str) -> dict:
+    """
+    Performs a Genius general search
+
+    Parameters
+    ----------
+    search_term : str
+        The term to search
+
+    Returns
+    -------
+    dict
+        A dictionary containing data about the search results
+    """
     results = genius.search(search_term)
     return results
 
-def get_song_yt(search_term: str) -> str | dict:
+def get_song_yt(search_term: str) -> dict:
+    """
+    Performs a YouTube video search
+
+    Parameters
+    ----------
+    search_term : str
+        The term to search
+
+    Returns
+    -------
+    dict
+        A dictionary containing data about the search results
+    """
     videosSearch = VideosSearch(search_term, limit = 1)
     result = videosSearch.result()["result"][0]
     return result
 
 def create_image(image_url: str, size: tuple[int, int]) -> PhotoImage:
+    """
+    Returns a created PhotoImage using an image url.
+    Resizes the image to the specified size
+
+    Parameters
+    ----------
+    image_url : str
+        The image url
+    size : tuple[int, int]
+        The size of the created image
+
+    Returns
+    -------
+    PhotoImage
+        A tkinter PhotoImage
+    """
     webimage = WebImage(image_url)
     webimage.resize(size)
     return webimage.get()
