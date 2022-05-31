@@ -145,6 +145,14 @@ class PlaylistManager:
             self.session.commit()
         return track
 
+    def add_track_cover_art(self, track: Track, cover_art_url: str):
+        if not track:
+            return
+        
+        track.cover_art_url = cover_art_url
+        self.session.merge(track)
+        self.session.commit()
+
     def get_playlist(self, title) -> Playlist:
         playlist = self.session.query(Playlist).filter_by(title=title).first()
         return playlist
