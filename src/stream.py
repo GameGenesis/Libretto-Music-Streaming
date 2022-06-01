@@ -358,12 +358,17 @@ class StreamData:
                 self.title = metadata.get("Song") if metadata else None
                 if not self.title:
                     self.title = yt.title
+
                 self.artist = metadata.get("Artist") if metadata else None
                 if not self.artist:
                     self.artist = yt.author
+                # Remove the Topic tag from YouTube's Topic channel names
+                self.artist = self.artist.replace(" - Topic", "")
+
                 self.album = metadata.get("Album") if metadata else None
                 if not self.album:
                     self.album = self.title
+
                 self.duration = yt.length
         else:
             # Assign streams if streams are valid
