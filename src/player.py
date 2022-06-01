@@ -31,7 +31,9 @@ looping = False
 playing = False
 stream = None
 
-def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
+
+def init(canvas: Canvas, elapsed_time_text: int, track_slider: "Slider",
+    heart_button: int, heart_empty_image: PhotoImage, heart_full_image: PhotoImage,
     loop_button: int, no_loop_button_image: PhotoImage, loop_button_image: PhotoImage,
     play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
     track_title_text: int, track_artist_text: int, total_time_text: int,
@@ -41,7 +43,40 @@ def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int
 
     Parameters
     ----------
-
+    canvas : Canvas
+        The main GUI canvas
+    elapsed_time_text : int
+        The elapsed time text canvas item
+    track_slider : Slider
+        The elapsed time slider
+    heart_button : int
+        The heart button canvas item
+    heart_empty_image : PhotoImage
+        The empty heart image
+    heart_full_image : PhotoImage
+        The full heart image
+    loop_button : int
+        The loop button canvas item
+    no_loop_button_image : PhotoImage
+        The inactive loop image
+    loop_button_image : PhotoImage
+        The active loop image
+    play_button : int
+        The play/pause button canvas item
+    play_button_image : PhotoImage
+        The play button image
+    pause_button_image : PhotoImage
+        The pause button image
+    track_title_text : int
+        The track title text canvas item
+    track_artist_text : int
+        The track artist text canvas item
+    total_time_text : int
+        The track total duration text canvas item
+    album_cover_art : int
+        The track album cover art image canvas item
+    album_cover_art_image : PhotoImage
+        The placeholder track album cover art
 
     Returns
     -------
