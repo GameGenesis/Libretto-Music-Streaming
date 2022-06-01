@@ -10,7 +10,7 @@ from PIL import ImageTk, Image
 import requests
 from io import BytesIO
 
-from tkinter import _CanvasItemId, Canvas, PhotoImage
+from tkinter import Canvas, PhotoImage
 
 from stream import Stream, StreamData
 from database import Playlist, Track, playlist_manager
@@ -205,8 +205,11 @@ def play_database_track(track_id: int) -> None:
     -------
     None
     """
+    if stream:
+        stream.stop()
+
     track = playlist_manager.get_track(id=track_id)
-    play_track(track.stream.url, track.title, track.artist, track.duration, track, cover_art_url=track.cover_art_url)
+    play_track(track)
 
 def play_search_track(track_title: str, cover_art_url: str) -> None:
     """
@@ -223,28 +226,32 @@ def play_search_track(track_title: str, cover_art_url: str) -> None:
     -------
     None
     """
-    result = get_song_yt(track_title)
-    play_track(result["link"], result["title"], result["channel"]["name"], Utils.get_unformatted_time(result["duration"]), cover_art_url=cover_art_url)
+    if stream:
+        stream.stop()
 
-def play_track(stream_url: str, title: str, artist: str, duration: int,
-    track: Optional[Track]=None, cover_art_url: Optional[str]=None):
+    result = get_song_yt(track_title)
+
+    track_id = StreamData(result["link"]).add_to_playlist()
+    track = playlist_manager.get_track(id=track_id)
+
+    playlist_manager.add_track_cover_art(track, cover_art_url)
+
+    play_track(track)
+
+def play_track(track: Track):
     global stream, playing, looping
     global gui_canvas, gui_heart_button, gui_heart_full_image, gui_heart_empty_image
     global gui_track_title_text, gui_track_artist_text, gui_total_time_text
     global gui_album_cover_art, gui_album_cover_art_image
-    if stream:
-        stream.stop()
 
-    if not track:
-        track_id = StreamData(stream_url).add_to_playlist()
-        track = playlist_manager.get_track(id=track_id)
-
-    if cover_art_url:
-        playlist_manager.add_track_cover_art(track, cover_art_url)
-        cover_art_image = create_image(cover_art_url, (54, 54))
-        gui_canvas.images = list()
-        gui_canvas.images.append(cover_art_image)
-        gui_canvas.itemconfig(gui_album_cover_art, image=cover_art_image)
+    if track.cover_art_url:
+        cover_art_image = create_image(track.cover_art_url, (54, 54))
+        if cover_art_image:
+            gui_canvas.images = list()
+            gui_canvas.images.append(cover_art_image)
+            gui_canvas.itemconfig(gui_album_cover_art, image=cover_art_image)
+        else:
+            gui_canvas.itemconfig(gui_album_cover_art, image=gui_album_cover_art_image)
     else:
         gui_canvas.itemconfig(gui_album_cover_art, image=gui_album_cover_art_image)
 
@@ -252,16 +259,16 @@ def play_track(stream_url: str, title: str, artist: str, duration: int,
     gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
     gui_canvas.tag_bind(gui_heart_button, "<ButtonPress-1>", lambda event, track=track: toggle_track_like(track))
 
-    title = Utils.truncate_string(title, 16)
-    artist = Utils.truncate_string(artist, 16)
+    title = Utils.truncate_string(track.title, 16)
+    artist = Utils.truncate_string(track.artist, 16)
 
     gui_canvas.itemconfig(gui_track_title_text, text=title)
     gui_canvas.itemconfig(gui_track_artist_text, text=artist)
 
-    track_duration = Utils.get_formatted_time(duration)
+    track_duration = Utils.get_formatted_time(track.duration)
     gui_canvas.itemconfig(gui_total_time_text, text=track_duration)
 
-    stream = Stream(stream_url, _update_elapsed_time)
+    stream = Stream(track.stream.url, _update_elapsed_time)
     stream.set_loop(looping)
     stream.play()
 
@@ -501,7 +508,7 @@ class Utils:
         return a + (b - a) * t
 
     @staticmethod
-    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs) -> _CanvasItemId:
+    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs) -> int:
         """
         Creates a rounded rectangle tkinter canvas element with a specified radius
 
@@ -526,7 +533,7 @@ class Utils:
 
         Returns
         -------
-        _CanvasItemId
+        int | _CanvasItemId
             The id of the created canvas item
         """
         points = [x1+radius, y1,
@@ -621,9 +628,13 @@ class WebImage:
         -------
         None
         """
-        request = requests.get(url)
-        self.image = Image.open(BytesIO(request.content))
-        self.photoimage = ImageTk.PhotoImage(self.image)
+        try:
+            request = requests.get(url)
+            self.image = Image.open(BytesIO(request.content))
+            self.photoimage = ImageTk.PhotoImage(self.image)
+        except Exception as e:
+            self.image, self.photoimage = None, None
+            print(f"Could not load image due to an error: {e}")
 
     def resize(self, size: tuple[int, int]) -> None:
         """
@@ -638,6 +649,9 @@ class WebImage:
         -------
         None
         """
+        if not self.image:
+            return
+
         self.image = self.image.resize(size)
         self.photoimage = ImageTk.PhotoImage(self.image)
 

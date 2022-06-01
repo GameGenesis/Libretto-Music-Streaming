@@ -121,7 +121,7 @@ def play_search_track(title, cover_art_url):
 
 def populate_search_results(search_entry):
     global scroll_view_canvas, canvas
-    global heart_empty_image
+    global heart_empty_image, album_cover_art_image
 
     search_term = search_entry.get()
     results = player.search(search_term)
@@ -156,6 +156,10 @@ def populate_search_results(search_entry):
         ))
 
         cover_art_image = player.create_image(result.get("result").get("header_image_thumbnail_url"), (40, 40))
+        if not cover_art_image:
+            cover_art_image = PhotoImage(
+            file=relative_to_assets("image_49.png"))
+
         objs.append(scroll_view_canvas.create_image(
             276.0+82,
             195.99999999999994 + (row * 66),
