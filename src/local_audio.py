@@ -7,10 +7,11 @@ from pygame import mixer
 from mutagen import File
 from mutagen.mp3 import MP3
 
+import player
+
 class LocalAudio:
     MUSIC_END = pygame.USEREVENT+1
     muted = False
-    MIN_VOLUME, MAX_VOLUME = 0.0, 1.0
 
     def __init__(self, path: str, title: Optional[str]=None, volume: Optional[float]=1.0) -> None:
         """
@@ -86,44 +87,113 @@ class LocalAudio:
         return 0 if index <= 0 else index - 1
 
     @staticmethod
-    def is_compatible_file(file: str) -> bool:
+    def is_compatible_file(file_name: str) -> bool:
+        """
+        Checks if a file is compatible for local play
+
+        Parameters
+        ----------
+        file_name : str
+            The name of the file
+
+        Returns
+        -------
+        bool
+            Whether the file extension is compatible or not
+        """
         extensions = [".mp3", ".wav", ".ogg"]
         # Return true if the file ends with any of the compatible file extensions
-        return any([file.endswith(e) for e in extensions])
+        return any([file_name.endswith(e) for e in extensions])
 
     @staticmethod
     def pause() -> None:
+        """
+        Pauses track playback
+
+        Returns
+        -------
+        None
+        """
         mixer.music.pause()
 
     @staticmethod
     def unpause() -> None:
+        """
+        Unpauses track playback
+
+        Returns
+        -------
+        None
+        """
         mixer.music.unpause()
 
     @staticmethod
     def stop() -> None:
+        """
+        Stops track playback
+
+        Returns
+        -------
+        None
+        """
         mixer.music.stop()
 
     @staticmethod
     def rewind(self) -> None:
+        """
+        Rewinds the current playing track
+
+        Returns
+        -------
+        None
+        """
         mixer.music.rewind()
         self.current_pos = 0
         self.elapsed_time_change = mixer.music.get_pos() // 1000
 
     @classmethod
     def get_volume(cls) -> tuple[float, bool]:
+        """
+        Returns a tuple containing the current volume (rounded to 2 decimal places) and whether the audio is muted or not
+
+        Returns
+        -------
+        tuple
+            the current volume (rounded to 2 decimal places) and whether the audio is muted or not
+        """
         return round(mixer.music.get_volume(), 2), cls.muted
 
     @classmethod
     def set_volume(cls, volume: float) -> None:
+        """
+        Sets the volume of the audio player
+
+        Parameters
+        ----------
+        volume : float
+            The volume to set for the audio player (clamped between 0 and 1)
+
+        Returns
+        -------
+        None
+        """
         if volume <= 0:
             cls.muted = True
         elif cls.muted:
             cls.toggle_mute()
-        volume = round(max(min(volume, cls.MAX_VOLUME), cls.MIN_VOLUME), 2)
+        volume = round(player.Utils.clamp01(volume), 2)
         mixer.music.set_volume(volume)
 
     @classmethod
     def toggle_mute(cls) -> bool:
+        """
+        Mutes or unmuted the music player
+
+        Returns
+        -------
+        bool
+            Whether the player is muted or unmuted
+        """
         cls.muted = not cls.muted
         if cls.muted:
             saved_volume = cls.volume
@@ -133,6 +203,18 @@ class LocalAudio:
         return cls.muted
 
     def play(self, start_time: Optional[int]=0) -> None:
+        """
+        Plays the track from a path. Optionally, plays from a specified start time
+
+        Parameters
+        ----------
+        start_time : int, optional
+            The point in time (in seconds) of the song to start playback
+
+        Returns
+        -------
+        None
+        """
         try:
             # Loading the track
             mixer.music.load(self.path)
@@ -145,6 +227,20 @@ class LocalAudio:
             print("Can't play track! File format not supported!")
 
     def on_end_callback(self, end_event: Optional[Callable]=None, *args, **kwargs) -> bool:
+        """
+        Calls an optional ends event callback when the current playing track ends.
+
+
+        Parameters
+        ----------
+        end_event : Callable, optional
+            The end event callback
+
+        Returns
+        -------
+        bool
+            Whether the current track is still playing
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -155,7 +251,21 @@ class LocalAudio:
                 return False
         return True
 
-    def queue_track(self, track) -> bool:
+    def queue_track(self, track: "LocalAudio") -> bool:
+        """
+        Queues a new track to play when the current one ends
+
+
+        Parameters
+        ----------
+        track : LocalAudio
+            The next track to play
+
+        Returns
+        -------
+        bool
+            Whether the current track is still playing
+        """
         return self.on_end_callback(end_event=lambda: track.play())
 
 
