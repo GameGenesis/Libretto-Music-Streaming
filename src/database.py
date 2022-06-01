@@ -46,6 +46,8 @@ class Playlist(Base):
             The date and time the playlist was created
         downloaded : bool
             Whether the contents of the playlist should be downloaded
+        description : str, optional
+            A description of the playlist
 
         Returns
         -------
@@ -97,8 +99,34 @@ class Track(Base):
         "Playlist", secondary=playlist_track, back_populates="tracks"
     )
 
-    def __init__(self, title: str, artist: str, album: str, duration: int, playlists: list[Playlist], path: str=None, stream_url: str=None,
-        liked: bool=False, cover_art_url: str=None) -> None:
+    def __init__(self, title: str, artist: str, album: str, duration: int, playlists: list[Playlist], liked: bool=False,
+        path: Optional[str]=None, stream_url: Optional[str]=None, cover_art_url: Optional[str]=None) -> None:
+        """
+        Parameters
+        ----------
+        title : str
+            The track title
+        artist : str
+            The track artist
+        album : str
+            The track album
+        duration : int
+            The track duration
+        playlists : list[Playlist]
+            A list of playlists that contain this track
+        liked : bool
+            Whether or not the track is liked
+        path : str, optional
+            The path the local version of the track is stored at
+        stream_url : str, optional
+            The url of the streamed track
+        cover_art_url : str, optional
+            The url of the cover art image
+
+        Returns
+        -------
+        None
+        """
         self.title = title
         self.artist = artist
         self.album = album
@@ -119,6 +147,16 @@ class Stream(Base):
     url = Column(String)
 
     def __init__(self, url: str) -> None:
+        """
+        Parameters
+        ----------
+        url : str
+            The stream url for the corresponding track
+
+        Returns
+        -------
+        None
+        """
         self.url = url
 
 class PlaylistManager:
@@ -247,46 +285,6 @@ class PlaylistManager:
 playlist_manager = PlaylistManager()
 
 def test():
-    import stream
-
-    # stream.StreamData("https://podcasts.google.com/feed/aHR0cHM6Ly9mZWVkcy5tZWdhcGhvbmUuZm0vYXJ0Y3VyaW91c3BvZGNhc3Q").add_to_liked_songs()
-    stream.StreamData("https://www.iheart.com/podcast/105-stuff-you-should-know-26940277/episode/selects-a-brief-overview-of-punk-94043727/").add_to_liked_songs()
-
-    post_malone_stream_urls = [
-        "https://www.youtube.com/watch?v=UceaB4D0jpo",
-        "https://www.youtube.com/watch?v=wXhTHyIgQ_U",
-        "https://www.youtube.com/watch?v=ApXoWvfEYVU",
-        "https://www.youtube.com/watch?v=SC4xMk98Pdc",
-        "https://www.youtube.com/watch?v=au2n7VVGv_c",
-        "https://www.youtube.com/watch?v=UYwF-jdcVjY",
-        "https://www.youtube.com/watch?v=393C3pr2ioY"
-        ]
-
-    bazzi_stream_urls = [
-        "https://www.youtube.com/watch?v=Gc71AmT_b2k",
-        "https://www.youtube.com/watch?v=Xhh3_-JRnDc",
-        "https://www.youtube.com/watch?v=Uk1hv6h7O1Y"
-        ]
-
-    lea_makhoul_urls = [
-        "https://www.youtube.com/watch?v=GT4IveXeAVg",
-        "https://www.youtube.com/watch?v=cUN1HpavTu0",
-        "https://www.youtube.com/watch?v=XJeOtXxygIs",
-        "https://www.youtube.com/watch?v=TUD5cIzokMs",
-        "https://www.youtube.com/watch?v=6ECsnJY290o"
-        ]
-
-    for stream_url in post_malone_stream_urls:
-        stream.StreamData(stream_url).add_to_playlist("This is Post Malone")
-
-    for stream_url in bazzi_stream_urls:
-        stream.StreamData(stream_url).add_to_playlist("This is Bazzi")
-
-    for stream_url in lea_makhoul_urls:
-        stream.StreamData(stream_url).add_to_playlist("This is Lea Makhoul")
-
-    stream.StreamData("https://www.youtube.com/watch?v=JTFDm41lJkQ").add_to_playlist("This is Maro")
-
     playlist_manager = PlaylistManager()
     playlist_manager.close_session()
     playlists = playlist_manager.session.query(Playlist).all()
@@ -294,7 +292,7 @@ def test():
     for playlist in playlists:
         print(playlist.title)
         print(f"Number of Tracks: {playlist.get_length()}")
-        print(f"Total duration: {time.strftime('%M:%S', time.gmtime(playlist.get_total_duration()))}")
+        print(f"Total duration: {time.strftime('%H:%M:%S', time.gmtime(playlist.get_total_duration()))}")
         for i, track in enumerate(playlist.tracks):
             print(f"{i+1}. Track: {track.title}")
             print(f"{i+1}. Url/Path: {track.stream.url if track.stream else track.path}")
