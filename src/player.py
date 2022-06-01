@@ -1,8 +1,6 @@
 import config
 import time
 
-from typing import Optional
-
 import lyricsgenius as lg
 from youtubesearchpython import VideosSearch
 
@@ -37,7 +35,18 @@ def init(canvas: Canvas, elapsed_time_text: int, track_slider, heart_button: int
     loop_button: int, no_loop_button_image: PhotoImage, loop_button_image: PhotoImage,
     play_button: int, play_button_image: PhotoImage, pause_button_image: PhotoImage,
     track_title_text: int, track_artist_text: int, total_time_text: int,
-    album_cover_art: int, album_cover_art_image: PhotoImage):
+    album_cover_art: int, album_cover_art_image: PhotoImage) -> None:
+    """
+    Pass in the tkinter GUI for referencing
+
+    Parameters
+    ----------
+
+
+    Returns
+    -------
+    None
+    """
     global genius
     global gui_canvas, gui_elapsed_time_text, gui_track_slider, gui_heart_button, gui_heart_empty_image, gui_heart_full_image
     global gui_loop_button, gui_no_loop_button_image, gui_loop_button_image
@@ -238,11 +247,23 @@ def play_search_track(track_title: str, cover_art_url: str) -> None:
 
     play_track(track)
 
-def play_track(track: Track):
+def play_track(track: Track) -> None:
     global stream, playing, looping
     global gui_canvas, gui_heart_button, gui_heart_full_image, gui_heart_empty_image
     global gui_track_title_text, gui_track_artist_text, gui_total_time_text
     global gui_album_cover_art, gui_album_cover_art_image
+    """
+    Plays a track and updates current playing track info
+
+    Parameters
+    ----------
+    track : Track
+        The track database object to access information from and play
+
+    Returns
+    -------
+    None
+    """
 
     if track.cover_art_url:
         cover_art_image = create_image(track.cover_art_url, (54, 54))
