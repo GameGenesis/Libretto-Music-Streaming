@@ -14,8 +14,11 @@ import os
 from pathlib import Path
 import sys
 
-from tkinter import END, WORD, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
+from typing import Optional
 
+from tkinter import END, WORD, Event, Frame, Label, Scrollbar, Tk, Canvas, Entry, Text, Button, PhotoImage, Toplevel
+
+# Allows importing from parent directory
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
@@ -24,24 +27,130 @@ from database import Playlist, playlist_manager
 import player
 
 
-HIGH_RES = False
-
+# The path to load the assets (images) from
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path("./assets")
+
+def relative_to_assets(path: str) -> Path:
+    """
+    Returns the full path for a file in the assets folder
+
+    Parameters
+    ----------
+    path : str
+        The file name or file subpath
+
+    Returns
+    -------
+    Path
+        The full file path
+    """
+    return ASSETS_PATH / Path(path)
+
+def close_main_window() -> None:
+    """
+    Closes the current SQL session and then closes the window
+
+    Returns
+    -------
+    None
+    """
+    playlist_manager.close_session()
+    window.destroy()
+
+fullscreen = False
+
+def toggle_fullscreen(event: Optional[Event]=None) -> None:
+    """
+    Closes the current SQL session and then closes the window
+
+    Parameters
+    ----------
+    event : Event, optional
+        An event object that gets passed in for binded canvas items
+
+    Returns
+    -------
+    None
+    """
+    global fullscreen
+    if fullscreen == False:
+        window.wm_state('zoomed')
+        fullscreen = True
+    else:
+        window.wm_state('normal')
+        fullscreen = False
+
+def minimize_window() -> None:
+    """
+    Minimizes the window
+
+    Returns
+    -------
+    None
+    """
+    window.iconify()
+
+def toggle_mute() -> None:
+    """
+    Toggles mute for playback andupdates the volume indicator
+
+    Returns
+    -------
+    None
+    """
+    global volume_indicator, high_volume_image, mute_volume_image
+    if not player.stream or not player.stream.player:
+        return
+
+    if player.stream.player.audio_get_mute():
+        player.stream.player.audio_set_mute(False)
+        canvas.itemconfig(volume_indicator, image=high_volume_image)
+    else:
+        player.stream.player.audio_set_mute(True)
+        canvas.itemconfig(volume_indicator, image=mute_volume_image)
+
+
+# Creates the root window with a title
+window = Tk("Music Player")
+
+# Determines whether or not the GUI should rescale for better resolution (Changes DPI)
+HIGH_RES = False
+
+if HIGH_RES:
+    # DPI Awareness (Increase Pixels per inch)
+    # Update window size to match new resolution
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    window.geometry("1006x673")
+else:
+    window.geometry("+0+0")
+    window.geometry("1008x680")
+
+# Updates the window background color
+window.configure(bg = "#202020")
+
+# Change the window flags to allow an overrideredirect window to be shown on the taskbar
+# See (https://stackoverflow.com/a/30819099/291641, https://stackoverflow.com/a/2400467/11106801)
 
 GWL_STYLE = -16
 GWLP_HWNDPARENT = -8
 WS_CAPTION = 0x00C00000
 WS_THICKFRAME = 0x00040000
 
+# Defining types
 INT = ctypes.c_int
 LONG_PTR = ctypes.c_long
 
 def _errcheck_not_zero(value, func, args):
+    """
+    Error check callback
+    (ctypes library code is undocumented)
+    """
     if value == 0:
         raise ctypes.WinError()
     return args
 
+# Defining functions
 GetWindowLongPtrW = ctypes.windll.user32.GetWindowLongPtrW
 SetWindowLongPtrW = ctypes.windll.user32.SetWindowLongPtrW
 
@@ -55,61 +164,29 @@ SetWindowLongPtrW.argtypes = (HWND, INT, LONG_PTR)
 SetWindowLongPtrW.restype = LONG_PTR
 SetWindowLongPtrW.errcheck = _errcheck_not_zero
 
-def relative_to_assets(path: str) -> Path:
-    return ASSETS_PATH / Path(path)
+def get_handle(root: Tk) -> ctypes._NamedFuncPointer:
+    """
+    Returns the window's parent
 
-def get_handle(root) -> int:
+    Parameters
+    ----------
+    root : Tk
+        The root tkinter window
+
+    Returns
+    -------
+    _NamedFuncPointer
+    """
     root.update_idletasks()
     return GetWindowLongPtrW(root.winfo_id(), GWLP_HWNDPARENT)
 
-def close_main_window():
-    playlist_manager.close_session()
-    window.destroy()
-
-fullscreen = False
-
-def toggle_fullscreen(event=None):
-    global fullscreen
-    if fullscreen == False:
-        window.wm_state('zoomed')
-        fullscreen = True
-    else:
-        window.wm_state('normal')
-        fullscreen = False
-
-def minimize_window():
-    window.iconify()
-
-def toggle_mute():
-    global volume_indicator, high_volume_image, mute_volume_image
-    if not player.stream or not player.stream.player:
-        return
-
-    if player.stream.player.audio_get_mute():
-        player.stream.player.audio_set_mute(False)
-        canvas.itemconfig(volume_indicator, image=high_volume_image)
-    else:
-        player.stream.player.audio_set_mute(True)
-        canvas.itemconfig(volume_indicator, image=mute_volume_image)
-
-
-window = Tk("Music Player")
-
-if HIGH_RES:
-    # DPI Awareness (Increase Pixels per inch)
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
-    window.geometry("1006x673")
-else:
-    window.geometry("+0+0")
-    window.geometry("1008x680")
-
-window.configure(bg = "#202020")
-
+# Removes the title bar of the window
 hwnd = get_handle(window)
 style = GetWindowLongPtrW(hwnd, GWL_STYLE)
 style &= ~(WS_CAPTION | WS_THICKFRAME)
 SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
+# -----------------------------------------------------------------------
 
 def play_search_track(title, cover_art_url):
     global canvas
@@ -996,6 +1073,7 @@ def do_move(event):
     if x and y:
         window.geometry(f'+{event.x_root - x}+{event.y_root - y}')
 
+# Creates the title bar frame rectangle on the canvas
 title_bar_frame = canvas.create_rectangle(
     0.0,
     0.0,
@@ -1005,12 +1083,16 @@ title_bar_frame = canvas.create_rectangle(
     outline=""
 )
 
+# Add title bar bindings
 canvas.tag_bind(title_bar_frame, "<ButtonPress-1>", start_move)
 canvas.tag_bind(title_bar_frame, "<ButtonRelease-1>", stop_move)
 canvas.tag_bind(title_bar_frame, "<B1-Motion>", do_move)
 canvas.tag_bind(title_bar_frame, '<Double-1>', toggle_fullscreen)
 
+# Open a new databse session
 playlist_manager.open_session()
+
+# Populate a list of playlists when the app is opened
 populate_playlists()
 
 
