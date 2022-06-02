@@ -164,7 +164,7 @@ SetWindowLongPtrW.argtypes = (HWND, INT, LONG_PTR)
 SetWindowLongPtrW.restype = LONG_PTR
 SetWindowLongPtrW.errcheck = _errcheck_not_zero
 
-def get_handle(root: Tk) -> ctypes._NamedFuncPointer:
+def get_handle(root: Tk) -> int:
     """
     Returns the window's parent
 
@@ -188,7 +188,21 @@ SetWindowLongPtrW(hwnd, GWL_STYLE, style)
 
 # -----------------------------------------------------------------------
 
-def play_search_track(title, cover_art_url):
+def play_search_track(title: str, cover_art_url: str) -> None:
+    """
+    Plays a track from the search results
+
+    Parameters
+    ----------
+    tile : str
+        The full track title
+    cover_art_url: str
+        The url for the album cover art image
+
+    Returns
+    -------
+    None
+    """
     global canvas
     if player.stream:
         player.stream.stop()
@@ -196,17 +210,33 @@ def play_search_track(title, cover_art_url):
     full_title = f"{title} Official Audio"
     player.play_search_track(full_title, cover_art_url)
 
-def populate_search_results(search_entry):
+def populate_search_results(search_entry: Entry) -> None:
+    """
+    Populates a list of tracks from a search entry
+
+    Parameters
+    ----------
+    search_entry : Entry
+        The entry box containing the search term
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas, canvas
     global heart_empty_image, album_cover_art_image
 
-    search_term = search_entry.get()
-    results = player.search(search_term)
-
+    # Resets the scroll view and deletes the previous search result elements
+    # Also, resets focus (removes entry box cursor)
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.focus_set()
 
+    # Gets the search term from the entry box and does a Genius search
+    search_term = search_entry.get()
+    results = player.search(search_term)
+
+    # Creates "Songs" title text
     scroll_view_canvas.create_text(
         247.0+82,
         131.99999999999994,
@@ -219,10 +249,12 @@ def populate_search_results(search_entry):
 
     final_row = 0
 
+    # Loops over the search results and creates a frame containing the information about that track
     for row, result in enumerate(results.get("hits")):
         final_row = row + 1
         objs = list()
 
+        # Creates and places the track frame image
         small_frame_image = PhotoImage(
             file=relative_to_assets("image_48.png"))
         objs.append(scroll_view_canvas.create_image(
@@ -232,6 +264,7 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
+        # Creates the cover art image from the obtained url
         cover_art_image = player.create_image(result.get("result").get("header_image_thumbnail_url"), (40, 40))
         if not cover_art_image:
             cover_art_image = PhotoImage(
@@ -244,6 +277,7 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
+        # Truncates the title and creates track title text on the canvas
         title = player.Utils.truncate_string(result.get("result").get("title"), 30)
         objs.append(scroll_view_canvas.create_text(
             316.0+82,
@@ -255,6 +289,7 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
+        # Truncates the artist name and creates track artist text on the canvas
         artist = player.Utils.truncate_string(result.get("result").get("artist_names"), 30)
         objs.append(scroll_view_canvas.create_text(
             590.0+82,
@@ -266,8 +301,7 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         ))
 
-        # Album name
-
+        # Creates a heart button image (placeholder)
         heart_button = scroll_view_canvas.create_image(
             960.0+82,
             195.99999999999994 + (row * 66),
@@ -275,12 +309,15 @@ def populate_search_results(search_entry):
             tag="search_result_element"
         )
 
+        # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
         scroll_view_canvas.images.append(small_frame_image)
         scroll_view_canvas.images.append(cover_art_image)
 
+        # Binds the track frame elements to playing the track
         for obj in objs:
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get("result").get("full_title"), cover_art_url=result.get("result").get("header_image_thumbnail_url"): play_search_track(title, cover_art_url))
 
+    # Creates a rectangle after the results to allow for more room to scroll
     scroll_view_canvas.create_rectangle(
         300.0,
         330.0 + (final_row * 52.0),
@@ -359,23 +396,46 @@ def populate_search_results(search_entry):
     # scroll_view_canvas.images.append(large_frame_image)
     # scroll_view_canvas.images.append(video_thumbnail_image)
 
-def cancel_search(search_entry: Entry):
+def cancel_search(search_entry: Entry) -> None:
+    """
+    Clears the search box and removes the search results
+
+    Parameters
+    ----------
+    search_entry : Entry
+        The entry box containing the search term
+
+    Returns
+    -------
+    None
+    """
     search_entry.delete(0, END)
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.focus_set()
 
-def search_tab():
+def search_tab() -> None:
+    """
+    Deletes all canvas elements for other tabs and creates the search bar for the search tab
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas, canvas
 
+    # Resets the scroll view and deletes all canvas elements
+    # Also, resets focus (removes entry box cursor)
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
 
+    # Creates a list of images on the canvas to append to (to avoid auto garbage collection)
     scroll_view_canvas.images = list()
 
+    # Creates the search bar bg image and places it on the canvas
     search_bar_image = PhotoImage(
     file=relative_to_assets("image_46.png"))
     search_bar = scroll_view_canvas.create_image(
@@ -384,6 +444,7 @@ def search_tab():
         image=search_bar_image
     )
 
+    # Creates the cancel search button image and places it on the canvas
     cancel_search_button_image = PhotoImage(
         file=relative_to_assets("image_47.png"))
     cancel_search_button = scroll_view_canvas.create_image(
@@ -393,6 +454,7 @@ def search_tab():
         tag="search_tab_element"
     )
 
+    # Creates the search entry and places it in a canvas window
     search_entry = Entry(
         scroll_view_canvas,
         width = 50,
@@ -407,18 +469,40 @@ def search_tab():
     search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry, tag="search_tab_element")
     check_textbox_content(scroll_view_canvas, search_entry_window, search_entry)
 
+    # Removes focus from the search bar entry field when the canvas is clicked
     scroll_view_canvas.bind("<ButtonPress-1>", lambda event: scroll_view_canvas.focus_set())
 
+    # Check if the entry filed contains anything before removing it
     search_entry.bind("<FocusOut>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: check_textbox_content(c, w, e))
+    # Populate the search results upon pressing enter
     search_entry.bind("<Return>", lambda event, e=search_entry: populate_search_results(e))
 
+    # Creates the entry box to type in when the search bar is clicked
     scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
+    # Cancel the search when the cancel search button is clicked
     scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event, e=search_entry: cancel_search(e))
 
+    # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     scroll_view_canvas.images.append(search_bar_image)
     scroll_view_canvas.images.append(cancel_search_button_image)
 
-def check_textbox_content(canvas, canvas_window, text_entry):
+def check_textbox_content(canvas: Canvas, canvas_window: int, text_entry: Entry) -> None:
+    """
+    Checks whether to hide or show the entry field depending on whether or not there is any content in it
+
+    Parameters
+    ----------
+    canvas : Canvas
+        The canvas that contains the entry window
+    canvas_window: int
+        The canvas window that contains the entry
+    text_entry : Entry
+        The text entry
+
+    Returns
+    -------
+    None
+    """
     description_state = "normal"
     if type(text_entry) == Text:
         description_state = "hidden" if not text_entry.get("1.0", END).strip() else "normal"
@@ -427,37 +511,111 @@ def check_textbox_content(canvas, canvas_window, text_entry):
 
     canvas.itemconfigure(canvas_window, state=description_state)
 
-def edit_textbox(canvas, canvas_window, text_entry):
+def edit_textbox(canvas: Canvas, canvas_window: int, text_entry: Entry):
+    """
+    Creates and shows the text entry and gives focus
+
+    Parameters
+    ----------
+    canvas : Canvas
+        The canvas that contains the entry window
+    canvas_window: int
+        The canvas window that contains the entry
+    text_entry : Entry
+        The text entry
+
+    Returns
+    -------
+    None
+    """
     canvas.itemconfigure(canvas_window, state="normal")
     text_entry.focus()
 
-def delete_playlist(overlay_window, playlist):
+def delete_playlist(overlay_window: Toplevel, playlist: Playlist) -> None:
+    """
+    Deletes a playlist from the database and repopulates the list of playlists
+
+    Parameters
+    ----------
+    overlay_window : Toplevel
+        The toplevel window containing playlist details
+    playlist: Playlist
+        The playlist to delete
+
+    Returns
+    -------
+    None
+    """
     playlist_manager.delete_playlist(playlist)
     close_toplevel_window(overlay_window)
     populate_playlists()
 
-def save_playlist_details(overlay_window, playlist, title_entry, description_entry):
+def save_playlist_details(overlay_window: Toplevel, playlist: Playlist, title_entry: Entry, description_entry: Entry) -> None:
+    """
+    Saves the playlist details that were updates in the edit details box
+
+    Parameters
+    ----------
+    overlay_window : Toplevel
+        The toplevel window containing playlist details
+    playlist: Playlist
+        The playlist to save details to
+    title_entry : Entry
+        The title entry to retrieve the track title from
+    description_entry : Entry
+        The title entry to retrieve the track description from
+
+    Returns
+    -------
+    None
+    """
     current_title = playlist.title
     current_description = playlist.description
     new_title = title_entry.get()
     new_description = description_entry.get("1.0", END).strip()
 
+    # Closes the edit details window
     close_toplevel_window(overlay_window)
 
+    # If none of the details have changes, don't save the data
     if current_title == new_title and current_description == new_description:
         return
 
+    # If the title changed and there isn't another playlist with the same title, rename the playlist
     if new_title and current_title != new_title and not playlist_manager.playlist_exists(new_title):
         playlist_manager.rename_playlist(playlist, new_title)
+    # If the description changed, update the playlist description
     if current_description != new_description:
         playlist_manager.edit_playlist_description(playlist, new_description)
+
+    # Repopulate the list of tracks
     populate_tracks(playlist)
 
-def close_toplevel_window(window):
+def close_toplevel_window(window: Toplevel) -> None:
+    """
+    Destroys the toplevel window
+
+    Parameters
+    ----------
+    window : Toplevel
+        The toplevel window to destroy
+
+    Returns
+    -------
+    None
+    """
     window.destroy()
     window.update()
 
 def create_overlay_window() -> tuple[Toplevel, Canvas]:
+    """
+    Creates a transparent overlay window with no titlebar and a canvas with a dark background
+
+    Returns
+    -------
+    tuple[Toplevel, Canvas]
+        A tuple of the toplevel window and the canvas that is contained on the window
+    """
     global window
     overlay_window = Toplevel(window)
     overlay_window.overrideredirect(True)
@@ -466,36 +624,61 @@ def create_overlay_window() -> tuple[Toplevel, Canvas]:
     overlay_window.configure(background="#101010")
 
     overlay_canvas = Canvas(overlay_window, width=1024, height=720, highlightthickness=0)
-    overlay_rectangle = overlay_canvas.create_rectangle(0, 0, 1024, 720, fill="#101010")
-    overlay_canvas.tag_bind(overlay_rectangle, "<ButtonPress-1>", lambda event: close_toplevel_window(overlay_window))
     overlay_canvas.pack()
+    overlay_rectangle = overlay_canvas.create_rectangle(0, 0, 1024, 720, fill="#101010")
 
+    # Binds the rectangle to close the window when clicked
+    overlay_canvas.tag_bind(overlay_rectangle, "<ButtonPress-1>", lambda event: close_toplevel_window(overlay_window))
+
+    # Closes the overlay window when the program is minimized (to prevent duplicates and window separation)
     window.bind("<Unmap>", lambda event: close_toplevel_window(overlay_window))
 
     return overlay_window, overlay_canvas
 
 def create_edit_window() -> tuple[Toplevel, Toplevel, Canvas]:
+    """
+    Creates an overlay and a toplevel window
+
+    Returns
+    -------
+    tuple[Toplevel, Toplevel, Canvas]
+        A tuple of the overlay window, the edit window and the canvas that is contained on the edit window
+    """
     overlay_window, overlay_canvas = create_overlay_window()
     edit_window = Toplevel(overlay_window)
     edit_window.overrideredirect(True)
     edit_window.geometry(f"1024x720+{window.winfo_x()}+{window.winfo_y()}")
 
+    # Makes the window transparent (to allow for rounded corners for the image frame)
     edit_window.config(background="red")
     edit_window.attributes("-transparentcolor", "red")
 
+    # Set the window as topmost to put it on top, then set to False to allow other program windows to be able to be set on top
     edit_window.wm_attributes("-topmost", True)
     edit_window.update()
     edit_window.wm_attributes("-topmost", False)
 
+    # Create a canvas on the edit window
     edit_canvas = Canvas(edit_window, width=1024, height=720, highlightthickness=0, bg="red")
     edit_canvas.pack()
 
     return overlay_window, edit_window, edit_canvas
 
-def create_rename_window(playlist):
+def create_rename_window(playlist: Playlist) -> None:
+    """
+    Creates a toplevel window containing playlist details to edit
+
+    Returns
+    -------
+    tuple[Toplevel, Toplevel, Canvas]
+        A tuple of the overlay window, the edit window and the canvas that is contained on the edit window
+    """
+
+    # Creates the edit window and a list of images on the edit canvas (to avoid garbage collection)
     overlay_window, edit_window, edit_canvas = create_edit_window()
     edit_canvas.images = list()
 
+    # Creates the playlist details frame image on the canvas
     playlist_details_box_image = PhotoImage(
     file=relative_to_assets("image_35.png"))
     playlist_details_box = edit_canvas.create_image(
@@ -504,6 +687,7 @@ def create_rename_window(playlist):
         image=playlist_details_box_image
     )
 
+    # Creates the title text box image on the canvas
     title_entry_image = PhotoImage(
         file=relative_to_assets("image_36.png"))
     title_textbox = edit_canvas.create_image(
@@ -512,6 +696,7 @@ def create_rename_window(playlist):
         image=title_entry_image
     )
 
+    # Creates the title entry on a canvas window
     title_entry = Entry(
         edit_canvas,
         width = 26,
@@ -523,9 +708,11 @@ def create_rename_window(playlist):
         font = ("RobotoRoman Medium", 12, "bold"),
         insertbackground = "#FFFFFF"
     )
+    # Make the entry contain the current playlist title
     title_entry.insert(END, playlist.title)
     title_entry_window = edit_canvas.create_window(597, 271, window=title_entry)
 
+    # Creates the description text box image on the canvas
     description_entry_image = PhotoImage(
         file=relative_to_assets("image_37.png"))
     description_textbox = edit_canvas.create_image(
@@ -534,6 +721,7 @@ def create_rename_window(playlist):
         image=description_entry_image
     )
 
+    # Creates the description entry on a canvas window
     description_entry = Text(
         edit_canvas,
         width = 26,
@@ -547,11 +735,13 @@ def create_rename_window(playlist):
         insertbackground = "#FFFFFF",
         wrap = WORD
     )
+    # Make the entry contain the current playlist description
     description_entry.insert("1.0", playlist.description)
 
     description_entry_window = edit_canvas.create_window(597, 356, window=description_entry)
     check_textbox_content(edit_canvas, description_entry_window, description_entry)
 
+    # Creates a preview of the playlist album cover image
     playlist_image = PhotoImage(
         file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
     edit_canvas.create_image(
@@ -560,6 +750,7 @@ def create_rename_window(playlist):
         image=playlist_image
     )
 
+    # Creates the save button image on the canvas
     save_button_image = PhotoImage(
         file=relative_to_assets("image_38.png"))
     save_button = edit_canvas.create_image(
@@ -568,6 +759,7 @@ def create_rename_window(playlist):
         image=save_button_image
     )
 
+    # Creates the delete playlist button image on the canvas
     delete_button_image = PhotoImage(
     file=relative_to_assets("image_45.png"))
     delete_button = edit_canvas.create_image(
@@ -576,6 +768,7 @@ def create_rename_window(playlist):
         image=delete_button_image
     )
 
+    # Creates the close window button image on the canvas
     close_button_image = PhotoImage(
         file=relative_to_assets("image_39.png"))
     close_button = edit_canvas.create_image(
@@ -585,20 +778,27 @@ def create_rename_window(playlist):
     )
 
 
+    # Create the entry fields when the text box images are clicked
     edit_canvas.tag_bind(description_textbox, "<ButtonPress-1>", lambda event, c=edit_canvas, w=description_entry_window, e=description_entry: edit_textbox(c, w, e))
     edit_canvas.tag_bind(title_textbox, "<ButtonPress-1>", lambda event, c=edit_canvas, w=title_entry_window, e=title_entry: edit_textbox(c, w, e))
+
+    # Remove focus from the text entries when the details box is clicked
     edit_canvas.tag_bind(playlist_details_box, "<ButtonPress-1>", lambda event: edit_canvas.focus_set())
 
+    # Check if the entries can be removed if empty when they lose focus
     description_entry.bind("<FocusOut>", lambda event, c=edit_canvas, w=description_entry_window, e=description_entry: check_textbox_content(c, w, e))
     title_entry.bind("<FocusOut>", lambda event, c=edit_canvas, w=title_entry_window, e=title_entry: check_textbox_content(c, w, e))
 
+    # Binds the title and description entries enter to save the new playlist details
     title_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
     description_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
 
+    # Binds the delete, save, and close buttons
     edit_canvas.tag_bind(delete_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist: delete_playlist(w, p))
     edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
     edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
 
+    # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     edit_canvas.images.append(playlist_details_box_image)
     edit_canvas.images.append(title_entry_image)
     edit_canvas.images.append(description_entry_image)
@@ -607,23 +807,52 @@ def create_rename_window(playlist):
     edit_canvas.images.append(delete_button_image)
     edit_canvas.images.append(close_button_image)
 
-def toggle_edit_details_popup(playlist_title: int, hidden: bool=False):
+def toggle_edit_details_popup(playlist_title: int, hidden: bool=False) -> None:
+    """
+    Show/hide the edit details pen icon when the playlist name is hovered over
+
+    Parameters
+    ----------
+    playlist_title : int
+        The playlist title canvas item
+    hidden : bool
+        Whether the icon should be hidden or not
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas
     state = "hidden" if hidden else "normal"
     scroll_view_canvas.itemconfigure(playlist_title, state=state)
 
-def populate_tracks(playlist: Playlist):
+def populate_tracks(playlist: Playlist) -> None:
+    """
+    Populate the list of tracks in a specific playlist along with the general playlist details (cover image, length, duration)
+
+    Parameters
+    ----------
+    playlist : Playlist
+        The playlist from which to populate the tracks
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas, canvas, track_title_text, track_artist_text
     global heart_button, heart_empty_image, heart_full_image
     global play_button, pause_button_image, play_button_image
     global total_time_text
 
+    # Resets the scroll view and deletes all canvas elements
+    # Also, resets focus (removes entry box cursor)
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
 
+    # Creates the playlist details background rectangle on the scroll canvas
     scroll_view_canvas.create_rectangle(
         300.0,
         33.0,
@@ -634,6 +863,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Creates the playlist cover image preview
     playlist_image = PhotoImage(
         file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
     scroll_view_canvas.create_image(
@@ -643,6 +873,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Truncates the playlist title and creates the text on the canvas
     playlist_title_name = player.Utils.truncate_string(playlist.title, 20)
     playlist_title = scroll_view_canvas.create_text(
         432.0+82,
@@ -656,6 +887,7 @@ def populate_tracks(playlist: Playlist):
 
     title_text_bounds = scroll_view_canvas.bbox(playlist_title)
 
+    # Creates the edit details icon popup depending on the length of the title
     edit_details_image = PhotoImage(
     file=relative_to_assets("image_42.png"))
     edit_details_popup = scroll_view_canvas.create_image(
@@ -665,11 +897,13 @@ def populate_tracks(playlist: Playlist):
         state = "hidden"
     )
 
+    # Add bindings to edit the playlist details for all playlists except "Liked Songs"
     if playlist.title != "Liked Songs":
         scroll_view_canvas.tag_bind(playlist_title, "<Enter>", lambda event: toggle_edit_details_popup(edit_details_popup, False))
         scroll_view_canvas.tag_bind(playlist_title, "<Leave>", lambda event: toggle_edit_details_popup(edit_details_popup, True))
         scroll_view_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event, playlist=playlist: create_rename_window(playlist))
 
+    # Create playlist author text on the canvas
     scroll_view_canvas.create_text(
         433.0+82,
         135.0,
@@ -680,6 +914,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Get information about the playlist (length and duration) and create text on the canvas to display the info
     playlist_information = player.get_playlist_info(playlist)
 
     scroll_view_canvas.create_text(
@@ -692,10 +927,13 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the playlist play/pause button image on the canvas
     play_image = PhotoImage(
         file=relative_to_assets("image_32.png"))
+
     pause_image = PhotoImage(
         file=relative_to_assets("image_33.png"))
+
     scroll_view_canvas.create_image(
         885.0+82,
         170.0,
@@ -703,6 +941,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the playlist shuffle tracks button image on the canvas
     shuffle_image = PhotoImage(
         file=relative_to_assets("image_34.png"))
     scroll_view_canvas.create_image(
@@ -712,10 +951,13 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the playlist download toggle local/streaming button image on the canvas
     download_image = PhotoImage(
         file=relative_to_assets("image_43.png"))
+
     downloaded_image = PhotoImage(
         file=relative_to_assets("image_44.png"))
+
     scroll_view_canvas.create_image(
         975.0+82,
         170.0,
@@ -723,6 +965,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the track number header text on the canvas
     scroll_view_canvas.create_text(
         270.0+82,
         265.99999999999994,
@@ -733,6 +976,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the track title header text on the canvas
     scroll_view_canvas.create_text(
         331.0+82,
         265.99999999999994,
@@ -743,6 +987,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the track artist header text on the canvas
     scroll_view_canvas.create_text(
         496.0+82,
         265.99999999999994,
@@ -753,6 +998,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the track album header text on the canvas
     scroll_view_canvas.create_text(
         645.0+82,
         265.99999999999994,
@@ -763,6 +1009,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the track date added header text on the canvas
     scroll_view_canvas.create_text(
         791.0+82,
         265.99999999999994,
@@ -773,6 +1020,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the track duration header image on the canvas
     duration_image = PhotoImage(
         file=relative_to_assets("image_29.png"))
     scroll_view_canvas.create_image(
@@ -782,6 +1030,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Create the the header separator rectangle on the canvas
     scroll_view_canvas.create_rectangle(
         246.0+82,
         292.99999999999994,
@@ -790,14 +1039,17 @@ def populate_tracks(playlist: Playlist):
         fill="#5B5B5B",
         outline="",
         tag="track_element"
-        )
+    )
 
     final_row = 0
 
     for row, track in enumerate(playlist.tracks):
+        # Iterate over the list of tracks in the playlist
+
         final_row = row + 1
         objs = list()
 
+        # Create the track frame image
         track_frame_image = PhotoImage(
             file=relative_to_assets("image_30.png"))
         objs.append(scroll_view_canvas.create_image(
@@ -807,6 +1059,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
+        # Create the track number text
         objs.append(scroll_view_canvas.create_text(
             270.0+82,
             314.99999999999994 + (row * 52),
@@ -817,6 +1070,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
+        # Truncate the track title and Create the track title text on the canvas
         track_title = player.Utils.truncate_string(track.title, 18)
         objs.append(scroll_view_canvas.create_text(
             331.0+82,
@@ -828,6 +1082,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
+        # Truncate the track artist and Create the track artist text on the canvas
         track_artist = player.Utils.truncate_string(track.artist, 16)
         objs.append(scroll_view_canvas.create_text(
             496.0+82,
@@ -839,6 +1094,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
+        # Truncate the track album and Create the track album text on the canvas
         track_album = player.Utils.truncate_string(track.album, 16)
         objs.append(scroll_view_canvas.create_text(
             645.0+82,
@@ -850,6 +1106,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
+        # Create the track date added text on the canvas (placeholder)
         objs.append(scroll_view_canvas.create_text(
             791.0+82,
             315.99999999999994 + (row * 52),
@@ -860,6 +1117,7 @@ def populate_tracks(playlist: Playlist):
             tag="track_element"
         ))
 
+        # Format the track duration in (m:ss) format and create the track duration text on the canvas
         track_duration = player.Utils.get_formatted_time(track.duration)
         objs.append(scroll_view_canvas.create_text(
             947.0+82,
@@ -870,12 +1128,17 @@ def populate_tracks(playlist: Playlist):
             font=("RobotoRoman Light", 11),
             tag="track_element"
         ))
+
+        # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
         scroll_view_canvas.images.append(track_frame_image)
+
+        # Binds the track frame elements to playing the track
         for obj in objs:
             scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
                 lambda event, track_id=track.id: player.play_database_track(track_id)
             )
 
+    # Creates a rectangle after the tracks to allow for more room to scroll
     scroll_view_canvas.create_rectangle(
         300.0,
         330.0 + (final_row * 52.0),
@@ -886,6 +1149,7 @@ def populate_tracks(playlist: Playlist):
         tag="track_element"
     )
 
+    # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     scroll_view_canvas.images.append(playlist_image)
     scroll_view_canvas.images.append(edit_details_image)
     scroll_view_canvas.images.append(play_image)
@@ -894,24 +1158,42 @@ def populate_tracks(playlist: Playlist):
     scroll_view_canvas.images.append(download_image)
     scroll_view_canvas.images.append(downloaded_image)
     scroll_view_canvas.images.append(duration_image)
+
+    # Configure the canvas scroll region
     onFrameConfigure(scroll_view_canvas)
 
-def populate_playlists():
+def populate_playlists() -> None:
+    """
+    Populate the list of playlists in the database
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas, canvas
 
+    # Resets the scroll view and deletes all canvas elements
+    # Also, resets focus (removes entry box cursor)
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("track_element")
     scroll_view_canvas.delete("playlist_element")
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
 
+    # Creates a list of images on the canvas (to avoid garbarge collection)
     scroll_view_canvas.images = list()
 
+    # Split the list of playlists into sublists for easier organization
+    # List the playlists as only 3 per row
     playlist_rows = player.Utils.split_list(playlist_manager.session.query(Playlist).all(), 3)
 
     for row, playlists in enumerate(playlist_rows):
         for column, playlist in enumerate(playlists):
+            # Iterate over the rows and columns in the playlist_rows list and its sublists
+
             objs = list()
+
+            # Create the playlist frame image on the canvas
             frame_image = PhotoImage(
                 file=relative_to_assets("image_25.png"))
             objs.append(scroll_view_canvas.create_image(
@@ -921,6 +1203,7 @@ def populate_playlists():
                 tag="playlist_element"
             ))
 
+            # Truncate the playlist title and create the playlist title text on the canvas
             playlist_title = player.Utils.truncate_string(playlist.title, 20)
             objs.append(scroll_view_canvas.create_text(
                 352.0 + (column * 208),
@@ -932,6 +1215,7 @@ def populate_playlists():
                 tag="playlist_element"
             ))
 
+            # Create the playlist author text on the canvas
             objs.append(scroll_view_canvas.create_text(
                 352.0 + (column * 208),
                 254.99999999999994 + (row * 260),
@@ -942,6 +1226,7 @@ def populate_playlists():
                 tag="playlist_element"
             ))
 
+            # Create the playlist cover art on the canvas
             playlist_image = PhotoImage(
                 file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
             objs.append(scroll_view_canvas.create_image(
@@ -950,16 +1235,28 @@ def populate_playlists():
                 image=playlist_image,
                 tag="playlist_element"
             ))
+
+            # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
             scroll_view_canvas.images.append(frame_image)
             scroll_view_canvas.images.append(playlist_image)
+
+            # Binds the playlist frame elements to populating the tracks in the playlist
             for obj in objs:
                 scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
                     lambda event, playlist=playlist:
                         populate_tracks(playlist))
 
+    # COnfigure the canvas scroll region
     onFrameConfigure(scroll_view_canvas)
 
-def create_new_playlist():
+def create_new_playlist() -> None:
+    """
+    Creates a new playlist and repopulates the list of playlists
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas, canvas
 
     playlist_created = False
@@ -973,27 +1270,82 @@ def create_new_playlist():
 
     populate_tracks(new_playlist)
 
-def view_liked_songs():
+def view_liked_songs() -> None:
+    """
+    Populates the list of tracks in the "Liked Songs" playlist
+
+    Returns
+    -------
+    None
+    """
     liked_songs_playlist = playlist_manager.get_or_create_playlist("Liked Songs")
     populate_tracks(liked_songs_playlist)
 
-def onFrameConfigure(canvas):
-    """Reset the scroll region to encompass the inner frame"""
+def onFrameConfigure(canvas: Canvas) -> None:
+    """
+    Reset the scroll region to encompass the inner frame
+
+    Parameters
+    ----------
+    canvas : Canvas
+        The canvas to configure the scrollregion on
+
+    Returns
+    -------
+    None
+    """
     canvas.configure(scrollregion=canvas.bbox("all"))
 
-def bound_to_mousewheel(event):
+def bound_to_mousewheel(event: Event) -> None:
+    """
+    Binds the mousewheel to scroll the scroll view canvas
+
+    Parameters
+    ----------
+    event: Event
+        Callback parameter containing information about the event
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas
     scroll_view_canvas.bind_all("<MouseWheel>", on_mousewheel)
 
-def unbound_to_mousewheel(event):
+def unbound_to_mousewheel(event: Event) -> None:
+    """
+    Unbinds the mousewheel from the scroll view canvas
+
+    Parameters
+    ----------
+    event: Event
+        Callback parameter containing information about the event
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas
     scroll_view_canvas.unbind_all("<MouseWheel>")
 
-def on_mousewheel(event):
-    # This code was modified using this source: https://stackoverflow.com/a/37861801
+def on_mousewheel(event: Event) -> None:
+    """
+    Scrolls the canvas.
+    This code was modified using this source: https://stackoverflow.com/a/37861801
+
+    Parameters
+    ----------
+    event: Event
+        Callback parameter containing information about the event
+
+    Returns
+    -------
+    None
+    """
     global scroll_view_canvas
     scroll_view_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
+# Creates the main canvas
 canvas = Canvas(
     window,
     bg = "#202020",
@@ -1003,8 +1355,9 @@ canvas = Canvas(
     highlightthickness = 0,
     relief = "ridge"
 )
-
 canvas.place(x = 0, y = 0)
+
+# Creates the main background rectangle
 canvas.create_rectangle(
     218.0,
     0.0,
@@ -1014,6 +1367,7 @@ canvas.create_rectangle(
     outline=""
 )
 
+# Creates the scroll view canvas containing the tab content
 scroll_view_canvas = Canvas(
     window,
     borderwidth=0,
@@ -1024,6 +1378,7 @@ scroll_view_canvas = Canvas(
 )
 scroll_view_canvas.place(x=218.0, y=33.0, width=806.0, height=607.0)
 
+# Creates the scroll view frame to allow for scrolling
 frame = Frame(scroll_view_canvas, background="#202020", width=806.0, padx=20.0, pady=20.0)
 
 scroll_view_canvas.create_window(
@@ -1032,11 +1387,14 @@ scroll_view_canvas.create_window(
     anchor="nw"
 )
 
+# Bind entering and leaving the scroll view canvas to activating/deactivating scroll
 scroll_view_canvas.bind('<Enter>', bound_to_mousewheel)
 scroll_view_canvas.bind('<Leave>', unbound_to_mousewheel)
 
+# Configure the canvas scroll region
 frame.bind("<Configure>", lambda event, canvas=scroll_view_canvas: onFrameConfigure(scroll_view_canvas))
 
+# Creates the background rectangle for the current playing track playback info
 canvas.create_rectangle(
     0.0,
     640.0,
@@ -1046,7 +1404,19 @@ canvas.create_rectangle(
     outline=""
 )
 
-def start_move(event):
+def start_move(event: Event) -> None:
+    """
+    Start moving the window (toolbar binding callback)
+
+    Parameters
+    ----------
+    event: Event
+        Callback parameter containing information about the event
+
+    Returns
+    -------
+    None
+    """
     global x, y
     window.geometry("1024x720")
     window.wm_overrideredirect(True)
@@ -1054,6 +1424,18 @@ def start_move(event):
     y = event.y
 
 def stop_move(event):
+    """
+    Stop moving the window (toolbar binding callback)
+
+    Parameters
+    ----------
+    event: Event
+        Callback parameter containing information about the event
+
+    Returns
+    -------
+    None
+    """
     global x, y
     if HIGH_RES:
         window.geometry("1006x673")
@@ -1068,6 +1450,18 @@ def stop_move(event):
     y = None
 
 def do_move(event):
+    """
+    Move the window (toolbar binding callback)
+
+    Parameters
+    ----------
+    event: Event
+        Callback parameter containing information about the event
+
+    Returns
+    -------
+    None
+    """
     global x, y
 
     if x and y:
