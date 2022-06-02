@@ -161,11 +161,33 @@ class Stream(Base):
 
 class PlaylistManager:
     def __init__(self) -> None:
+        """
+        Creates the engine and a new session
+
+        Returns
+        -------
+        None
+        """
         Base.metadata.create_all(engine)
         self.session = None
         self.open_session()
 
     def get_track(self, title: Optional[str]=None, id: Optional[int]=None) -> Track:
+        """
+        Returns the first track with the corresponding title or id
+
+        Parameters
+        ----------
+        title : str, optional
+            The track object title
+        id : int, optional
+            The track object id
+
+        Returns
+        -------
+        Track
+            The first track with the corresponding title or id
+        """
         track = None
         if title:
             track = self.session.query(Track).filter_by(title=title).first()
@@ -173,7 +195,32 @@ class PlaylistManager:
             track = self.session.query(Track).filter_by(id=id).first()
         return track
 
-    def get_or_create_track(self, title: str, artist: str, album: str, duration: int, stream_url: str, cover_art_url: str=None):
+    def get_or_create_track(self, title: str, artist: str, album: str, duration: int, stream_url: str,
+        cover_art_url: Optional[str]=None) -> Track:
+        """
+        Returns the first track with the corresponding title.
+        If the track doesn't exist, creates a new track with the corresponding details and returns the object.
+
+        Parameters
+        ----------
+        title : str
+            The track title
+        artist : str
+            The track artist
+        album : str
+            The track album
+        duration : int
+            The track duration
+        stream_url : str
+            The track stream url
+        cover_art_url : str, optional
+            The track cover art image url
+
+        Returns
+        -------
+        Track
+            The first track with the corresponding title or id
+        """
         track = self.get_track(title=title)
         if track == None:
             if not cover_art_url:
@@ -183,19 +230,58 @@ class PlaylistManager:
             self.session.commit()
         return track
 
-    def add_track_cover_art(self, track: Track, cover_art_url: str):
+    def add_track_cover_art(self, track: Track, cover_art_url: str) -> None:
+        """
+        Adds a cover art url to an existing track object
+
+        Parameters
+        ----------
+        track : Track
+            The track database object
+        cover_art_url : str
+            The track cover art image url
+
+        Returns
+        -------
+        None
+        """
         if not track:
             return
-        
+
         track.cover_art_url = cover_art_url
         self.session.merge(track)
         self.session.commit()
 
-    def get_playlist(self, title) -> Playlist:
+    def get_playlist(self, title: str) -> Playlist:
+        """
+        Returns the first playlist with the specified title
+
+        Parameters
+        ----------
+        title : str
+            The playlist title
+        Returns
+        -------
+        Playlist
+            The first playlist with the specified title
+        """
         playlist = self.session.query(Playlist).filter_by(title=title).first()
         return playlist
 
     def get_or_create_playlist(self, title: str="New Playlist") -> Playlist:
+        """
+        Returns the first playlist with the specified title.
+        If the playlist doesn't exist, creates a new playlist with the specified title.
+
+        Parameters
+        ----------
+        title : str
+            The playlist title
+        Returns
+        -------
+        Playlist
+            The first playlist with the specified title
+        """
         playlist = self.get_playlist(title)
         if playlist:
             return playlist
@@ -207,9 +293,34 @@ class PlaylistManager:
         return playlist
 
     def playlist_exists(self, title: str) -> bool:
+        """
+        Returns whether or not a playlist with the specified title already exists
+
+        Parameters
+        ----------
+        title : str
+            The playlist title
+        Returns
+        -------
+        bool
+            Whether or not a playlist with the specified title already exists
+        """
         return self.get_playlist(title) is not None
 
-    def rename_playlist(self, playlist: Playlist, new_title: str):
+    def rename_playlist(self, playlist: Playlist, new_title: str) -> None:
+        """
+        Renames an existing playlist
+
+        Parameters
+        ----------
+        playlist : Playlist
+            The playlist database object
+        new_title : str
+            The new playlist title
+        Returns
+        -------
+        None
+        """
         if not playlist:
             return
 
@@ -217,7 +328,20 @@ class PlaylistManager:
         self.session.merge(playlist)
         self.session.commit()
 
-    def edit_playlist_description(self, playlist: Playlist, new_description: str):
+    def edit_playlist_description(self, playlist: Playlist, new_description: str) -> None:
+        """
+        Edits an existing playlist's description
+
+        Parameters
+        ----------
+        playlist : Playlist
+            The playlist database object
+        new_description : str
+            The new playlist description
+        Returns
+        -------
+        None
+        """
         if not playlist:
             return
 
@@ -225,14 +349,39 @@ class PlaylistManager:
         self.session.merge(playlist)
         self.session.commit()
 
-    def delete_playlist(self, playlist: Playlist):
+    def delete_playlist(self, playlist: Playlist) -> None:
+        """
+        Deletes the specified playlist from the database
+
+        Parameters
+        ----------
+        playlist : Playlist
+            The playlist database object to delete
+        Returns
+        -------
+        None
+        """
         if not playlist:
             return
 
         self.session.delete(playlist)
         self.session.commit()
 
-    def add_track_to_playlist(self, track: Track, playlist: Playlist):
+    def add_track_to_playlist(self, track: Track, playlist: Playlist) -> None:
+        """
+        Adds an existing track to an existing playlist
+
+        Parameters
+        ----------
+        track : Track
+            The track database object
+        playlist : Playlist
+            The playlist database object to add the track to
+
+        Returns
+        -------
+        None
+        """
         playlists = track.playlists
         if playlist in playlists:
             return
@@ -240,20 +389,96 @@ class PlaylistManager:
         track.playlists = playlists
         self.session.commit()
 
-    def create_and_add_track_to_playlist(self, title: str, artist: str, album: str, duration: int, stream_url: str, playlist: Playlist, cover_art_url: str=None) -> Track:
+    def create_and_add_track_to_playlist(self, title: str, artist: str, album: str, duration: int,
+        stream_url: str, playlist: Playlist, cover_art_url: Optional[str]=None) -> Track:
+        """
+        Creates and adds a track to an existing playlist
+
+        Parameters
+        ----------
+        title : str
+            The track title
+        artist : str
+            The track artist
+        album : str
+            The track album
+        duration : int
+            The track duration
+        stream_url : str
+            The track stream url
+        playlist : Playlist
+            The playlist to add the track to
+        cover_art_url : str, optional
+            The track cover art image url
+
+        Returns
+        -------
+        Track
+            The newly created track
+        """
         track = self.get_or_create_track(title, artist, album, duration, stream_url, cover_art_url=cover_art_url)
         self.add_track_to_playlist(track, playlist)
         return track
 
-    def add_track_to_liked_songs(self, track: Track):
+    def add_track_to_liked_songs(self, track: Track) -> None:
+        """
+        Adds an existing track to the "Liked Songs" playlist
+
+        Parameters
+        ----------
+        track : Track
+            The track database object
+
+        Returns
+        -------
+        None
+        """
         liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.add_track_to_playlist(track, liked_songs_playlist)
 
-    def create_and_add_track_to_liked_songs(self, title: str, artist: str, album: str, duration: int, stream_url: str, cover_art_url: str=None) -> None:
-        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
-        self.create_and_add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist, cover_art_url=cover_art_url)
+    def create_and_add_track_to_liked_songs(self, title: str, artist: str, album: str, duration: int,
+        stream_url: str, cover_art_url: Optional[str]=None) -> Track:
+        """
+        Creates and adds a track to the "Likes Songs" playlist
 
-    def remove_track_from_playlist(self, track: Track, playlist: Playlist) -> None:  
+        Parameters
+        ----------
+        title : str
+            The track title
+        artist : str
+            The track artist
+        album : str
+            The track album
+        duration : int
+            The track duration
+        stream_url : str
+            The track stream url
+        cover_art_url : str, optional
+            The track cover art image url
+
+        Returns
+        -------
+        Track
+            The newly created track
+        """
+        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
+        return self.create_and_add_track_to_playlist(title, artist, album, duration, stream_url, liked_songs_playlist, cover_art_url=cover_art_url)
+
+    def remove_track_from_playlist(self, track: Track, playlist: Playlist) -> None:
+        """
+        Removes a track from a playlist
+
+        Parameters
+        ----------
+        track : Track
+            The track database object
+        playlist : Playlist
+            The playlist database object (that contains the track) to remove the track from
+
+        Returns
+        -------
+        None
+        """
         playlists = track.playlists
         if playlist in playlists:
             playlists.remove(playlist)
@@ -261,14 +486,45 @@ class PlaylistManager:
             self.session.commit()
 
     def remove_track_from_liked_songs(self, track: Track) -> None:
-        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
+        """
+        Removes a track from the "Liked Songs" playlist
 
+        Parameters
+        ----------
+        track : Track
+            The track database object
+
+        Returns
+        -------
+        None
+        """
+        liked_songs_playlist = self.get_or_create_playlist("Liked Songs")
         self.remove_track_from_playlist(track, liked_songs_playlist)
 
     def track_is_liked(self, track: Track) -> bool:
+        """
+        Returns whether or not the "Liked Songs" playlist contains the specified track
+
+        Parameters
+        ----------
+        track : Track
+            The track database object
+
+        Returns
+        -------
+        bool
+            Whether or not the "Liked Songs" playlist contains the specified track
+        """
         return self.get_or_create_playlist("Liked Songs") in track.playlists
 
     def open_session(self) -> None:
+        """
+        Opens a new SQL session
+
+        Returns
+        -------
+        None
+        """
         if self.session and self.session.is_active:
             return
 
@@ -277,9 +533,23 @@ class PlaylistManager:
         self.session = Session()
 
     def commit_session(self) -> None:
+        """
+        Commits the current session
+
+        Returns
+        -------
+        None
+        """
         self.session.commit()
 
     def close_session(self) -> None:
+        """
+        Closes the current session
+
+        Returns
+        -------
+        None
+        """
         self.session.close()
 
 playlist_manager = PlaylistManager()
