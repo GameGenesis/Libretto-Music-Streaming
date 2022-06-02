@@ -1016,16 +1016,18 @@ populate_playlists()
 
 """
 ---------------------------------------------------------------------------------------------------------
-Most of the basic GUI code below was generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer,
+A lot of the basic GUI code below was generated using Tkinter Designer: https://github.com/ParthJadhav/Tkinter-Designer,
 and was later modified to fit the specific needs of the application
 ---------------------------------------------------------------------------------------------------------
 """
 
-
+# Creates the current track play button image and binds it to playing/pausing the current track
 play_button_image = PhotoImage(
     file=relative_to_assets("image_1.png"))
+
 pause_button_image = PhotoImage(
     file=relative_to_assets("image_2.png"))
+
 play_button = canvas.create_image(
     511.0,
     669.0,
@@ -1034,22 +1036,25 @@ play_button = canvas.create_image(
 
 canvas.tag_bind(play_button, "<ButtonPress-1>", lambda event: player.play_pause_track())
 
-image_image_3 = PhotoImage(
+# Creates the next track button image and places it on the canvas
+next_track_button_image = PhotoImage(
     file=relative_to_assets("image_3.png"))
-image_3 = canvas.create_image(
+next_track_button = canvas.create_image(
     561.0,
     671.0,
-    image=image_image_3
+    image=next_track_button_image
 )
 
-image_image_4 = PhotoImage(
+# Creates the previous track button image and places it on the canvas
+previous_track_button_image = PhotoImage(
     file=relative_to_assets("image_4.png"))
-image_4 = canvas.create_image(
+previous_track_button = canvas.create_image(
     460.0,
     671.0,
-    image=image_image_4
+    image=previous_track_button_image
 )
 
+# Creates the current track skip backwards button image and binds it to skipping backwards in playback
 skip_backwards_button_image = PhotoImage(
     file=relative_to_assets("image_5.png"))
 skip_backwards_button = canvas.create_image(
@@ -1060,6 +1065,7 @@ skip_backwards_button = canvas.create_image(
 
 canvas.tag_bind(skip_backwards_button, "<ButtonPress-1>", lambda event: player.skip_backwards())
 
+# Creates the current track skip forwards button image and binds it to skipping forwards in playback
 skip_forwards_button_image = PhotoImage(
     file=relative_to_assets("image_6.png"))
 skip_forwards_button = canvas.create_image(
@@ -1070,18 +1076,22 @@ skip_forwards_button = canvas.create_image(
 
 canvas.tag_bind(skip_forwards_button, "<ButtonPress-1>", lambda event: player.skip_forwards())
 
-image_image_7 = PhotoImage(
+# Creates the track shuffle button image and places it on the canvas
+track_shuffle_button_image = PhotoImage(
     file=relative_to_assets("image_7.png"))
-image_7 = canvas.create_image(
+track_shuffle_button = canvas.create_image(
     375.0,
     671.0,
-    image=image_image_7
+    image=track_shuffle_button_image
 )
 
+# Creates the current track loop button image and binds it to toggling loop playback
 no_loop_button_image = PhotoImage(
     file=relative_to_assets("image_8.png"))
+
 loop_button_image = PhotoImage(
     file=relative_to_assets("image_9.png"))
+
 loop_button = canvas.create_image(
     644.0,
     671.0,
@@ -1090,8 +1100,10 @@ loop_button = canvas.create_image(
 
 canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop())
 
+# Creates the current track elapsed time slider and places it on the canvas
 track_slider = player.Slider(canvas, 317.0, 699.0, 707.0, 704.0)
 
+# Creates the current track elapsed time text and places it on the canvas (placeholder - gets reassigned later)
 elapsed_time_text = canvas.create_text(
     310.0,
     694.0,
@@ -1101,6 +1113,7 @@ elapsed_time_text = canvas.create_text(
     font=("RobotoRoman Light", 9)
 )
 
+# Creates the current track total duration text and places it on the canvas (placeholder - gets reassigned later)
 total_time_text = canvas.create_text(
     715.0,
     694.0,
@@ -1110,6 +1123,7 @@ total_time_text = canvas.create_text(
     font=("RobotoRoman Light", 9)
 )
 
+# Creates the album cover art placeholder and places it on the canvas (gets reassigned later)
 album_cover_art_image = PhotoImage(
     file=relative_to_assets("image_12.png"))
 album_cover_art = canvas.create_image(
@@ -1118,6 +1132,7 @@ album_cover_art = canvas.create_image(
     image=album_cover_art_image
 )
 
+# Creates the current track artist text and places it on the canvas (placeholder - gets reassigned later)
 track_artist_text = canvas.create_text(
     85.0,
     683.0,
@@ -1127,6 +1142,7 @@ track_artist_text = canvas.create_text(
     font=("RobotoRoman Light", 10)
 )
 
+# Creates the current track title text and places it on the canvas (placeholder - gets reassigned later)
 track_title_text = canvas.create_text(
     85.0,
     663.0,
@@ -1136,6 +1152,7 @@ track_title_text = canvas.create_text(
     font=("RobotoRoman Medium", 12, "bold")
 )
 
+# Creates the heart/like song button image and places it on the canvas
 heart_empty_image = PhotoImage(
     file=relative_to_assets("image_13.png"))
 
@@ -1148,6 +1165,7 @@ heart_button = canvas.create_image(
     image=heart_empty_image
 )
 
+# Creates the fullscreen preview button image
 image_image_15 = PhotoImage(
     file=relative_to_assets("image_15.png"))
 image_15 = canvas.create_image(
@@ -1156,6 +1174,7 @@ image_15 = canvas.create_image(
     image=image_image_15
 )
 
+# Creates the lyrics button image
 image_image_16 = PhotoImage(
     file=relative_to_assets("image_16.png"))
 image_16 = canvas.create_image(
@@ -1164,6 +1183,7 @@ image_16 = canvas.create_image(
     image=image_image_16
 )
 
+# Creates the volume indicator icon/button and binds it to toggling mute
 low_volume_image = PhotoImage(
     file=relative_to_assets("image_17.png"))
 
@@ -1184,6 +1204,7 @@ volume_indicator = canvas.create_image(
 
 canvas.tag_bind(volume_indicator, "<ButtonPress-1>", lambda event: toggle_mute())
 
+# Creates the volume slider foreground and background images
 image_image_21 = PhotoImage(
     file=relative_to_assets("image_21.png"))
 image_21 = canvas.create_image(
@@ -1200,78 +1221,85 @@ image_22 = canvas.create_image(
     image=image_image_22
 )
 
+# Creates the side bar canvas rectangle
 canvas.create_rectangle(
     0.0,
     0.0,
     218.0,
     640.0,
     fill="#009CDF",
-    outline="")
+    outline=""
+)
 
-button_image_1 = PhotoImage(
+# Creates the "Liked Songs" button and places it on the canvas
+liked_songs_button_image = PhotoImage(
     file=relative_to_assets("button_1.png"))
-button_1 = Button(
-    image=button_image_1,
+liked_songs_button = Button(
+    image=liked_songs_button_image,
     borderwidth=0,
     highlightthickness=0,
     command=view_liked_songs,
     relief="flat"
 )
-button_1.place(
+liked_songs_button.place(
     x=0.0,
     y=293.99999999999994,
     width=218.0,
     height=43.0
 )
 
-button_image_2 = PhotoImage(
+# Creates the "Create Playlist" button and places it on the canvas
+create_playlist_button_image = PhotoImage(
     file=relative_to_assets("button_2.png"))
-button_2 = Button(
-    image=button_image_2,
+create_playlist_button = Button(
+    image=create_playlist_button_image,
     borderwidth=0,
     highlightthickness=0,
     command=create_new_playlist,
     relief="flat"
 )
-button_2.place(
+create_playlist_button.place(
     x=0.0,
     y=250.99999999999994,
     width=218.0,
     height=43.0
 )
 
-button_image_3 = PhotoImage(
+# Creates the radio tab button and places it on the canvas
+radio_button_image = PhotoImage(
     file=relative_to_assets("button_3.png"))
-button_3 = Button(
-    image=button_image_3,
+radio_button = Button(
+    image=radio_button_image,
     borderwidth=0,
     highlightthickness=0,
     command=lambda: print("button_3 clicked"),
     relief="flat"
 )
-button_3.place(
+radio_button.place(
     x=0.0,
     y=181.99999999999994,
     width=218.0,
     height=43.0
 )
 
-button_image_4 = PhotoImage(
+# Creates the "Your Library" button and places it on the canvas
+library_button_image = PhotoImage(
     file=relative_to_assets("button_4.png"))
-button_4 = Button(
-    image=button_image_4,
+library_button = Button(
+    image=library_button_image,
     borderwidth=0,
     highlightthickness=0,
     command=lambda: print("button_4 clicked"),
     relief="flat"
 )
-button_4.place(
+library_button.place(
     x=0.0,
     y=138.99999999999994,
     width=218.0,
     height=43.0
 )
 
+# Creates the search button and places it on the canvas
 search_button_image = PhotoImage(
     file=relative_to_assets("button_5.png"))
 search_button = Button(
@@ -1288,22 +1316,24 @@ search_button.place(
     height=43.0
 )
 
-button_image_6 = PhotoImage(
+# Creates the home button and places it on the canvas
+home_button_image = PhotoImage(
     file=relative_to_assets("button_6.png"))
-button_6 = Button(
-    image=button_image_6,
+home_button = Button(
+    image=home_button_image,
     borderwidth=0,
     highlightthickness=0,
     command=populate_playlists,
     relief="flat"
 )
-button_6.place(
+home_button.place(
     x=0.0,
     y=52.99999999999994,
     width=218.0,
     height=43.0
 )
 
+# Creates the Music placeholder logo image and places it on the canvas
 image_image_23 = PhotoImage(
     file=relative_to_assets("image_23.png"))
 image_23 = canvas.create_image(
@@ -1312,6 +1342,7 @@ image_23 = canvas.create_image(
     image=image_image_23
 )
 
+# Creates the three dots (extra settings) image and places it on the canvas
 image_image_24 = PhotoImage(
     file=relative_to_assets("image_24.png"))
 image_24 = canvas.create_image(
@@ -1320,74 +1351,69 @@ image_24 = canvas.create_image(
     image=image_image_24
 )
 
-button_image_7 = PhotoImage(
+# Creates the close window button and places it on the canvas
+close_window_image = PhotoImage(
     file=relative_to_assets("button_7.png"))
-button_7 = Button(
-    image=button_image_7,
+close_window_button = Button(
+    image=close_window_image,
     borderwidth=0,
     highlightthickness=0,
     command=close_main_window,
     relief="flat"
 )
-button_7.place(
+close_window_button.place(
     x=972.0,
     y=5.684341886080802e-14,
     width=52.0,
     height=33.0
 )
 
-button_image_8 = PhotoImage(
+# Creates the toggle fullscreen button and places it on the canvas
+fullscreen_button_window_image = PhotoImage(
     file=relative_to_assets("button_8.png"))
-button_8 = Button(
-    image=button_image_8,
-    borderwidth=0,
-    highlightthickness=0,
-    command=lambda: print("button_8 clicked"),
-    relief="flat"
-)
-button_8.place(
-    x=920.0,
-    y=5.684341886080802e-14,
-    width=52.0,
-    height=33.0
-)
 
-button_image_9 = PhotoImage(
+windowed_button_image = PhotoImage(
     file=relative_to_assets("button_9.png"))
-button_9 = Button(
-    image=button_image_9,
+
+toggle_fullscreen_button = Button(
+    image=windowed_button_image,
     borderwidth=0,
     highlightthickness=0,
     command=toggle_fullscreen,
     relief="flat"
 )
-button_9.place(
+
+toggle_fullscreen_button.place(
     x=920.0,
     y=5.684341886080802e-14,
     width=52.0,
     height=33.0
 )
 
-button_image_10 = PhotoImage(
+# Creates the minimize window button and places it on the canvas
+minimize_window_image = PhotoImage(
     file=relative_to_assets("button_10.png"))
-button_10 = Button(
-    image=button_image_10,
+minimize_window_button = Button(
+    image=minimize_window_image,
     borderwidth=0,
     highlightthickness=0,
     command=minimize_window,
     relief="flat",
 )
-button_10.place(
+minimize_window_button.place(
     x=868.0,
     y=5.684341886080802e-14,
     width=52.0,
     height=33.0,
 )
 
+# Pass GUI elements as parameters to the player module for easier acess
 player.init(
     canvas, elapsed_time_text, track_slider, heart_button, heart_empty_image,
     heart_full_image, loop_button, no_loop_button_image, loop_button_image,
     play_button, play_button_image, pause_button_image, track_title_text, track_artist_text, total_time_text,
     album_cover_art, album_cover_art_image
 )
+
+# Call the mainloop of Tk
 window.mainloop()
