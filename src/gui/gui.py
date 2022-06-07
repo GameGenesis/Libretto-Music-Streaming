@@ -328,6 +328,9 @@ def populate_search_results(search_entry: Entry) -> None:
         tag="search_result_element"
     )
 
+    # Configure the canvas scroll region
+    onFrameConfigure(scroll_view_canvas)
+
     # scroll_view_canvas.create_text(
     #     247.0+82,
     #     339.99999999999994,
