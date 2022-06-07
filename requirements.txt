@@ -1,9 +1,9 @@
 beautifulsoup4==4.10.0
-ffmpeg-python==0.2.0
-httpx==0.22.0
 lyricsgenius==3.0.1
 moviepy==1.0.3
 mutagen==1.45.1
+pafy==0.5.5
+Pillow==8.4.0
 pygame==2.1.2
 python-vlc==3.0.16120
 pytube==12.1.0
@@ -11,6 +11,4 @@ pytube==12.1.0
 requests==2.25.1
 spotipy==2.19.0
 SQLAlchemy==1.4.31
-urllib3==1.26.7
-youtube-dl==2020.12.2
-config==0.5.1
+youtube-search-python==1.6.2
