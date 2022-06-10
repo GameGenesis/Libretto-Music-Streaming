@@ -1,10 +1,11 @@
+from typing import Optional
 import config
 import time
 
 import lyricsgenius as lg
 from youtubesearchpython import VideosSearch
 
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageDraw
 import requests
 from io import BytesIO
 
@@ -393,10 +394,11 @@ def get_song_yt(search_term: str) -> dict:
     result = videosSearch.result()["result"][0]
     return result
 
-def create_image(image_url: str, size: tuple[int, int]) -> PhotoImage:
+def create_image(image_url: str, size: tuple[int, int], radius: Optional[int]=None) -> PhotoImage:
     """
     Returns a created PhotoImage using an image url.
-    Resizes the image to the specified size
+    Resizes the image to the specified size.
+    Optionally, adds rounded corners to the created image.
 
     Parameters
     ----------
@@ -404,6 +406,8 @@ def create_image(image_url: str, size: tuple[int, int]) -> PhotoImage:
         The image url
     size : tuple[int, int]
         The size of the created image
+    radius: : int, optional
+        The radius of the image corners
 
     Returns
     -------
@@ -411,6 +415,8 @@ def create_image(image_url: str, size: tuple[int, int]) -> PhotoImage:
         A tkinter PhotoImage
     """
     webimage = WebImage(image_url)
+    if radius:
+        webimage.add_corners(radius)
     webimage.resize(size)
     return webimage.get()
 
@@ -710,6 +716,19 @@ class WebImage:
 
         self.image = self.image.resize(size)
         self.photoimage = ImageTk.PhotoImage(self.image)
+
+    def add_corners(self, radius):
+        # Source: https://stackoverflow.com/a/11291419
+        circle = Image.new('L', (radius * 2, radius * 2), 0)
+        draw = ImageDraw.Draw(circle)
+        draw.ellipse((0, 0, radius * 2, radius * 2), fill=255)
+        alpha = Image.new('L', self.image.size, 255)
+        w, h = self.image.size
+        alpha.paste(circle.crop((0, 0, radius, radius)), (0, 0))
+        alpha.paste(circle.crop((0, radius, radius, radius * 2)), (0, h - radius))
+        alpha.paste(circle.crop((radius, 0, radius * 2, radius)), (w - radius, 0))
+        alpha.paste(circle.crop((radius, radius, radius * 2, radius * 2)), (w - radius, h - radius))
+        self.image.putalpha(alpha)
 
     def get(self) -> PhotoImage:
         """
