@@ -867,8 +867,15 @@ def populate_tracks(playlist: Playlist) -> None:
     )
 
     # Creates the playlist cover image preview
-    playlist_image = PhotoImage(
-        file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
+    if playlist.title == "Liked Songs":
+        playlist_image = PhotoImage(
+            file=relative_to_assets("image_41.png"))
+    elif playlist.tracks and playlist.tracks[0].cover_art_url:
+        playlist_image = player.create_image(playlist.tracks[0].cover_art_url, (160, 160), 15)
+    else:
+        playlist_image = PhotoImage(
+            file=relative_to_assets("image_40.png"))
+
     scroll_view_canvas.create_image(
         326.0+82,
         135.99999999999994,
@@ -1230,8 +1237,15 @@ def populate_playlists() -> None:
             ))
 
             # Create the playlist cover art on the canvas
-            playlist_image = PhotoImage(
-                file=relative_to_assets("image_27.png" if playlist.title == "Liked Songs" else "image_26.png"))
+            if playlist.title == "Liked Songs":
+                playlist_image = PhotoImage(
+                    file=relative_to_assets("image_27.png"))
+            elif playlist.tracks and playlist.tracks[0].cover_art_url:
+                playlist_image = player.create_image(playlist.tracks[0].cover_art_url, (140, 140), 15)
+            else:
+                playlist_image = PhotoImage(
+                    file=relative_to_assets("image_26.png"))
+
             objs.append(scroll_view_canvas.create_image(
                 418.0 + (column * 208),
                 149.99999999999994 + (row * 260),
