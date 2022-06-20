@@ -673,8 +673,7 @@ def create_rename_window(playlist: Playlist) -> None:
 
     Returns
     -------
-    tuple[Toplevel, Toplevel, Canvas]
-        A tuple of the overlay window, the edit window and the canvas that is contained on the edit window
+    None
     """
 
     # Creates the edit window and a list of images on the edit canvas (to avoid garbage collection)
@@ -828,6 +827,120 @@ def toggle_edit_details_popup(playlist_title: int, hidden: bool=False) -> None:
     global scroll_view_canvas
     state = "hidden" if hidden else "normal"
     scroll_view_canvas.itemconfigure(playlist_title, state=state)
+
+def create_add_track_window() -> None:
+    """
+    Creates a toplevel window containing an entry to add a track, playlist, or podcast via url
+
+    Returns
+    -------
+    None
+    """
+
+    # Creates the edit window and a list of images on the edit canvas (to avoid garbage collection)
+    overlay_window, edit_window, edit_canvas = create_edit_window()
+    edit_canvas.images = list()
+
+    # Creates the add tracks frame image on the canvas
+    add_tracks_box_image = PhotoImage(
+    file=relative_to_assets("image_52.png"))
+    add_tracks_box = edit_canvas.create_image(
+        512.0,
+        358.99999999999994,
+        image=add_tracks_box_image
+    )
+
+    # Creates the link text box image on the canvas
+    link_entry_image = PhotoImage(
+        file=relative_to_assets("image_54.png"))
+    link_textbox = edit_canvas.create_image(
+        512.0,
+        326.99999999999994,
+        image=link_entry_image
+    )
+
+    # Creates the link entry on a canvas window
+    link_entry = Entry(
+        edit_canvas,
+        width = 45,
+        bg = "#4B4B4B",
+        fg = "#FFFFFF",
+        bd = 0,
+        highlightthickness = 0,
+        relief = "ridge",
+        font = ("RobotoRoman Medium", 12, "bold"),
+        insertbackground = "#FFFFFF"
+    )
+    link_entry_window = edit_canvas.create_window(511, 327, window=link_entry)
+    check_textbox_content(edit_canvas, link_entry_window, link_entry)
+
+    # Creates the playlist text box image on the canvas
+    playlist_entry_image = PhotoImage(
+        file=relative_to_assets("image_53.png"))
+    playlist_textbox = edit_canvas.create_image(
+        512.0,
+        375.99999999999994,
+        image=playlist_entry_image
+    )
+
+    # Creates the link entry on a canvas window
+    playlist_entry = Entry(
+        edit_canvas,
+        width = 45,
+        bg = "#4B4B4B",
+        fg = "#FFFFFF",
+        bd = 0,
+        highlightthickness = 0,
+        relief = "ridge",
+        font = ("RobotoRoman Medium", 12, "bold"),
+        insertbackground = "#FFFFFF"
+    )
+    playlist_entry_window = edit_canvas.create_window(511, 376, window=playlist_entry)
+    check_textbox_content(edit_canvas, playlist_entry_window, playlist_entry)
+
+    # Creates the add button image on the canvas
+    add_button_image = PhotoImage(
+        file=relative_to_assets("image_55.png"))
+    add_button = edit_canvas.create_image(
+        674.0,
+        438.99999999999994,
+        image=add_button_image
+    )
+
+    # Creates the close window button image on the canvas
+    close_button_image = PhotoImage(
+        file=relative_to_assets("image_39.png"))
+    close_button = edit_canvas.create_image(
+        720.0,
+        271.99999999999994,
+        image=close_button_image
+    )
+
+
+    # Create the entry fields when the text box images are clicked
+    edit_canvas.tag_bind(link_textbox, "<ButtonPress-1>", lambda event, c=edit_canvas, w=link_entry_window, e=link_entry: edit_textbox(c, w, e))
+    edit_canvas.tag_bind(playlist_textbox, "<ButtonPress-1>", lambda event, c=edit_canvas, w=playlist_entry_window, e=playlist_entry: edit_textbox(c, w, e))
+
+    # Remove focus from the text entries when the details box is clicked
+    edit_canvas.tag_bind(add_tracks_box, "<ButtonPress-1>", lambda event: edit_canvas.focus_set())
+
+    # Check if the entries can be removed if empty when they lose focus
+    link_entry.bind("<FocusOut>", lambda event, c=edit_canvas, w=link_entry_window, e=link_entry: check_textbox_content(c, w, e))
+    playlist_entry.bind("<FocusOut>", lambda event, c=edit_canvas, w=playlist_entry_window, e=playlist_entry: check_textbox_content(c, w, e))
+
+    # Binds the title and description entries enter to save the new playlist details
+    # title_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
+
+    # Binds the delete, save, and close buttons
+    # edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
+    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
+
+    # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
+    edit_canvas.images.append(add_tracks_box_image)
+    edit_canvas.images.append(link_entry_image)
+    edit_canvas.images.append(playlist_entry_image)
+    edit_canvas.images.append(add_button_image)
+    edit_canvas.images.append(close_button_image)
 
 def populate_tracks(playlist: Playlist) -> None:
     """
@@ -1765,7 +1878,7 @@ radio_button = Button(
     image=radio_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=lambda: print("button_3 clicked"),
+    command=create_add_track_window,
     relief="flat"
 )
 radio_button.place(
