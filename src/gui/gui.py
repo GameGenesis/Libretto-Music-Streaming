@@ -744,8 +744,14 @@ def create_rename_window(playlist: Playlist) -> None:
     check_textbox_content(edit_canvas, description_entry_window, description_entry)
 
     # Creates a preview of the playlist album cover image
-    playlist_image = PhotoImage(
-        file=relative_to_assets("image_41.png" if playlist.title == "Liked Songs" else "image_40.png"))
+    if playlist.title == "Liked Songs":
+        playlist_image = PhotoImage(
+            file=relative_to_assets("image_41.png"))
+    elif playlist.tracks and playlist.tracks[0].cover_art_url:
+        playlist_image = player.create_image(playlist.tracks[0].cover_art_url, (160, 160), 15)
+    else:
+        playlist_image = PhotoImage(
+            file=relative_to_assets("image_40.png"))
     edit_canvas.create_image(
         378.0,
         331.99999999999994,
