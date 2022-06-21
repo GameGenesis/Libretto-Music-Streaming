@@ -399,12 +399,16 @@ def populate_search_results(search_entry: Entry) -> None:
     # scroll_view_canvas.images.append(large_frame_image)
     # scroll_view_canvas.images.append(video_thumbnail_image)
 
-def cancel_search(search_entry: Entry) -> None:
+def cancel_search(canvas: Canvas, canvas_window: int, search_entry: Entry) -> None:
     """
     Clears the search box and removes the search results
 
     Parameters
     ----------
+    canvas : Canvas
+        The canvas that contains the entry window
+    canvas_window: int
+        The canvas window that contains the entry
     search_entry : Entry
         The entry box containing the search term
 
@@ -416,6 +420,8 @@ def cancel_search(search_entry: Entry) -> None:
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.focus_set()
+
+    check_textbox_content(canvas, canvas_window, search_entry)
 
 def search_tab() -> None:
     """
@@ -483,7 +489,7 @@ def search_tab() -> None:
     # Creates the entry box to type in when the search bar is clicked
     scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
     # Cancel the search when the cancel search button is clicked
-    scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event, e=search_entry: cancel_search(e))
+    scroll_view_canvas.tag_bind(cancel_search_button, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: cancel_search(c, w, e))
 
     # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     scroll_view_canvas.images.append(search_bar_image)
