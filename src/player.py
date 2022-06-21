@@ -4,6 +4,7 @@ import time
 
 import lyricsgenius as lg
 from youtubesearchpython import VideosSearch
+import pytube
 
 from PIL import ImageTk, Image, ImageDraw
 import requests
@@ -395,6 +396,13 @@ def get_song_yt(search_term: str) -> dict:
     return result
 
 def add_track_manually(url: str, playlist_name: str):
+    if "playlist?list=" in url:
+        playlist = pytube.Playlist(url)
+
+        for video_url in playlist:
+            StreamData(video_url).add_to_playlist(playlist_name)
+        return
+
     StreamData(url).add_to_playlist(playlist_name)
 
 def create_image(image_url: str, size: tuple[int, int], radius: Optional[int]=None) -> PhotoImage:

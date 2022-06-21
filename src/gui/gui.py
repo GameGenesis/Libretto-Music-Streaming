@@ -1358,7 +1358,7 @@ def populate_playlists() -> None:
             ))
 
             # Truncate the playlist title and create the playlist title text on the canvas
-            playlist_title = player.Utils.truncate_string(playlist.title, 20)
+            playlist_title = player.Utils.truncate_string(playlist.title, 18)
             objs.append(scroll_view_canvas.create_text(
                 352.0 + (column * 208),
                 230.99999999999994 + (row * 260),
