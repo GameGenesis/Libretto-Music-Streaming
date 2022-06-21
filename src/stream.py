@@ -636,6 +636,9 @@ class Stream():
         """
         if StreamUtility.is_youtube_url(url):
             stream = pafy.new(url).getbestaudio().url
+
+            if "manifest" in stream and "webm" in stream:
+                stream = StreamUtility.get_youtube_audio_streams(url)[0][0]
         else:
             stream = url
 
