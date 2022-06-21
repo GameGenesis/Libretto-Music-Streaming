@@ -555,7 +555,7 @@ def delete_playlist(overlay_window: Toplevel, playlist: Playlist) -> None:
 
 def save_playlist_details(overlay_window: Toplevel, playlist: Playlist, title_entry: Entry, description_entry: Entry) -> None:
     """
-    Saves the playlist details that were updates in the edit details box
+    Saves the playlist details that were updated in the edit details box
 
     Parameters
     ----------
@@ -798,7 +798,7 @@ def create_rename_window(playlist: Playlist) -> None:
     # Binds the delete, save, and close buttons
     edit_canvas.tag_bind(delete_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist: delete_playlist(w, p))
     edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
-    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
+    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: close_toplevel_window(overlay_window))
 
     # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     edit_canvas.images.append(playlist_details_box_image)
@@ -827,6 +827,37 @@ def toggle_edit_details_popup(playlist_title: int, hidden: bool=False) -> None:
     global scroll_view_canvas
     state = "hidden" if hidden else "normal"
     scroll_view_canvas.itemconfigure(playlist_title, state=state)
+
+def add_track_manually(overlay_window: Toplevel, link_entry: Entry, playlist_entry: Entry) -> None:
+    """
+    Add the specified track, podcast, or playlist url to the specified playlist
+
+    Parameters
+    ----------
+    overlay_window : Toplevel
+        The toplevel window containing the add track manual window
+    link_entry : Entry
+        The link entry to retrieve the URL from
+    playlist_entry : Entry
+        The playlist entry to retrieve the playlist name from
+
+    Returns
+    -------
+    None
+    """
+    url = link_entry.get()
+    playlist_name = playlist_entry.get()
+
+    if not playlist_name:
+        playlist_name = "Liked Songs"
+
+    # Closes the edit details window
+    close_toplevel_window(overlay_window)
+
+    player.add_track_manually(url, playlist_name)
+
+    # Repopulate the list of playlists
+    populate_playlists()
 
 def create_add_track_window() -> None:
     """
@@ -868,7 +899,7 @@ def create_add_track_window() -> None:
         bd = 0,
         highlightthickness = 0,
         relief = "ridge",
-        font = ("RobotoRoman Medium", 12, "bold"),
+        font = ("RobotoRoman Medium", 12),
         insertbackground = "#FFFFFF"
     )
     link_entry_window = edit_canvas.create_window(511, 327, window=link_entry)
@@ -931,9 +962,9 @@ def create_add_track_window() -> None:
     # Binds the title and description entries enter to save the new playlist details
     # title_entry.bind("<Return>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
 
-    # Binds the delete, save, and close buttons
-    # edit_canvas.tag_bind(save_button, "<ButtonPress-1>", lambda event, w=overlay_window, p=playlist, t=title_entry, d=description_entry: save_playlist_details(w, p, t, d))
-    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: overlay_window.destroy())
+    # Binds the add and close buttons
+    edit_canvas.tag_bind(add_button, "<ButtonPress-1>", lambda event, w=overlay_window, l=link_entry, p=playlist_entry: add_track_manually(w, l, p))
+    edit_canvas.tag_bind(close_button, "<ButtonPress-1>", lambda event: close_toplevel_window(overlay_window))
 
     # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     edit_canvas.images.append(add_tracks_box_image)
@@ -1878,7 +1909,7 @@ radio_button = Button(
     image=radio_button_image,
     borderwidth=0,
     highlightthickness=0,
-    command=create_add_track_window,
+    command=lambda: print("button_3 clicked"),
     relief="flat"
 )
 radio_button.place(
@@ -1949,13 +1980,14 @@ image_23 = canvas.create_image(
 )
 
 # Creates the three dots (extra settings) image and places it on the canvas
-image_image_24 = PhotoImage(
+add_track_window_button_image = PhotoImage(
     file=relative_to_assets("image_24.png"))
-image_24 = canvas.create_image(
+add_track_window_button = canvas.create_image(
     188.0,
     27.999999999999943,
-    image=image_image_24
+    image=add_track_window_button_image
 )
+canvas.tag_bind(add_track_window_button, "<ButtonPress-1>", lambda event: create_add_track_window())
 
 # Creates the close window button and places it on the canvas
 close_window_image = PhotoImage(

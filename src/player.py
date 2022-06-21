@@ -394,6 +394,9 @@ def get_song_yt(search_term: str) -> dict:
     result = videosSearch.result()["result"][0]
     return result
 
+def add_track_manually(url: str, playlist_name: str):
+    StreamData(url).add_to_playlist(playlist_name)
+
 def create_image(image_url: str, size: tuple[int, int], radius: Optional[int]=None) -> PhotoImage:
     """
     Returns a created PhotoImage using an image url.
