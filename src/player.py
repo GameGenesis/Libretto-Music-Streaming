@@ -360,7 +360,31 @@ def get_playlist_info(playlist: Playlist) -> str:
     playlist_information = f"{formatted_length}, {formatted_time}"
     return playlist_information
 
-def search(search_term: str) -> dict:
+def genre_search(genre_name: str, pages: int=5) -> dict:
+    """
+    Performs a Genius genre tag search and returns a dictionary containing
+    information on the top songs in the genre
+
+    Parameters
+    ----------
+    genre_name : str
+        The genre tag name
+    pages : int
+        The number of pages to search (20 results per page)
+
+    Returns
+    -------
+    dict
+        A dictionary containing data about the search results
+    """
+    results = list()
+    for i in range(pages):
+        for result in genius.tag(genre_name, page=i).get("hits"):
+            track_result = genius.search(result.get("title")).get("hits")[0]
+            results.append(track_result)
+    return results
+
+def fuzzy_search(search_term: str) -> dict:
     """
     Performs a Genius general search
 
