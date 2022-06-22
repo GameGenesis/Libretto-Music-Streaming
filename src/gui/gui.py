@@ -1049,6 +1049,7 @@ def populate_tracks(playlist: Playlist) -> None:
     global heart_button, heart_empty_image, heart_full_image
     global play_button, pause_button_image, play_button_image
     global total_time_text
+    global search_entry
 
     # Resets the scroll view and deletes all canvas elements
     # Also, resets focus (removes entry box cursor)
@@ -1058,6 +1059,9 @@ def populate_tracks(playlist: Playlist) -> None:
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.delete("search_categories_element")
+
+    if search_entry:
+        search_entry.delete()
 
     # Creates the playlist details background rectangle on the scroll canvas
     scroll_view_canvas.create_rectangle(
@@ -1384,7 +1388,7 @@ def populate_playlists() -> None:
     -------
     None
     """
-    global scroll_view_canvas, canvas
+    global scroll_view_canvas, canvas, search_entry
 
     # Resets the scroll view and deletes all canvas elements
     # Also, resets focus (removes entry box cursor)
@@ -1394,6 +1398,9 @@ def populate_playlists() -> None:
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.delete("search_categories_element")
+
+    if search_entry:
+        search_entry.delete()
 
     # Creates a list of images on the canvas (to avoid garbarge collection)
     scroll_view_canvas.images = list()
@@ -1697,6 +1704,8 @@ title_bar_frame = canvas.create_rectangle(
     fill="#313131",
     outline=""
 )
+
+search_entry = None
 
 # Add title bar bindings
 canvas.tag_bind(title_bar_frame, "<ButtonPress-1>", start_move)
