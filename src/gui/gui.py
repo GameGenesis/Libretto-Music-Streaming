@@ -229,6 +229,7 @@ def populate_search_results(search_entry: Entry) -> None:
     # Resets the scroll view and deletes the previous search result elements
     # Also, resets focus (removes entry box cursor)
     scroll_view_canvas.yview_moveto(0)
+    scroll_view_canvas.delete("search_categories_element")
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.focus_set()
 
@@ -422,6 +423,49 @@ def cancel_search(canvas: Canvas, canvas_window: int, search_entry: Entry) -> No
     scroll_view_canvas.focus_set()
 
     check_textbox_content(canvas, canvas_window, search_entry)
+    display_search_categories()
+
+def display_search_categories():
+    global scroll_view_canvas, canvas
+    # Resets the scroll view and deletes all canvas elements
+    # Also, resets focus (removes entry box cursor)
+    scroll_view_canvas.delete("search_result_element")
+    scroll_view_canvas.focus_set()
+
+    # Creates "Categories" title text
+    scroll_view_canvas.create_text(
+        247.0+82,
+        131.99999999999994,
+        anchor="nw",
+        text="Categories",
+        fill="#FFFFFF",
+        font=("RobotoRoman Medium", 16, "bold"),
+        tag="search_categories_element"
+    )
+
+    categories = ["rap", "pop", "r-b", "rock", "country", "sports"]
+    category_images_list = ["image_56.png", "image_57.png", "image_58.png", "image_59.png", "image_60.png", "image_61.png"]
+    category_images_rows = player.Utils.split_list(category_images_list, 3)
+
+    index = 0
+    for row, category_images in enumerate(category_images_rows):
+        for column, category_image in enumerate(category_images):
+            category_button_image = PhotoImage(
+                file=relative_to_assets(category_image))
+            category_button = scroll_view_canvas.create_image(
+                444.0 + (column * 259.0),
+                233.0 + (row * 154.0),
+                image=category_button_image,
+                tag="search_categories_element"
+            )
+
+            # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
+            scroll_view_canvas.images.append(category_button_image)
+
+            scroll_view_canvas.tag_bind(category_button, "<ButtonPress-1>",
+                    lambda event, c=categories[index]: print(c))
+
+            index += 1
 
 def search_tab() -> None:
     """
@@ -440,6 +484,7 @@ def search_tab() -> None:
     scroll_view_canvas.delete("playlist_element")
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
+    scroll_view_canvas.delete("search_categories_element")
 
     # Creates a list of images on the canvas to append to (to avoid auto garbage collection)
     scroll_view_canvas.images = list()
@@ -494,6 +539,8 @@ def search_tab() -> None:
     # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
     scroll_view_canvas.images.append(search_bar_image)
     scroll_view_canvas.images.append(cancel_search_button_image)
+
+    display_search_categories()
 
 def check_textbox_content(canvas: Canvas, canvas_window: int, text_entry: Entry) -> None:
     """
@@ -1010,6 +1057,7 @@ def populate_tracks(playlist: Playlist) -> None:
     scroll_view_canvas.delete("playlist_element")
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
+    scroll_view_canvas.delete("search_categories_element")
 
     # Creates the playlist details background rectangle on the scroll canvas
     scroll_view_canvas.create_rectangle(
@@ -1345,6 +1393,7 @@ def populate_playlists() -> None:
     scroll_view_canvas.delete("playlist_element")
     scroll_view_canvas.delete("search_tab_element")
     scroll_view_canvas.delete("search_result_element")
+    scroll_view_canvas.delete("search_categories_element")
 
     # Creates a list of images on the canvas (to avoid garbarge collection)
     scroll_view_canvas.images = list()
@@ -1416,8 +1465,7 @@ def populate_playlists() -> None:
             # Binds the playlist frame elements to populating the tracks in the playlist
             for obj in objs:
                 scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>",
-                    lambda event, playlist=playlist:
-                        populate_tracks(playlist))
+                    lambda event, playlist=playlist: populate_tracks(playlist))
 
     # COnfigure the canvas scroll region
     onFrameConfigure(scroll_view_canvas)
