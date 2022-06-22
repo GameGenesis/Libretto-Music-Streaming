@@ -321,9 +321,9 @@ def populate_search_results(search_entry: Entry) -> None:
     # Creates a rectangle after the results to allow for more room to scroll
     scroll_view_canvas.create_rectangle(
         300.0,
-        330.0 + (final_row * 52.0),
+        180.0 + (final_row * 66.0),
         1106.0,
-        340.0 + (final_row * 52.0),
+        190.0 + (final_row * 66.0),
         fill="#202020",
         outline="",
         tag="search_result_element"
@@ -425,6 +425,9 @@ def cancel_search(canvas: Canvas, canvas_window: int, search_entry: Entry) -> No
     check_textbox_content(canvas, canvas_window, search_entry)
     display_search_categories()
 
+    # Configure the canvas scroll region
+    onFrameConfigure(scroll_view_canvas)
+
 def display_search_categories():
     global scroll_view_canvas, canvas
     # Resets the scroll view and deletes all canvas elements
@@ -522,6 +525,9 @@ def search_tab() -> None:
     )
     search_entry_window = scroll_view_canvas.create_window(600, 82, window=search_entry, tag="search_tab_element")
     check_textbox_content(scroll_view_canvas, search_entry_window, search_entry)
+
+    # Configure the canvas scroll region
+    onFrameConfigure(scroll_view_canvas)
 
     # Removes focus from the search bar entry field when the canvas is clicked
     scroll_view_canvas.bind("<ButtonPress-1>", lambda event: scroll_view_canvas.focus_set())
