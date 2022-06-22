@@ -1119,7 +1119,7 @@ def populate_tracks(playlist: Playlist) -> None:
         playlist_image = PhotoImage(
             file=relative_to_assets("image_40.png"))
 
-    scroll_view_canvas.create_image(
+    playlist_cover_art = scroll_view_canvas.create_image(
         326.0+82,
         135.99999999999994,
         image=playlist_image,
@@ -1155,6 +1155,7 @@ def populate_tracks(playlist: Playlist) -> None:
         scroll_view_canvas.tag_bind(playlist_title, "<Enter>", lambda event: toggle_edit_details_popup(edit_details_popup, False))
         scroll_view_canvas.tag_bind(playlist_title, "<Leave>", lambda event: toggle_edit_details_popup(edit_details_popup, True))
         scroll_view_canvas.tag_bind(playlist_title, "<ButtonPress-1>", lambda event, playlist=playlist: create_rename_window(playlist))
+        scroll_view_canvas.tag_bind(playlist_cover_art, "<ButtonPress-1>", lambda event, playlist=playlist: create_rename_window(playlist))
 
     # Create playlist author text on the canvas
     scroll_view_canvas.create_text(
