@@ -210,14 +210,47 @@ def play_search_track(title: str, cover_art_url: str) -> None:
     full_title = f"{title} Official Audio"
     player.play_search_track(full_title, cover_art_url)
 
-def populate_search_results(search_entry: Entry) -> None:
+def genre_search(genre_name: str) -> None:
     """
-    Populates a list of tracks from a search entry
+    Gets top tracks in the specific genre
+
+    Parameters
+    ----------
+    genre_name : str
+        The Genius genre tag
+
+    Returns
+    -------
+    None
+    """
+    results = player.genre_search(genre_name, 1)
+    populate_search_results(results)
+
+def fuzzy_search(search_entry: Entry) -> None:
+    """
+    Gets search results from an entry
 
     Parameters
     ----------
     search_entry : Entry
         The entry box containing the search term
+
+    Returns
+    -------
+    None
+    """
+
+    # Gets the search term from the entry box and does a Genius search
+    search_term = search_entry.get()
+    results = player.fuzzy_search(search_term)
+    populate_search_results(results.get("hits"))
+
+def populate_search_results(results: dict) -> None:
+    """
+    Populates a list of tracks from genius search results
+
+    results : dict
+        A dictionary containing information about the search results
 
     Returns
     -------
@@ -233,10 +266,6 @@ def populate_search_results(search_entry: Entry) -> None:
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.focus_set()
 
-    # Gets the search term from the entry box and does a Genius search
-    search_term = search_entry.get()
-    results = player.search(search_term)
-
     # Creates "Songs" title text
     scroll_view_canvas.create_text(
         247.0+82,
@@ -251,7 +280,7 @@ def populate_search_results(search_entry: Entry) -> None:
     final_row = 0
 
     # Loops over the search results and creates a frame containing the information about that track
-    for row, result in enumerate(results.get("hits")):
+    for row, result in enumerate(results):
         final_row = row + 1
         objs = list()
 
@@ -466,7 +495,7 @@ def display_search_categories():
             scroll_view_canvas.images.append(category_button_image)
 
             scroll_view_canvas.tag_bind(category_button, "<ButtonPress-1>",
-                    lambda event, c=categories[index]: print(c))
+                    lambda event, c=categories[index]: genre_search(c))
 
             index += 1
 
@@ -535,7 +564,7 @@ def search_tab() -> None:
     # Check if the entry filed contains anything before removing it
     search_entry.bind("<FocusOut>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: check_textbox_content(c, w, e))
     # Populate the search results upon pressing enter
-    search_entry.bind("<Return>", lambda event, e=search_entry: populate_search_results(e))
+    search_entry.bind("<Return>", lambda event, e=search_entry: fuzzy_search(e))
 
     # Creates the entry box to type in when the search bar is clicked
     scroll_view_canvas.tag_bind(search_bar, "<ButtonPress-1>", lambda event, c=scroll_view_canvas, w=search_entry_window, e=search_entry: edit_textbox(c, w, e))
