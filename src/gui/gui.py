@@ -223,8 +223,8 @@ def genre_search(genre_name: str) -> None:
     -------
     None
     """
-    results = player.genre_search(genre_name, 1)
-    populate_search_results(results)
+    results = player.genre_search(genre_name)
+    populate_search_results(results.get("chart_items"), result_dict_key="item")
 
 def fuzzy_search(search_entry: Entry) -> None:
     """
@@ -245,7 +245,7 @@ def fuzzy_search(search_entry: Entry) -> None:
     results = player.fuzzy_search(search_term)
     populate_search_results(results.get("hits"))
 
-def populate_search_results(results: dict) -> None:
+def populate_search_results(results: dict, result_dict_key="result") -> None:
     """
     Populates a list of tracks from genius search results
 
@@ -295,7 +295,7 @@ def populate_search_results(results: dict) -> None:
         ))
 
         # Creates the cover art image from the obtained url
-        cover_art_image = player.create_image(result.get("result").get("header_image_thumbnail_url"), (40, 40))
+        cover_art_image = player.create_image(result.get(result_dict_key).get("header_image_thumbnail_url"), (40, 40))
         if not cover_art_image:
             cover_art_image = PhotoImage(
             file=relative_to_assets("image_49.png"))
@@ -308,7 +308,7 @@ def populate_search_results(results: dict) -> None:
         ))
 
         # Truncates the title and creates track title text on the canvas
-        title = player.Utils.truncate_string(result.get("result").get("title"), 30)
+        title = player.Utils.truncate_string(result.get(result_dict_key).get("title"), 30)
         objs.append(scroll_view_canvas.create_text(
             316.0+82,
             184.99999999999994 + (row * 66),
@@ -320,7 +320,7 @@ def populate_search_results(results: dict) -> None:
         ))
 
         # Truncates the artist name and creates track artist text on the canvas
-        artist = player.Utils.truncate_string(result.get("result").get("artist_names"), 30)
+        artist = player.Utils.truncate_string(result.get(result_dict_key).get("artist_names"), 30)
         objs.append(scroll_view_canvas.create_text(
             590.0+82,
             184.99999999999994 + (row * 66),
@@ -345,7 +345,7 @@ def populate_search_results(results: dict) -> None:
 
         # Binds the track frame elements to playing the track
         for obj in objs:
-            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get("result").get("full_title"), cover_art_url=result.get("result").get("header_image_thumbnail_url"): play_search_track(title, cover_art_url))
+            scroll_view_canvas.tag_bind(obj, "<ButtonPress-1>", lambda event, title=result.get(result_dict_key).get("full_title"), cover_art_url=result.get(result_dict_key).get("header_image_thumbnail_url"): play_search_track(title, cover_art_url))
 
     # Creates a rectangle after the results to allow for more room to scroll
     scroll_view_canvas.create_rectangle(
@@ -475,7 +475,7 @@ def display_search_categories():
         tag="search_categories_element"
     )
 
-    categories = ["rap", "pop", "r-b", "rock", "country", "sports"]
+    categories = ["rap", "pop", "rb", "rock", "country", "all"]
     category_images_list = ["image_56.png", "image_57.png", "image_58.png", "image_59.png", "image_60.png", "image_61.png"]
     category_images_rows = player.Utils.split_list(category_images_list, 3)
 

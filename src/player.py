@@ -360,28 +360,27 @@ def get_playlist_info(playlist: Playlist) -> str:
     playlist_information = f"{formatted_length}, {formatted_time}"
     return playlist_information
 
-def genre_search(genre_name: str, pages: int=5) -> dict:
+def genre_search(genre: str, time_period: str="month", songs: int=20, results_type: Optional[str]=None) -> dict:
     """
-    Performs a Genius genre tag search and returns a dictionary containing
-    information on the top songs in the genre
+    Returns a dictionary containing information on the top songs in the genre or as a whole for the time period
 
     Parameters
     ----------
-    genre_name : str
-        The genre tag name
-    pages : int
-        The number of pages to search (20 results per page)
+    genre : str
+        The genre of the results ("all", "rap", "pop", "rb", "rock", "country")
+    time_period : str
+        Time period of the results. ("day", "week", "month", or "all_time").
+    songs : int
+        The number of songs to search (max 50)
+    results_type : int, optional
+        The type to get the charts for. The default is songs. ("songs", "albums", "artists" or "referents")
 
     Returns
     -------
     dict
-        A dictionary containing data about the search results
+        A dictionary containing data about the songs
     """
-    results = list()
-    for i in range(pages):
-        for result in genius.tag(genre_name, page=i).get("hits"):
-            track_result = genius.search(result.get("title")).get("hits")[0]
-            results.append(track_result)
+    results = genius.charts(time_period=time_period, chart_genre=genre, per_page=songs)
     return results
 
 def fuzzy_search(search_term: str) -> dict:
