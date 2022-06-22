@@ -210,20 +210,24 @@ def play_search_track(title: str, cover_art_url: str) -> None:
     full_title = f"{title} Official Audio"
     player.play_search_track(full_title, cover_art_url)
 
-def genre_search(genre_name: str) -> None:
+def genre_search(genre: str, time_period: str = "month", songs: int = 20) -> None:
     """
     Gets top tracks in the specific genre
 
     Parameters
     ----------
-    genre_name : str
-        The Genius genre tag
+    genre : str
+        The genre of the results ("all", "rap", "pop", "rb", "rock", "country")
+    time_period : str
+        Time period of the results. ("day", "week", "month", or "all_time").
+    songs : int
+        The number of songs to search (max 50)
 
     Returns
     -------
     None
     """
-    results = player.genre_search(genre_name)
+    results = player.genre_search(genre, time_period, songs)
     populate_search_results(results.get("chart_items"), result_dict_key="item")
 
 def fuzzy_search(search_entry: Entry) -> None:
@@ -491,13 +495,36 @@ def display_search_categories():
                 tag="search_categories_element"
             )
 
+            scroll_view_canvas.tag_bind(category_button, "<ButtonPress-1>",
+                    lambda event, g=categories[index]: genre_search(g))
+
             # Appends the images to a list stored on the canvas so they won't be automatically garbage collected
             scroll_view_canvas.images.append(category_button_image)
 
-            scroll_view_canvas.tag_bind(category_button, "<ButtonPress-1>",
-                    lambda event, c=categories[index]: genre_search(c))
-
             index += 1
+
+    top_songs_button_image = PhotoImage(
+    file=relative_to_assets("image_62.png"))
+    top_songs_button = scroll_view_canvas.create_image(
+        703.0,
+        541.0,
+        image=top_songs_button_image,
+        tag="search_categories_element"
+    )
+
+    scroll_view_canvas.create_rectangle(
+        300.0,
+        629.0,
+        1106.0,
+        639.0,
+        fill="#202020",
+        outline="",
+        tag="search_result_element"
+    )
+
+    scroll_view_canvas.tag_bind(top_songs_button, "<ButtonPress-1>",
+        lambda event, g="all", t="all_time", s=50: genre_search(g, t, s))
+    scroll_view_canvas.images.append(top_songs_button_image)
 
 def search_tab() -> None:
     """
