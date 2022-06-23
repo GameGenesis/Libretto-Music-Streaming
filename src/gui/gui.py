@@ -91,26 +91,6 @@ def minimize_window() -> None:
     """
     window.iconify()
 
-def toggle_mute() -> None:
-    """
-    Toggles mute for playback andupdates the volume indicator
-
-    Returns
-    -------
-    None
-    """
-    global volume_indicator, high_volume_image, mute_volume_image
-    if not player.stream or not player.stream.player:
-        return
-
-    if player.stream.player.audio_get_mute():
-        player.stream.player.audio_set_mute(False)
-        canvas.itemconfig(volume_indicator, image=high_volume_image)
-    else:
-        player.stream.player.audio_set_mute(True)
-        canvas.itemconfig(volume_indicator, image=mute_volume_image)
-
-
 # Creates the root window with a title
 window = Tk("Music Player")
 
@@ -1636,6 +1616,41 @@ def on_mousewheel(event: Event) -> None:
     global scroll_view_canvas
     scroll_view_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
+def mute(mute: bool) -> None:
+    global volume_indicator, high_volume_image, mute_volume_image, volume_slider
+    if not player.stream or not player.stream.player:
+        return
+
+    if mute:
+        player.stream.player.audio_set_mute(True)
+        canvas.itemconfig(volume_indicator, image=mute_volume_image)
+    else:
+        player.stream.player.audio_set_mute(False)
+        canvas.itemconfig(volume_indicator, image=high_volume_image)
+
+def toggle_mute() -> None:
+    """
+    Toggles mute for playback andupdates the volume indicator
+
+    Returns
+    -------
+    None
+    """
+    if player.stream.player.audio_get_mute():
+        mute(False)
+        volume_slider.set_position(player.stream.player.audio_get_volume() / 100)
+    else:
+        mute(True)
+        volume_slider.set_position(0)
+
+def set_volume(percent: float) -> None:
+    if percent <= 0:
+        mute(True)
+    else:
+        mute(False)
+
+    player.set_volume(percent)
+
 # Creates the main canvas
 canvas = Canvas(
     window,
@@ -1974,21 +1989,7 @@ volume_indicator = canvas.create_image(
 canvas.tag_bind(volume_indicator, "<ButtonPress-1>", lambda event: toggle_mute())
 
 # Creates the volume slider foreground and background images
-image_image_21 = PhotoImage(
-    file=relative_to_assets("image_21.png"))
-image_21 = canvas.create_image(
-    935.0,
-    678.0,
-    image=image_image_21
-)
-
-image_image_22 = PhotoImage(
-    file=relative_to_assets("image_22.png"))
-image_22 = canvas.create_image(
-    910.0,
-    678.0,
-    image=image_image_22
-)
+volume_slider = player.Slider(window, canvas, 880.0, 675.0, 992.0, 680.0, callback=set_volume)
 
 # Creates the side bar canvas rectangle
 canvas.create_rectangle(

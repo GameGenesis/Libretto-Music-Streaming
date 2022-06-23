@@ -167,6 +167,12 @@ def skip_forwards():
 
     stream.skip_forwards(10.0)
 
+def set_volume(percent: float) -> None:
+    if not stream:
+        return
+    
+    stream.set_volume(int(percent * 100))
+
 def toggle_loop() -> None:
     """
     Toggles the current playing track from not looping to looping and vice versa.
