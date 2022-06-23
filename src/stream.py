@@ -853,6 +853,24 @@ class Stream():
 
         self.player.set_rate(rate)
 
+    def set_volume(self, volume: int) -> None:
+        """
+        Set the audio playback volume as a range from 0 to 100 (inclusive int)
+
+        Parameters
+        ----------
+        volume : int
+            The volume percentage
+
+        Returns
+        -------
+        None
+        """
+        if not self.player:
+            return
+
+        self.player.audio_set_volume(volume)
+
     def set_loop(self, looping: bool=True) -> None:
         """
         Sets whether the current track should loop
