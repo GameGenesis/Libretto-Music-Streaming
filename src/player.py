@@ -140,7 +140,6 @@ def set_position(percent: float) -> None:
         return
 
     stream.set_position(percent)
-    print(stream.player.get_time())
 
 def skip_backwards() -> None:
     """
@@ -695,7 +694,7 @@ class Utils:
 class Slider:
     def __init__(self, root_window: Tk, canvas: Canvas,
         x1: float, y1: float, x2: float, y2: float, radius: int=5,
-        bg: str="#838383", fg: str="#DADADA", callback: Optional[Callable]=None) -> None:
+        bg: str="#838383", fg: str="#DADADA", fg_active: str="#009CDF", callback: Optional[Callable]=None) -> None:
         """
         Parameters
         ----------
@@ -717,6 +716,8 @@ class Slider:
             The background color (The color of the slider background rectangle)
         fg : str
             The foreground color (The color of the moving slider rectangle)
+        fg_active : str
+            The foreground color when moused-over (The color of the moving slider rectangle)
 
         Returns
         -------
@@ -731,16 +732,27 @@ class Slider:
         self.current_position = self.start_pos
         self.current_percent = 0
 
-        self.radius, self.bg, self.fg = radius, bg, fg
+        self.radius, self.bg, self.fg, self.fg_active = radius, bg, fg, fg_active
 
         self.slider_background = Utils.round_rectangle(canvas, x1, y1, x2, y2, radius=radius, fill=bg)
         self.slider_foreground = Utils.round_rectangle(canvas, x1, y1, x1, y2, radius=0, fill=fg)
-        self.slider_handle = Utils.create_circle(canvas, self.current_position, self.y, 5, fill=fg, outline=None)
+        self.slider_handle = Utils.create_circle(canvas, self.current_position, self.y, 5, fill=fg, outline="", state="hidden")
+        self.slider_interaction_box = self.canvas.create_rectangle(x1-4, y1-6, x2+4, y2+6, outline="", fill="")
 
         self.callback = callback
 
-        self.canvas.tag_bind(self.slider_background, "<ButtonPress-1>", self.on_slider_clicked)
-        self.canvas.tag_bind(self.slider_foreground, "<ButtonPress-1>", self.on_slider_clicked)
+        self.canvas.tag_bind(self.slider_interaction_box, "<ButtonPress-1>", self.on_slider_clicked)
+
+        self.canvas.tag_bind(self.slider_interaction_box, "<Enter>", self.on_slider_enter)
+        self.canvas.tag_bind(self.slider_interaction_box, "<Leave>", self.on_slider_exit)
+
+    def on_slider_enter(self, event):
+        self.canvas.itemconfigure(self.slider_handle, state="normal")
+        self.canvas.itemconfigure(self.slider_foreground, fill=self.fg_active)
+
+    def on_slider_exit(self, event):
+        self.canvas.itemconfigure(self.slider_handle, state="hidden")
+        self.canvas.itemconfigure(self.slider_foreground, fill=self.fg)
 
     def on_slider_clicked(self, event):
         x = event.x
@@ -767,7 +779,7 @@ class Slider:
         """
         self.current_percent = percent
         self.current_position = Utils.lerp(self.start_pos, self.end_pos, percent)
-        # self.canvas.itemconfig(self.slider_foreground, __coords=Utils.get_round_rectangle_points(self.x1, self.y1, self.current_position, self.y2, self.radius))
+        self.canvas.coords(self.slider_foreground, Utils.get_round_rectangle_points(self.x1, self.y1, self.current_position, self.y2, self.radius))
         self.canvas.coords(self.slider_handle, self.current_position-5, self.y-5, self.current_position+5, self.y+5)
 
 class WebImage:
