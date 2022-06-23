@@ -783,6 +783,12 @@ class Stream():
         if self.player:
             self.player.play()
 
+    def set_position(self, percent: float) -> None:
+        if not self.player:
+            return
+
+        self.player.set_position(percent)
+
     def skip_forwards(self, seconds: float) -> None:
         """
         Skip forwards in the current audio playback
