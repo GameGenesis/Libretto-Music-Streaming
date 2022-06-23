@@ -1870,7 +1870,7 @@ loop_button = canvas.create_image(
 canvas.tag_bind(loop_button, "<ButtonPress-1>", lambda event: player.toggle_loop())
 
 # Creates the current track elapsed time slider and places it on the canvas
-track_slider = player.Slider(canvas, 317.0, 699.0, 707.0, 704.0)
+track_slider = player.Slider(window, canvas, 317.0, 699.0, 707.0, 704.0, callback=player.set_position)
 
 # Creates the current track elapsed time text and places it on the canvas (placeholder - gets reassigned later)
 elapsed_time_text = canvas.create_text(

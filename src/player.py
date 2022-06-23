@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Callable, Optional
 import config
 import time
 
@@ -10,7 +10,7 @@ from PIL import ImageTk, Image, ImageDraw
 import requests
 from io import BytesIO
 
-from tkinter import Canvas, PhotoImage
+from tkinter import Canvas, PhotoImage, Tk
 
 from stream import Stream, StreamData
 from database import Playlist, Track, playlist_manager
@@ -134,6 +134,13 @@ def toggle_track_like(track: Track) -> None:
 
     liked_track = not liked_track
     gui_canvas.itemconfig(gui_heart_button, image=gui_heart_full_image if liked_track else gui_heart_empty_image)
+
+def set_position(percent: float) -> None:
+    if not stream:
+        return
+
+    stream.set_position(percent)
+    print(stream.player.get_time())
 
 def skip_backwards() -> None:
     """
@@ -603,10 +610,13 @@ class Utils:
         t = Utils.clamp_01(t)
         return a + (b - a) * t
 
+    def create_circle(canvas, x, y, r, **kwargs):
+        return canvas.create_oval(x-r, y-r, x+r, y+r, **kwargs)
+
     @staticmethod
-    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs) -> int:
+    def get_round_rectangle_points(x1: float, y1: float, x2: float, y2: float, radius: int=25) -> list[int]:
         """
-        Creates a rounded rectangle tkinter canvas element with a specified radius
+        returns the polygon points for a rounded rectangle
 
         Source
         ------
@@ -614,8 +624,6 @@ class Utils:
 
         Parameters
         ----------
-        canvas : Canvas
-            The canvas on which to create the rounded rectangle
         x1 : float
             The first or leftmost x coordinate
         y1 : float
@@ -629,8 +637,8 @@ class Utils:
 
         Returns
         -------
-        int | _CanvasItemId
-            The id of the created canvas item
+        list[int]
+            A list of points for the polygon
         """
         points = [x1+radius, y1,
                 x1+radius, y1,
@@ -653,16 +661,46 @@ class Utils:
                 x1, y1+radius,
                 x1, y1]
 
+        return points
+
+    @staticmethod
+    def round_rectangle(canvas: Canvas, x1: float, y1: float, x2: float, y2: float, radius: int=25, **kwargs) -> int:
+        """
+        Creates a rounded rectangle tkinter canvas element with a specified radius
+
+        Parameters
+        ----------
+        canvas : Canvas
+            The canvas on which to create the rounded rectangle
+        x1 : float
+            The first or leftmost x coordinate
+        y1 : float
+            The first or topmost y coordinate
+        x2 : float
+            The second or rightmost x coordinate
+        y2 : float
+            The second or bottommost y coordinate
+        radius : int
+            The radius of the rounded rectangle
+
+        Returns
+        -------
+        int | _CanvasItemId
+            The id of the created canvas item
+        """
+        points = Utils.get_round_rectangle_points(x1, y1, x2, y2, radius)
         return canvas.create_polygon(points, **kwargs, smooth=True)
 
 
 class Slider:
-    def __init__(self, canvas: Canvas,
+    def __init__(self, root_window: Tk, canvas: Canvas,
         x1: float, y1: float, x2: float, y2: float, radius: int=5,
-        bg: str="#838383", fg: str="#DADADA") -> None:
+        bg: str="#838383", fg: str="#DADADA", callback: Optional[Callable]=None) -> None:
         """
         Parameters
         ----------
+        root_window : Tk
+            The root tkinter window
         canvas : Canvas
             The canvas on which to create the slider
         x1 : float
@@ -684,15 +722,35 @@ class Slider:
         -------
         None
         """
+        self.root_window = root_window
         self.canvas = canvas
 
         self.x1, self.y1, self.x2, self.y2 = x1, y1, x2, y2
+        self.y = (y1 + y2) // 2
         self.start_pos, self.end_pos = x1, x2
+        self.current_position = self.start_pos
+        self.current_percent = 0
 
         self.radius, self.bg, self.fg = radius, bg, fg
 
         self.slider_background = Utils.round_rectangle(canvas, x1, y1, x2, y2, radius=radius, fill=bg)
         self.slider_foreground = Utils.round_rectangle(canvas, x1, y1, x1, y2, radius=0, fill=fg)
+        self.slider_handle = Utils.create_circle(canvas, self.current_position, self.y, 5, fill=fg, outline=None)
+
+        self.callback = callback
+
+        self.canvas.tag_bind(self.slider_background, "<ButtonPress-1>", self.on_slider_clicked)
+        self.canvas.tag_bind(self.slider_foreground, "<ButtonPress-1>", self.on_slider_clicked)
+
+    def on_slider_clicked(self, event):
+        x = event.x
+        slider_range = self.end_pos - self.start_pos
+        start_value = x - self.start_pos
+        percent = start_value / slider_range
+        self.set_position(percent)
+
+        if self.callback:
+            self.callback(percent)
 
     def set_position(self, percent: float) -> None:
         """
@@ -707,10 +765,10 @@ class Slider:
         -------
         None
         """
-        self.current_pos = Utils.lerp(self.start_pos, self.end_pos, percent)
-        self.canvas.delete(self.slider_foreground)
-        self.slider_foreground = Utils.round_rectangle(self.canvas, self.x1, self.y1, self.current_pos, self.y2, radius=self.radius, fill=self.fg)
-
+        self.current_percent = percent
+        self.current_position = Utils.lerp(self.start_pos, self.end_pos, percent)
+        # self.canvas.itemconfig(self.slider_foreground, __coords=Utils.get_round_rectangle_points(self.x1, self.y1, self.current_position, self.y2, self.radius))
+        self.canvas.coords(self.slider_handle, self.current_position-5, self.y-5, self.current_position+5, self.y+5)
 
 class WebImage:
     def __init__(self, url: str) -> None:
