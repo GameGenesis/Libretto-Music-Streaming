@@ -735,7 +735,7 @@ class Slider:
         self.radius, self.bg, self.fg, self.fg_active = radius, bg, fg, fg_active
 
         self.slider_background = Utils.round_rectangle(canvas, x1, y1, x2, y2, radius=radius, fill=bg)
-        self.slider_foreground = Utils.round_rectangle(canvas, x1, y1, x1, y2, radius=0, fill=fg)
+        self.slider_foreground = Utils.round_rectangle(canvas, x1, y1, x1, y2, radius=radius, fill=fg)
         self.slider_handle = Utils.create_circle(canvas, self.current_position, self.y, 5, fill=fg, outline="", state="hidden")
         self.slider_interaction_box = self.canvas.create_rectangle(x1-4, y1-6, x2+4, y2+6, outline="", fill="")
 
@@ -746,6 +746,8 @@ class Slider:
         self.canvas.tag_bind(self.slider_interaction_box, "<Enter>", self.on_slider_enter)
         self.canvas.tag_bind(self.slider_interaction_box, "<Leave>", self.on_slider_exit)
 
+        self.set_position(0)
+
     def on_slider_enter(self, event):
         self.canvas.itemconfigure(self.slider_handle, state="normal")
         self.canvas.itemconfigure(self.slider_foreground, fill=self.fg_active)
@@ -755,7 +757,7 @@ class Slider:
         self.canvas.itemconfigure(self.slider_foreground, fill=self.fg)
 
     def on_slider_clicked(self, event):
-        x = event.x
+        x = Utils.clamp(event.x, self.start_pos, self.end_pos)
         slider_range = self.end_pos - self.start_pos
         start_value = x - self.start_pos
         percent = start_value / slider_range
@@ -777,6 +779,11 @@ class Slider:
         -------
         None
         """
+        if percent <= 0:
+            self.canvas.itemconfigure(self.slider_foreground, state="hidden")
+        else:
+            self.canvas.itemconfigure(self.slider_foreground, state="normal")
+
         self.current_percent = percent
         self.current_position = Utils.lerp(self.start_pos, self.end_pos, percent)
         self.canvas.coords(self.slider_foreground, Utils.get_round_rectangle_points(self.x1, self.y1, self.current_position, self.y2, self.radius))
