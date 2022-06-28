@@ -785,15 +785,16 @@ class Slider:
         -------
         None
         """
-        if percent <= 0:
-            self.canvas.itemconfigure(self.slider_foreground, state="hidden")
-        else:
-            self.canvas.itemconfigure(self.slider_foreground, state="normal")
 
         self.current_percent = percent
         self.current_position = Utils.lerp(self.start_pos, self.end_pos, percent)
         self.canvas.coords(self.slider_foreground, Utils.get_round_rectangle_points(self.x1, self.y1, self.current_position, self.y2, self.radius))
         self.canvas.coords(self.slider_handle, self.current_position-5, self.y-5, self.current_position+5, self.y+5)
+
+        if self.current_position - self.start_pos <= 1:
+            self.canvas.itemconfigure(self.slider_foreground, state="hidden")
+        else:
+            self.canvas.itemconfigure(self.slider_foreground, state="normal")
 
 class WebImage:
     def __init__(self, url: str) -> None:

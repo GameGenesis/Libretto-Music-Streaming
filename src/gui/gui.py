@@ -430,12 +430,17 @@ def cancel_search(canvas: Canvas, canvas_window: int, search_entry: Entry) -> No
     -------
     None
     """
+    
+    # Clears the search entry text
     search_entry.delete(0, END)
+    check_textbox_content(canvas, canvas_window, search_entry)
+
+    # Resets the scroll view and deletes all canvas elements
+    # Also, resets focus (removes entry box cursor)
     scroll_view_canvas.yview_moveto(0)
     scroll_view_canvas.delete("search_result_element")
     scroll_view_canvas.focus_set()
 
-    check_textbox_content(canvas, canvas_window, search_entry)
     display_search_categories()
 
     # Configure the canvas scroll region
@@ -1617,9 +1622,16 @@ def on_mousewheel(event: Event) -> None:
     scroll_view_canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
 def mute(mute: bool) -> None:
-    global volume_indicator, high_volume_image, mute_volume_image, volume_slider
+    global volume_indicator, low_volume_image, medium_volume_image, high_volume_image, mute_volume_image
     if not player.stream or not player.stream.player:
         return
+    
+    # if player.stream.player.audio_get_volume() <= 33:
+    #     unmute_volume_image = low_volume_image
+    # elif player.stream.player.audio_get_volume() <= 67:
+    #     unmute_volume_image = medium_volume_image
+    # else:
+    #     unmute_volume_image = high_volume_image
 
     if mute:
         player.stream.player.audio_set_mute(True)
@@ -1636,6 +1648,9 @@ def toggle_mute() -> None:
     -------
     None
     """
+    global volume_slider
+    if not player.stream or not player.stream.player:
+        return
     if player.stream.player.audio_get_mute():
         mute(False)
         volume_slider.set_position(player.stream.player.audio_get_volume() / 100)
@@ -1644,12 +1659,12 @@ def toggle_mute() -> None:
         volume_slider.set_position(0)
 
 def set_volume(percent: float) -> None:
+    player.set_volume(percent)
+
     if percent <= 0:
         mute(True)
     else:
         mute(False)
-
-    player.set_volume(percent)
 
 # Creates the main canvas
 canvas = Canvas(
@@ -1988,7 +2003,7 @@ volume_indicator = canvas.create_image(
 
 canvas.tag_bind(volume_indicator, "<ButtonPress-1>", lambda event: toggle_mute())
 
-# Creates the volume slider foreground and background images
+# Creates the volume slider
 volume_slider = player.Slider(window, canvas, 880.0, 675.0, 992.0, 680.0, callback=set_volume)
 
 # Creates the side bar canvas rectangle
