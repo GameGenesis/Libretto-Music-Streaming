@@ -217,6 +217,8 @@ class StreamUtility:
         int
             the duration of the stream in seconds
         """
+        duration = 0
+
         instance = vlc.Instance()
         player = instance.media_player_new()
         player.audio_set_mute(True)
@@ -852,6 +854,24 @@ class Stream():
             return
 
         self.player.set_rate(rate)
+
+    def get_volume(self) -> None:
+        """
+        Get the audio playback volume as a range from 0 to 100 (inclusive int)
+
+        Parameters
+        ----------
+        volume : int
+            The volume percentage
+
+        Returns
+        -------
+        None
+        """
+        if not self.player:
+            return 0
+
+        return self.player.audio_get_volume()
 
     def set_volume(self, volume: int) -> None:
         """

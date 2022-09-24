@@ -1653,7 +1653,7 @@ def toggle_mute() -> None:
         return
     if player.stream.player.audio_get_mute():
         mute(False)
-        volume_slider.set_position(player.stream.player.audio_get_volume() / 100)
+        volume_slider.set_position(player.stream.get_volume() / 100)
     else:
         mute(True)
         volume_slider.set_position(0)
