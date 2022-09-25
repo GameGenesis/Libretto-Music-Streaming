@@ -1,6 +1,7 @@
 # Project-specific
 *.mp3
 *.db
+src/pytube/
 
 # Config file with API access token
 config.py
