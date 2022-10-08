@@ -2,6 +2,7 @@
 *.mp3
 *.db
 src/pytube/
+src/pafy/
 
 # Config file with API access token
 config.py

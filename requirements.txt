@@ -3,11 +3,12 @@ lyricsgenius==3.0.1
 moviepy==1.0.3
 mutagen==1.45.1
 pafy==0.5.5
+-e git+https://github.com/Cupcakus/pafy#egg=pafy
 Pillow==8.4.0
 pygame==2.1.2
 python-vlc==3.0.16120
 pytube==12.1.0
--e git+https://github.com/GameGenesis/pytube@d2f23ba1552299b671fb214134677dcfa5a34c9c#egg=pytube
+-e git+https://github.com/pytube/pytube#egg=pytube
 requests==2.25.1
 spotipy==2.19.0
 SQLAlchemy==1.4.31
