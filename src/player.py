@@ -461,7 +461,7 @@ def create_image(image_url: str, size: tuple[int, int], radius: Optional[int]=No
         A tkinter PhotoImage
     """
     webimage = WebImage(image_url)
-    if radius:
+    if radius and webimage.image:
         webimage.add_corners(radius)
     webimage.resize(size)
     return webimage.get()

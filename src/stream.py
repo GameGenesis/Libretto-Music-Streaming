@@ -637,7 +637,7 @@ class Stream():
             The function that is called when the stream is played and the time changes
         """
         if StreamUtility.is_youtube_url(url):
-            stream = pafy.new(url).getbestaudio().url
+            stream = pafy.new(url, ydl_opts={'nocheckcertificate': True}).getbestaudio().url
 
             if "manifest" in stream and "webm" in stream:
                 stream = StreamUtility.get_youtube_audio_streams(url)[0][0]
@@ -690,6 +690,11 @@ class Stream():
         condition, current_time = True, 0.0
         while condition:
             condition, current_time = StreamUtility.wait_while(not self.player.is_playing(), current_time)
+
+        if current_time >= 5.0:
+            print(f"Exceeded timeout: Time taken was {current_time}")
+            self.play()
+            return
 
         # Set the start time in ms
         if start_time > 0.0:
