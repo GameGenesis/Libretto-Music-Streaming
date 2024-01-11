@@ -13,3 +13,6 @@ Logo designed by [**John Seong**](https://github.com/wonmor)
 ![Search_Query_view](https://github.com/GameGenesis/Libretto-Music-Streaming/assets/52415147/1926b46b-5819-4593-b66a-d344841f55db)
 ![Search_view](https://github.com/GameGenesis/Libretto-Music-Streaming/assets/52415147/3b71e900-b97d-48c6-bcb9-96d4ddcaee76)
 ![Top_Songs_view](https://github.com/GameGenesis/Libretto-Music-Streaming/assets/52415147/b3c7f0ac-dbb0-452e-94e9-1e1e24fa2413)
+
+## Video
+https://github.com/GameGenesis/Libretto-Music-Streaming/assets/52415147/2b4e8820-642b-447e-98a1-27e241ba5ab7
