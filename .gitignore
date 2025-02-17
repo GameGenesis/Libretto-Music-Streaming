@@ -3,6 +3,7 @@
 *.db
 src/pytube/
 src/pafy/
+src/youtube-dl/
 
 # Config file with API access token
 config.py
